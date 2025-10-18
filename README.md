@@ -15,13 +15,13 @@ This project provides a fully automated, reproducible data pipeline that:
 
 The project is organized into three main folders for different user needs:
 
-### 🔧 Data-Extraction-and-Transformation
+### 🔧 Data Extraction and Transformation
 Contains all technical components for data engineers and developers who want to replicate or modify the pipeline. Includes Python scripts, dbt models, raw data sources, and configuration files.
 
-### 📊 Final-Datasets  
+### 📊 Final Datasets  
 Contains polished, ready-to-use CSV files for researchers, analysts, and anyone who just wants the data without technical setup. These files are cleaned, validated, and formatted for immediate analysis.
 
-### 📈 Data-Visualization
+### 📈 Data Visualization
 Contains Tableau workbooks and links to interactive dashboards for data visualization and exploration. Perfect for creating presentations and sharing insights.
 
 ## 🏗️ Architecture
@@ -42,13 +42,24 @@ CDC WONDER API → Python Extraction → DuckDB → dbt Transformations → Goog
 
 ## 📊 Data Sources
 
-The pipeline extracts data from three CDC WONDER datasets:
+The pipeline will extract data from three complementary sources:
 
+### 1. CDC WONDER (Currently Active)
 - **D77**: Official mortality data (1999-2020) - Multiple Cause of Death
 - **D157**: Official mortality data (2018-2023) - Multiple Cause of Death, Single Race  
-- **D176**: Provisional mortality data (2023-current) - Provisional Mortality Statistics
+- **D176**: Provisional mortality data (2018-current) - Provisional Mortality Statistics
+- **Focus**: Synthetic opioid deaths (ICD-10 code T40.4)
 
-All datasets focus on synthetic opioid deaths (ICD-10 code T40.4).
+### 2. Customs and Border Control (Planned)
+- **Seizure Data**: Fentanyl interdiction quantities and locations
+- **Enforcement Statistics**: Border patrol activities and resource deployment
+- **Port Data**: Entry point traffic and inspection volumes
+- **Focus**: Supply-side interdiction efforts
+
+### 3. Third Data Source (To Be Determined)
+- **Potential Sources**: Healthcare data, law enforcement reports, economic indicators
+- **Integration Goal**: Provide upstream indicators and downstream outcomes
+- **Focus**: Comprehensive view of the fentanyl crisis ecosystem
 
 ## 🚀 Quick Start
 
@@ -89,13 +100,14 @@ All datasets focus on synthetic opioid deaths (ICD-10 code T40.4).
 5. **Run the pipeline**
    ```bash
    # Navigate to the technical folder
-   cd Data-Extraction-and-Transformation
+   cd "Data Extraction and Transformation"
    
    # Extract data from CDC WONDER
-   python extract_data.py
+   cd "Data Sources/CDC WONDER"
+   python cdc_wonder_extractor.py
    
    # Transform data with dbt
-   cd dbt
+   cd ../../dbt
    dbt deps
    dbt seed
    dbt run
@@ -110,19 +122,22 @@ All datasets focus on synthetic opioid deaths (ICD-10 code T40.4).
 
 ```
 fentanyl-awareness/
-├── Data-Extraction-and-Transformation/    # Technical pipeline components
+├── Data Extraction and Transformation/    # Technical pipeline components
+│   ├── Data Sources/                      # Raw data from multiple sources
+│   │   └── CDC WONDER/                   # Mortality data (1999-present)
+│   │       ├── cdc_wonder_extractor.py   # CDC WONDER data extraction script
+│   │       ├── Official 1999-2020 (Synthetic Opioid Deaths)-req.xml
+│   │       ├── Official 2018-2023 (Synthetic Opioid Deaths)-req.xml
+│   │       ├── Provisional Mortality Statistics, 2018 through Last Week_1760806798363-req.xml
+│   │       └── README.md                 # CDC WONDER documentation
 │   ├── dbt/                              # dbt project for data transformations
-│   ├── elt/                              # Extract, Load, Transform scripts
-│   ├── cleaned_datasets/                 # Intermediate processed data
-│   ├── extract_data.py                   # CDC WONDER data extraction
+│   │   └── seeds/                        # Raw CSV data files
 │   ├── load_gcloud.py                    # Google Sheets integration
 │   ├── requirements.txt                  # Python dependencies
 │   └── README.md                         # Technical documentation
-├── Final-Datasets/                       # Ready-to-use CSV files
-│   ├── synthetic_opioid_deaths_sample.csv
+├── Final Datasets/                       # Ready-to-use CSV files
 │   └── README.md                         # Dataset documentation
-├── Data-Visualization/                   # Tableau workbooks and dashboards
-│   ├── tableau_workbooks_placeholder.txt
+├── Data Visualization/                   # Tableau workbooks and dashboards
 │   └── README.md                         # Visualization documentation
 └── README.md                             # This file
 ```

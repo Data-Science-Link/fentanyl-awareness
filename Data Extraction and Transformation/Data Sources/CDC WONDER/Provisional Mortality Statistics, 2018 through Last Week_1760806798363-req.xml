@@ -21,9 +21,7 @@
 	</parameter>
 	<parameter>
 		<name>F_D176.V1</name>
-		<value>2023</value>
-		<value>2024</value>
-		<value>2025</value>
+		<value>*All*</value>
 	</parameter>
 	<parameter>
 		<name>F_D176.V10</name>
@@ -71,9 +69,7 @@
 	</parameter>
 	<parameter>
 		<name>I_D176.V1</name>
-		<value>2023 (2023)
-2024 (2024 (provisional))
-2025 (2025 (provisional and partial))
+		<value>*All* (All Dates)
 </value>
 	</parameter>
 	<parameter>
@@ -227,7 +223,7 @@
 	</parameter>
 	<parameter>
 		<name>O_export-format</name>
-		<value>xls</value>
+		<value>csv</value>
 	</parameter>
 	<parameter>
 		<name>O_javascript</name>
@@ -258,12 +254,16 @@
 		<value>100000</value>
 	</parameter>
 	<parameter>
+		<name>O_show_totals</name>
+		<value>true</value>
+	</parameter>
+	<parameter>
 		<name>O_timeout</name>
 		<value>600</value>
 	</parameter>
 	<parameter>
 		<name>O_title</name>
-		<value>Provisional 2023-Current (Synthetic Opioid Deaths)</value>
+		<value/>
 	</parameter>
 	<parameter>
 		<name>O_ucd</name>
