@@ -1,0 +1,69 @@
+version: 2
+
+models:
+  - name: stg_cdc_wonder_fentanyl_deaths_provisional_2018_current
+    description: "Staging model for CDC WONDER D176 Provisional 2018-Current synthetic opioid mortality data. This model performs basic data cleaning and standardization of the raw CDC WONDER data."
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - year
+              - month_code
+              - residence_state_code
+              - multiple_cause_of_death_code
+
+    columns:
+      - name: notes
+        description: "Additional notes or comments from CDC WONDER"
+      
+      - name: year
+        description: "Year of death occurrence"
+        tests:
+          - not_null
+      
+      - name: year_code
+        description: "Year code identifier"
+        tests:
+          - not_null
+      
+      - name: month
+        description: "Month description (e.g., 'Jan., 2018')"
+        tests:
+          - not_null
+      
+      - name: month_code
+        description: "Month code identifier (e.g., '2018/01')"
+        tests:
+          - not_null
+      
+      - name: residence_state
+        description: "State where death occurred"
+        tests:
+          - not_null
+      
+      - name: residence_state_code
+        description: "State code identifier"
+        tests:
+          - not_null
+      
+      - name: multiple_cause_of_death
+        description: "Cause of death description (e.g., 'Other synthetic narcotics')"
+        tests:
+          - not_null
+      
+      - name: multiple_cause_of_death_code
+        description: "Cause of death code (e.g., 'T40.4')"
+        tests:
+          - not_null
+      
+      - name: deaths
+        description: "Number of deaths (integer, defaults to 0 for missing values)"
+        tests:
+          - not_null
+      
+      - name: population
+        description: "Population count (null when 'Not Applicable')"
+      
+      - name: crude_rate
+        description: "Crude death rate per 100,000 population (null when 'Not Applicable')"
