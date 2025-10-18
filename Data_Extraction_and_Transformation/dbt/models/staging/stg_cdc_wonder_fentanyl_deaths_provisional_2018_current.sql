@@ -1,7 +1,10 @@
 -- Staging model for D176 Provisional 2018-Current data
 -- This model cleans and standardizes the raw CDC WONDER data
 
-{{ config(materialized='table') }}
+{{ config(
+    materialized='table',
+    order_by=['year', 'month', 'residence_state']
+) }}
 
 with source_data as (
     select * from {{ source('cdc_wonder_raw', 'd176_provisional_2018_current') }}
@@ -10,33 +13,27 @@ with source_data as (
 cleaned_data as (
     select
         -- Clean and standardize columns
-        notes,
-        trim("Year") as year,
-        "Year Code" as year_code,
-        trim("Month") as month,
-        trim("Month Code") as month_code,
-        trim("Residence State") as residence_state,
-        "Residence State Code" as residence_state_code,
-        trim("Multiple Cause of death") as multiple_cause_of_death,
-        trim("Multiple Cause of death Code") as multiple_cause_of_death_code,
+        "Year Code" as year
+        , strptime(trim("Month Code"), '%Y/%m')::date as month
+        , trim("Residence State") as residence_state
+        , trim("Multiple Cause of death") as multiple_cause_of_death
+        , trim("Multiple Cause of death Code") as multiple_cause_of_death_code
         
         -- Deaths is already an integer, just handle nulls
-        case 
-            when "Deaths" is null then 0
+        , case 
+            when "Deaths" is null 
+                then 0
             else "Deaths"
-        end as deaths,
-        
-        -- Handle population column (often "Not Applicable")
-        case 
-            when "Population" = 'Not Applicable' or "Population" = '' or "Population" is null then null
-            else cast("Population" as integer)
-        end as population,
-        
-        -- Handle crude rate column (often "Not Applicable")
-        case 
-            when "Crude Rate" = 'Not Applicable' or "Crude Rate" = '' or "Crude Rate" is null then null
-            else cast("Crude Rate" as decimal(10,2))
-        end as crude_rate
+          end as deaths
+
+        -- These columns are available in the raw data, but not needed for our analysis
+        -- , notes -- Always null
+        -- , trim("Year") as year -- String with (provisional and partial sometimes attached) (not needed as we will be prioritizing non-provisional data from other datasets in downstream datasets)
+        -- , trim("Month") as month --Sting representation of the month (Jan., 2018, etc.)
+        -- , "Residence State Code" as residence_state_code -- The integer state code is not needed for our analysis
+        -- , population -- Almost always "Not Applicable". CDC Wonder attempts to anonymize the data when it is too granular (state, month, etc.)
+        -- , crude_rate -- Almost always "Not Applicable". CDC Wonder attempts to anonymize the data when it is too granular (state, month, etc.)
+
         
     from source_data
 )
