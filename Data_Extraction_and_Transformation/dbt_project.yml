@@ -1,0 +1,38 @@
+name: 'fentanyl_awareness'
+version: '1.0.0'
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'fentanyl_awareness'
+
+# These configurations specify where dbt should look for different types of files.
+# The `model-paths` config, for example, states that models in this project can be
+# found in the "models/" directory. You probably won't need to change these!
+model-paths: ["dbt/models"]
+analysis-paths: ["dbt/analysis"]
+test-paths: ["dbt/tests"]
+seed-paths: ["dbt/seeds"]
+macro-paths: ["dbt/macros"]
+snapshot-paths: ["dbt/snapshots"]
+
+clean-targets:         # directories to be removed by `dbt clean`
+  - "target"
+  - "dbt_packages"
+
+# Configuring models
+# Full documentation: https://docs.getdbt.com/docs/configuring-models
+
+# In this example config, we tell dbt to build all models in the example/
+# directory as views. These settings can be overridden in the individual model files
+# using the `{{ config(...) }}` macro.
+models:
+  fentanyl_awareness:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
+
+# Configuring seeds
+seeds:
+  fentanyl_awareness:
+    +quote_columns: true

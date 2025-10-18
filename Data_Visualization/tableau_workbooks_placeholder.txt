@@ -1,0 +1,24 @@
+# Tableau Workbooks
+
+This folder will contain Tableau workbooks (.twbx files) for data visualization.
+
+## Planned Workbooks
+
+- `fentanyl_mortality_dashboard.twbx` - Main interactive dashboard
+- `state_comparison.twbx` - State-level analysis
+- `county_analysis.twbx` - County-level detailed analysis
+- `trend_analysis.twbx` - Time series analysis
+
+## Tableau Public Links
+
+Once published, links to the live dashboards will be added here:
+- Main Dashboard: [To be added]
+- State Comparison: [To be added]
+- County Analysis: [To be added]
+
+## Instructions
+
+1. Create your Tableau workbooks using the data from the Final-Datasets folder
+2. Save workbooks in this directory
+3. Publish to Tableau Public for sharing
+4. Update this file with links to published dashboards
