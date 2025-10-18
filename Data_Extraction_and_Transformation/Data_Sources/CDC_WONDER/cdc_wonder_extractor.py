@@ -207,9 +207,9 @@ class CDCWonderExtractor:
         
         # Define dataset mappings - using the new request file and original files
         dataset_mappings = {
-            "Provisional Mortality Statistics, 2018 through Last Week_1760806798363-req.xml": "d176_provisional_2018_current.csv",
-            "Official 1999-2020 (Synthetic Opioid Deaths)-req.xml": "d77_official_1999_2020.csv",
-            "Official 2018-2023 (Synthetic Opioid Deaths)-req.xml": "d157_official_2018_2023.csv"
+            "Provisional_Mortality_Statistics_2018_through_Last_Week_1760806798363-req.xml": "d176_provisional_2018_current.csv",
+            "Official_1999-2020_Synthetic_Opioid_Deaths-req.xml": "d77_official_1999_2020.csv",
+            "Official_2018-2023_Synthetic_Opioid_Deaths-req.xml": "d157_official_2018_2023.csv"
         }
         
         for xml_file, output_file in dataset_mappings.items():

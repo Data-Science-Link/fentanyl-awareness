@@ -1,4 +1,4 @@
-# Data Visualization
+# Data_Visualization
 
 This folder contains Tableau workbooks and visualization resources for exploring fentanyl-related mortality data.
 

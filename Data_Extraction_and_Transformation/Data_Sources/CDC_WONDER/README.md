@@ -1,21 +1,21 @@
-# CDC WONDER Data Source
+# CDC_WONDER Data Source
 
 This folder contains CDC WONDER (Wide-ranging Online Data for Epidemiologic Research) data files and documentation.
 
 ## 📊 Current Datasets
 
 ### Request Files (.xml)
-- `Official 1999-2020 (Synthetic Opioid Deaths)-req.xml` - Historical mortality data (D77)
-- `Official 2018-2023 (Synthetic Opioid Deaths)-req.xml` - Recent official mortality data (D157)
-- `Provisional Mortality Statistics, 2018 through Last Week_1760806798363-req.xml` - Provisional mortality data (D176)
+- `Official_1999-2020_Synthetic_Opioid_Deaths-req.xml` - Historical mortality data (D77)
+- `Official_2018-2023_Synthetic_Opioid_Deaths-req.xml` - Recent official mortality data (D157)
+- `Provisional_Mortality_Statistics_2018_through_Last_Week_1760806798363-req.xml` - Provisional mortality data (D176)
 
 ### Extraction Script
 - `cdc_wonder_extractor.py` - Automated data extraction script that processes XML request files and saves results as CSV files
 
 ### Documentation
-- `Screenshot 2025-10-12 at 5.42.48 PM.png` - CDC WONDER interface screenshot
-- `Screenshot 2025-10-12 at 5.42.54 PM.png` - Data request configuration
-- `Screenshot 2025-10-12 at 5.43.00 PM.png` - Query results preview
+- `Screenshot_2025-10-12_at_5.42.48_PM.png` - CDC WONDER interface screenshot
+- `Screenshot_2025-10-12_at_5.42.54_PM.png` - Data request configuration
+- `Screenshot_2025-10-12_at_5.43.00_PM.png` - Query results preview
 
 ## 🔗 Data Source Information
 

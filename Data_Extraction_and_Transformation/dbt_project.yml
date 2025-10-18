@@ -8,12 +8,12 @@ profile: 'fentanyl_awareness'
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
 # found in the "models/" directory. You probably won't need to change these!
-model-paths: ["models"]
-analysis-paths: ["analysis"]
-test-paths: ["tests"]
-seed-paths: ["seeds"]
-macro-paths: ["macros"]
-snapshot-paths: ["snapshots"]
+model-paths: ["dbt/models"]
+analysis-paths: ["dbt/analysis"]
+test-paths: ["dbt/tests"]
+seed-paths: ["dbt/seeds"]
+macro-paths: ["dbt/macros"]
+snapshot-paths: ["dbt/snapshots"]
 
 clean-targets:         # directories to be removed by `dbt clean`
   - "target"
@@ -35,11 +35,4 @@ models:
 # Configuring seeds
 seeds:
   fentanyl_awareness:
-    +column_types:
-      year: varchar
-      state: varchar
-      county: varchar
-      deaths: integer
-      population: integer
-      crude_rate: decimal(10,2)
-      age_adjusted_rate: decimal(10,2)
+    +quote_columns: true
