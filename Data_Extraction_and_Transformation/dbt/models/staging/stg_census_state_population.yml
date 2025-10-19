@@ -1,0 +1,137 @@
+version: 2
+
+models:
+  - name: stg_census_state_population
+    description: |
+      Staging model for US Census Population Estimates Program (PEP) data.
+      
+      This model cleans and standardizes state-level population estimates from the US Census Bureau.
+      The data provides annual population counts for all US states and the District of Columbia,
+      which is essential for calculating per-capita mortality rates and other demographic analyses.
+      
+      **Data Characteristics:**
+      - **Source**: US Census Bureau Population Estimates Program
+      - **Time Period**: 2010-current (annual estimates)
+      - **Geographic Level**: State-level aggregation
+      - **Update Frequency**: Annual
+      - **Data Quality**: Official government estimates, highly reliable
+      
+      **Key Transformations:**
+      - Standardizes state names and codes
+      - Adds data quality flags for population values
+      - Validates population data ranges
+      - Maintains referential integrity with source data
+      
+      This staging model serves as the foundation for calculating mortality rates per 100,000
+      population and other demographic analyses in downstream mart models.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - year
+              - state_code
+
+    columns:
+      - name: year
+        description: "Year of population estimate"
+        tests:
+          - not_null
+      
+      - name: state_code
+        description: "US Census FIPS state code (numeric)"
+        tests:
+          - not_null
+      
+      - name: state_name
+        description: "Full state name"
+        tests:
+          - not_null
+      
+      - name: population
+        description: "Total population estimate for the state"
+        tests:
+          - not_null
+      
+      - name: date_description
+        description: "Description of the date period (e.g., 'April 1, 2023')"
+      
+      - name: has_population_data
+        description: "Boolean flag indicating if population data is available"
+      
+      - name: population_quality_flag
+        description: "Data quality flag for population values (missing, zero, low_population, normal)"
+
+  - name: stg_census_state_economic
+    description: |
+      Staging model for US Census American Community Survey (ACS) economic data.
+      
+      This model cleans and standardizes state-level economic indicators from the US Census Bureau
+      American Community Survey. The data provides median household income, per capita income,
+      unemployment rates, and labor force statistics for all US states.
+      
+      **Data Characteristics:**
+      - **Source**: US Census Bureau American Community Survey 5-Year Estimates
+      - **Time Period**: 2009-current (5-year rolling estimates)
+      - **Geographic Level**: State-level aggregation
+      - **Update Frequency**: Annual (5-year estimates)
+      - **Data Quality**: Survey-based estimates with margins of error
+      
+      **Key Transformations:**
+      - Standardizes state names and codes
+      - Calculates unemployment rate from labor force data
+      - Adds data quality flags for income and employment values
+      - Validates economic data ranges
+      
+      This staging model provides economic context for mortality analysis, enabling
+      correlation analysis between economic indicators and health outcomes.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - year
+              - state_code
+
+    columns:
+      - name: year
+        description: "Year of economic estimate"
+        tests:
+          - not_null
+      
+      - name: state_code
+        description: "US Census FIPS state code (numeric)"
+        tests:
+          - not_null
+      
+      - name: state_name
+        description: "Full state name"
+        tests:
+          - not_null
+      
+      - name: median_household_income
+        description: "Median household income in current dollars"
+      
+      - name: per_capita_income
+        description: "Per capita income in current dollars"
+      
+      - name: unemployment_rate
+        description: "Unemployment rate as percentage"
+      
+      - name: labor_force_total
+        description: "Total labor force (civilian + military)"
+      
+      - name: employed
+        description: "Number of employed persons"
+      
+      - name: unemployed
+        description: "Number of unemployed persons"
+      
+      - name: has_income_data
+        description: "Boolean flag indicating if income data is available"
+      
+      - name: income_quality_flag
+        description: "Data quality flag for income values (missing, low_income, high_income, normal)"
+      
+      - name: unemployment_quality_flag
+        description: "Data quality flag for unemployment rates (missing, very_low, very_high, normal)"

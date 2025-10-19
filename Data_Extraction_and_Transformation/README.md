@@ -22,9 +22,10 @@ This folder contains all the technical components for extracting, processing, an
 - `setup.py` - Package setup configuration
 
 ### Raw Data Sources
-- `elt/extract/source_wonder/` - CDC WONDER XML request files and documentation
-- `elt/transform/` - Data transformation scripts
-- `elt/load/` - Data loading utilities
+- `data_sources/CDC_WONDER/` - CDC WONDER XML request files and documentation
+- `data_sources/Census_ACS/` - US Census Bureau data extraction scripts
+- `data_sources/Customs_and_Border_Control/` - Border control data (placeholder)
+- `data_sources/Third_Source/` - Additional data sources (placeholder)
 
 ### Processed Data
 - `cleaned_datasets/` - Intermediate cleaned data files
@@ -134,10 +135,71 @@ conn.close()
 "
 ```
 
+## 🏛️ Census Data Integration
+
+### Overview
+The pipeline now includes US Census Bureau data integration for enhanced demographic analysis:
+
+- **Population Estimates Program (PEP)** - State-level population data
+- **American Community Survey (ACS)** - Economic and demographic indicators
+- **Automated extraction** - Python scripts for API data retrieval
+- **dbt integration** - Staging models and mart models for analysis
+
+### Setup Census Data
+
+1. **Get Census API Key**:
+   ```bash
+   # Visit: https://api.census.gov/data/key_signup.html
+   # Add to environment or .env file:
+   export CENSUS_API_KEY='your_api_key_here'
+   ```
+
+2. **Run Census Setup**:
+   ```bash
+   cd data_sources/Census_ACS
+   python3 setup_census.py
+   ```
+
+3. **Extract Census Data**:
+   ```bash
+   python3 census_extractor.py
+   ```
+
+4. **Load into dbt**:
+   ```bash
+   cd ../../
+   dbt seed
+   dbt run
+   ```
+
+### Available Census Models
+
+- `stg_census_state_population` - Cleaned population estimates
+- `stg_census_state_economic` - Economic indicators
+- `fct_synthetic_opioid_deaths_with_population` - Combined mortality + population data
+
+### Sample Queries with Population Data
+
+```sql
+-- Mortality rates per 100,000 population
+SELECT 
+    residence_state,
+    year,
+    SUM(deaths) as total_deaths,
+    AVG(population) as avg_population,
+    ROUND(SUM(deaths)::decimal / AVG(population) * 100000, 2) as death_rate_per_100k
+FROM main.fct_synthetic_opioid_deaths_with_population
+WHERE population IS NOT NULL
+GROUP BY residence_state, year
+ORDER BY death_rate_per_100k DESC
+LIMIT 10;
+```
+
 ## 🔧 Technical Details
 
 This folder contains the complete data engineering pipeline that:
 - Extracts data from CDC WONDER API (datasets D77, D157, D176)
+- Integrates US Census Bureau demographic and economic data
 - Transforms data using dbt with DuckDB
 - Implements data quality tests and validation
 - Automates the entire process with GitHub Actions

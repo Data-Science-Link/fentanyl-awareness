@@ -7,3 +7,12 @@ sources:
     tables:           
       - name: d176_provisional_2018_current
         description: "Provisional mortality data from 2018-current"
+  
+  - name: census_raw
+    description: "Raw US Census Bureau data (Population Estimates Program and ACS)"
+    schema: main
+    tables:
+      - name: census_state_population
+        description: "State-level population estimates from Census PEP"
+      - name: census_state_economic
+        description: "State-level economic data from Census ACS"
