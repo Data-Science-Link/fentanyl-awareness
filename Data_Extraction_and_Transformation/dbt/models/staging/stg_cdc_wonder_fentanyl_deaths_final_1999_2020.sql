@@ -2,7 +2,7 @@
 -- This model cleans and standardizes the raw CDC WONDER data
 
 {{ config(
-    materialized='table',
+    materialized='view',
     order_by=['year', 'month', 'state']
 ) }}
 

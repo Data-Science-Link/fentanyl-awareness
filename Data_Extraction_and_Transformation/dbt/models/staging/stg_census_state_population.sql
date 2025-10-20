@@ -2,7 +2,7 @@
 -- This model cleans and standardizes state-level population data from US Census
 
 {{ config(
-    materialized='table',
+    materialized='view',
     order_by=['year', 'state_code']
 ) }}
 

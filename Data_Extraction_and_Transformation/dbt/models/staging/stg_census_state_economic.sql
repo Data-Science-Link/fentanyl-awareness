@@ -2,7 +2,7 @@
 -- This model cleans and standardizes state-level economic data from US Census
 
 {{ config(
-    materialized='table',
+    materialized='view',
     order_by=['year', 'state_code']
 ) }}
 
