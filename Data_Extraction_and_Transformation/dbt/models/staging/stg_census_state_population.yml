@@ -1,0 +1,63 @@
+version: 2
+
+models:
+  - name: stg_census_state_population
+    description: |
+      Staging model for US Census Population Estimates Program (PEP) data.
+      
+      This model cleans and standardizes state-level population estimates from the US Census Bureau.
+      The data provides annual population counts for all US states and the District of Columbia,
+      which is essential for calculating per-capita mortality rates and other demographic analyses.
+      
+      **Data Characteristics:**
+      - **Source**: US Census Bureau Population Estimates Program
+      - **Time Period**: 2010-current (annual estimates)
+      - **Geographic Level**: State-level aggregation
+      - **Update Frequency**: Annual
+      - **Data Quality**: Official government estimates, highly reliable
+      
+      **Key Transformations:**
+      - Standardizes state names and codes
+      - Adds data quality flags for population values
+      - Validates population data ranges
+      - Maintains referential integrity with source data
+      
+      This staging model serves as the foundation for calculating mortality rates per 100,000
+      population and other demographic analyses in downstream mart models.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - year
+              - state_code
+
+    columns:
+      - name: year
+        description: "Year of population estimate"
+        tests:
+          - not_null
+      
+      - name: state_code
+        description: "US Census FIPS state code (numeric)"
+        tests:
+          - not_null
+      
+      - name: state_name
+        description: "Full state name"
+        tests:
+          - not_null
+      
+      - name: population
+        description: "Total population estimate for the state"
+        tests:
+          - not_null
+      
+      - name: date_description
+        description: "Description of the date period (e.g., 'April 1, 2023')"
+      
+      - name: has_population_data
+        description: "Boolean flag indicating if population data is available"
+      
+      - name: population_quality_flag
+        description: "Data quality flag for population values (missing, zero, low_population, normal)"

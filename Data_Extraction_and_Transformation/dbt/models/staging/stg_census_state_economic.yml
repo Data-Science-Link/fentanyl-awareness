@@ -1,0 +1,78 @@
+version: 2
+
+models:
+  - name: stg_census_state_economic
+    description: |
+      Staging model for US Census Economic Data (ACS).
+      
+      This model cleans and standardizes state-level economic data from the US Census 
+      Bureau's American Community Survey (ACS), including household income, employment 
+      statistics, and labor force data.
+      
+      **Data Characteristics:**
+      - **Source**: US Census Bureau ACS
+      - **Geographic Level**: State-level aggregation
+      - **Update Frequency**: Annual
+      - **Data Quality**: Includes quality flags for income and employment data
+      
+      **Key Transformations:**
+      - Standardizes column names and data types
+      - Adds derived fields for data availability flags
+      - Includes data quality flags for outlier detection
+      - Maintains referential integrity with source data
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - year
+              - state_code
+
+    columns:
+      - name: year
+        description: "Year of the economic data"
+        tests:
+          - not_null
+      
+      - name: state_code
+        description: "Two-letter state code"
+        tests:
+          - not_null
+      
+      - name: state_name
+        description: "Full state name"
+        tests:
+          - not_null
+      
+      - name: median_household_income
+        description: "Median household income in dollars"
+      
+      - name: per_capita_income
+        description: "Per capita income in dollars"
+      
+      - name: unemployment_rate
+        description: "Unemployment rate as percentage"
+      
+      - name: labor_force_total
+        description: "Total labor force count"
+      
+      - name: employed
+        description: "Number of employed persons"
+      
+      - name: unemployed
+        description: "Number of unemployed persons"
+      
+      - name: extracted_at
+        description: "Timestamp when data was extracted"
+      
+      - name: has_income_data
+        description: "Boolean flag indicating if income data is available"
+      
+      - name: has_employment_data
+        description: "Boolean flag indicating if employment data is available"
+      
+      - name: income_quality_flag
+        description: "Data quality flag for income data (missing, low_income, normal, high_income)"
+      
+      - name: unemployment_quality_flag
+        description: "Data quality flag for unemployment data (missing, very_low, normal, very_high)"

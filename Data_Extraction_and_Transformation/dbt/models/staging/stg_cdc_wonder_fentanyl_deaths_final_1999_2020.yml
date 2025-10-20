@@ -1,0 +1,72 @@
+version: 2
+
+models:
+  - name: stg_cdc_wonder_fentanyl_deaths_final_1999_2020
+    description: |
+      Staging model for CDC WONDER D77 Multiple Cause of Death (1999-2020).
+      
+      This model cleans and standardizes synthetic opioid mortality data from the CDC WONDER 
+      database, specifically focusing on ICD-10 code T40.4 (Other synthetic narcotics) which 
+      includes fentanyl-related deaths. The data represents official mortality statistics 
+      that are finalized and complete for the specified time period.
+      
+      **Data Characteristics:**
+      - **Time Period**: 1999-2020 (finalized data)
+      - **Geographic Level**: State-level aggregation
+      - **Cause of Death**: Synthetic opioid deaths (T40.4)
+      - **Update Frequency**: Finalized data (no further updates expected)
+      - **Data Quality**: Complete population and crude rate data available
+      
+      **Key Transformations:**
+      - Standardizes column names and data types
+      - Handles null values appropriately
+      - Preserves data quality flags for downstream analysis
+      - Maintains referential integrity with source data
+      
+      This staging model serves as the foundation for downstream mart models that will 
+      combine this finalized data with provisional mortality datasets to provide 
+      comprehensive synthetic opioid mortality analysis.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - year
+              - month
+              - state
+              - multiple_cause_of_death_code
+
+    columns:
+      - name: year
+        description: "Year of death occurrence (derived from Year Code)"
+        tests:
+          - not_null
+      
+      - name: month
+        description: "Date representation of the month (first day of month, e.g., '2018-01-01')"
+        tests:
+          - not_null
+      
+      - name: state
+        description: "State where death occurred"
+        tests:
+          - not_null
+      
+      - name: multiple_cause_of_death
+        description: "Cause of death description (e.g., 'Other synthetic narcotics')"
+        tests:
+          - not_null
+      
+      - name: multiple_cause_of_death_code
+        description: "Cause of death code (e.g., 'T40.4')"
+        tests:
+          - not_null
+      
+      - name: deaths
+        description: "Number of deaths (integer, defaults to 0 for missing values)"
+      
+      - name: population
+        description: "Population count (null when 'Not Applicable')"
+      
+      - name: crude_rate
+        description: "Crude death rate per 100,000 population (null when 'Not Applicable')"
