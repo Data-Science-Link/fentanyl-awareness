@@ -58,13 +58,13 @@ class CensusExtractor:
         Extract state-level population estimates from ACS
         
         Args:
-            years: List of years to extract (default: 2018-2022)
+            years: List of years to extract (default: 2005-2023)
             
         Returns:
             DataFrame with state population data
         """
         if years is None:
-            years = list(range(2018, 2023))  # 2018-2022 (ACS 5-year estimates)
+            years = list(range(2005, 2024))  # 2005-2023 (ACS 5-year estimates)
         
         logger.info(f"Extracting state population estimates for years: {years}")
         
