@@ -1,33 +1,31 @@
 version: 2
 
 models:
-  - name: stg_cdc_wonder_fentanyl_deaths_provisional_2018_current
+  - name: stg_cdc_wonder_fentanyl_deaths_final_1999_2020
     description: |
-      Staging model for CDC WONDER D176 Provisional Mortality Statistics (2018-current).
+      Staging model for CDC WONDER D77 Multiple Cause of Death (1999-2020).
       
       This model cleans and standardizes synthetic opioid mortality data from the CDC WONDER 
       database, specifically focusing on ICD-10 code T40.4 (Other synthetic narcotics) which 
-      includes fentanyl-related deaths. The data represents provisional mortality statistics 
-      that are updated monthly and may be subject to revision as more complete information 
-      becomes available.
+      includes fentanyl-related deaths. The data represents official mortality statistics 
+      that are finalized and complete for the specified time period.
       
       **Data Characteristics:**
-      - **Time Period**: 2018 through current (provisional and partial data)
+      - **Time Period**: 1999-2020 (finalized data)
       - **Geographic Level**: State-level aggregation
       - **Cause of Death**: Synthetic opioid deaths (T40.4)
-      - **Update Frequency**: Monthly provisional updates
-      - **Data Quality**: Population and crude rate often marked as "Not Applicable" 
-        for provisional data
+      - **Update Frequency**: Finalized data (no further updates expected)
+      - **Data Quality**: Complete population and crude rate data available
       
       **Key Transformations:**
       - Standardizes column names and data types
-      - Handles "Not Applicable" values appropriately
+      - Handles null values appropriately
       - Preserves data quality flags for downstream analysis
       - Maintains referential integrity with source data
       
       This staging model serves as the foundation for downstream mart models that will 
-      combine this provisional data with official mortality datasets (D77, D157) to 
-      provide comprehensive synthetic opioid mortality analysis.
+      combine this finalized data with provisional mortality datasets to provide 
+      comprehensive synthetic opioid mortality analysis.
 
     tests:
       - dbt_utils.unique_combination_of_columns:
@@ -35,7 +33,7 @@ models:
             combination_of_columns:
               - year
               - month
-              - residence_state
+              - state
               - multiple_cause_of_death_code
 
     columns:

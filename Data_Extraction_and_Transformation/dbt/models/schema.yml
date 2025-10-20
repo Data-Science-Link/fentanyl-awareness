@@ -5,8 +5,12 @@ sources:
     description: "Raw CDC WONDER synthetic opioid mortality data"
     schema: main
     tables:           
-      - name: d176_provisional_2018_current
-        description: "Provisional mortality data from 2018-current"
+      - name: provisional_mortality_statistics_2018_through_last_week_manual_download
+        description: "Provisional mortality data from 2018-current (manual download)"
+      - name: fentanyl_deaths_final_1999_2020
+        description: "Fentanyl deaths final data from 1999-2020 (manual download)"
+      - name: fentanyl_deaths_final_2018_2023
+        description: "Fentanyl deaths final data from 2018-2023 (manual download)"
   
   - name: census_raw
     description: "Raw US Census Bureau data (Population Estimates Program and ACS)"

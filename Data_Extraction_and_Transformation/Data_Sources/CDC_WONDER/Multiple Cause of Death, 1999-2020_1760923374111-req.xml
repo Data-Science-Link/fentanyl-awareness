@@ -182,16 +182,12 @@
 		<value>100000</value>
 	</parameter>
 	<parameter>
-		<name>O_show_totals</name>
-		<value>true</value>
-	</parameter>
-	<parameter>
 		<name>O_timeout</name>
 		<value>600</value>
 	</parameter>
 	<parameter>
 		<name>O_title</name>
-		<value>Official 1999-2020 (Synthetic Opioid Deaths)</value>
+		<value/>
 	</parameter>
 	<parameter>
 		<name>O_ucd</name>

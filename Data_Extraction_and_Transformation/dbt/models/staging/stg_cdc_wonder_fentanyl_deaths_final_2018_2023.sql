@@ -1,13 +1,13 @@
--- Staging model for D176 Provisional 2018-Current data
+-- Staging model for CDC WONDER Fentanyl Deaths Final 2018-2023 data
 -- This model cleans and standardizes the raw CDC WONDER data
 
 {{ config(
     materialized='table',
-    order_by=['year', 'month', 'residence_state']
+    order_by=['year', 'month', 'state']
 ) }}
 
 with source_data as (
-    select * from {{ source('cdc_wonder_raw', 'provisional_mortality_statistics_2018_through_last_week_manual_download') }}
+    select * from {{ source('cdc_wonder_raw', 'fentanyl_deaths_final_2018_2023') }}
 ),
 
 cleaned_data as (
@@ -15,7 +15,7 @@ cleaned_data as (
         -- Clean and standardize columns
         "Year Code" as year
         , strptime(trim("Month Code"), '%Y/%m')::date as month
-        , trim("Residence State") as state
+        , trim("State") as state
         , trim("Multiple Cause of death") as multiple_cause_of_death
         , trim("Multiple Cause of death Code") as multiple_cause_of_death_code
         
