@@ -113,47 +113,65 @@ class CensusExtractor:
         logger.info(f"Successfully extracted {len(combined_df)} records")
         return combined_df
     
-    def get_state_economic_data(self, year: int = 2022) -> pd.DataFrame:
+    def get_state_economic_data(self, years: List[int] = None) -> pd.DataFrame:
         """
         Extract state-level economic data from ACS
         
         Args:
-            year: Year to extract (default: 2022, most recent 5-year estimate)
+            years: List of years to extract (default: 2009-2023)
             
         Returns:
             DataFrame with state economic data
         """
-        logger.info(f"Extracting state economic data for year {year}")
+        if years is None:
+            years = list(range(2009, 2024))  # 2009-2023 (ACS 5-year estimates)
         
-        try:
-            # ACS 5-Year Estimates endpoint
-            url = f"{self.base_url}/{year}/acs/acs5"
-            
-            params = {
-                'get': 'B19013_001E,B19301_001E,B23025_002E,B23025_003E,B23025_004E,B23025_005E,NAME',
-                'for': 'state:*',
-                'key': self.api_key
-            }
-            
-            response = self.session.get(url, params=params, timeout=30)
-            response.raise_for_status()
-            
-            data = response.json()
-            
-            # Convert to DataFrame
-            df = pd.DataFrame(data[1:], columns=data[0])
-            df['year'] = year
-            df['extracted_at'] = datetime.now()
-            
-            # Clean and standardize data
-            df = self._clean_economic_data(df)
-            
-            logger.info(f"Successfully extracted {len(df)} economic records")
-            return df
-            
-        except Exception as e:
-            logger.error(f"Error fetching economic data for year {year}: {e}")
-            raise
+        logger.info(f"Extracting state economic data for years: {years}")
+        
+        all_data = []
+        
+        for year in years:
+            try:
+                # ACS 5-Year Estimates endpoint
+                url = f"{self.base_url}/{year}/acs/acs5"
+                
+                params = {
+                    'get': 'B19013_001E,B19301_001E,B23025_002E,B23025_003E,B23025_004E,B23025_005E,NAME',
+                    'for': 'state:*',
+                    'key': self.api_key
+                }
+                
+                logger.info(f"Fetching economic data for year {year}...")
+                response = self.session.get(url, params=params, timeout=30)
+                response.raise_for_status()
+                
+                data = response.json()
+                
+                # Convert to DataFrame
+                df = pd.DataFrame(data[1:], columns=data[0])
+                df['year'] = year
+                df['extracted_at'] = datetime.now()
+                
+                all_data.append(df)
+                
+                # Rate limiting
+                time.sleep(RATE_LIMITS["delay_between_requests"])
+                
+            except Exception as e:
+                logger.error(f"Error fetching economic data for year {year}: {e}")
+                continue
+        
+        if not all_data:
+            raise Exception("No economic data extracted successfully")
+        
+        # Combine all years
+        combined_df = pd.concat(all_data, ignore_index=True)
+        
+        # Clean and standardize data
+        combined_df = self._clean_economic_data(combined_df)
+        
+        logger.info(f"Successfully extracted {len(combined_df)} economic records")
+        return combined_df
     
     def _clean_population_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Clean and standardize population data from ACS"""
