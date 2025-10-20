@@ -77,22 +77,22 @@ deduplicated_data as (
 -- Final format with coalesced deaths, prioritized data source, and census data
 final_format as (
     select
-        w.year
-        , w.month
-        , w.state
-        , coalesce(w.deaths, 0) as deaths
-        , w.data_source
-        , p.population
-        , e.median_household_income
-        , e.unemployment_rate
-    from deduplicated_data w
-    left join census_population p
-        on w.year = p.year
-        and w.state = p.state
-    left join census_economic e
-        on w.year = e.year
-        and w.state = e.state
-    where w.row_num = 1  -- Keep only the highest priority record for each key
+        deduplicated_data.year
+        , deduplicated_data.month
+        , deduplicated_data.state
+        , coalesce(deduplicated_data.deaths, 0) as deaths
+        , deduplicated_data.data_source
+        , stg_census_state_population.population
+        , stg_census_state_economic.median_household_income
+        , stg_census_state_economic.unemployment_rate
+    from deduplicated_data
+    left join stg_census_state_population
+        on deduplicated_data.year = stg_census_state_population.year
+        and deduplicated_data.state = stg_census_state_population.state
+    left join stg_census_state_economic
+        on deduplicated_data.year = stg_census_state_economic.year
+        and deduplicated_data.state = stg_census_state_economic.state
+    where deduplicated_data.row_num = 1  -- Keep only the highest priority record for each key
 )
 
 select * from final_format
