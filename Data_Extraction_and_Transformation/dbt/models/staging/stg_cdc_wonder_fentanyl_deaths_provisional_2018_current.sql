@@ -3,7 +3,7 @@
 
 {{ config(
     materialized='table',
-    order_by=['year', 'month', 'residence_state']
+    order_by=['year', 'month', 'state']
 ) }}
 
 with source_data as (

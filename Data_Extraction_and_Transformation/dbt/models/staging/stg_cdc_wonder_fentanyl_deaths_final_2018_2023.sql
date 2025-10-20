@@ -7,7 +7,7 @@
 ) }}
 
 with source_data as (
-    select * from {{ source('cdc_wonder_raw', 'fentanyl_deaths_final_2018_2023') }}
+    select * from {{ source('cdc_wonder_raw', 'multiple_cause_of_death_2018_2023_single_race_manual_download') }}
 ),
 
 cleaned_data as (

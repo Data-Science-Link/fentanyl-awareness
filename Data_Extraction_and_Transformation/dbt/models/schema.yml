@@ -7,10 +7,10 @@ sources:
     tables:           
       - name: provisional_mortality_statistics_2018_through_last_week_manual_download
         description: "Provisional mortality data from 2018-current (manual download)"
-      - name: fentanyl_deaths_final_1999_2020
-        description: "Fentanyl deaths final data from 1999-2020 (manual download)"
-      - name: fentanyl_deaths_final_2018_2023
-        description: "Fentanyl deaths final data from 2018-2023 (manual download)"
+      - name: multiple_cause_of_death_1999_2020_manual_download
+        description: "Multiple cause of death data from 1999-2020 (manual download)"
+      - name: multiple_cause_of_death_2018_2023_single_race_manual_download
+        description: "Multiple cause of death data from 2018-2023, single race (manual download)"
   
   - name: census_raw
     description: "Raw US Census Bureau data (Population Estimates Program and ACS)"

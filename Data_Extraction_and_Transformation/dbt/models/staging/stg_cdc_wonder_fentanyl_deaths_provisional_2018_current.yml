@@ -35,7 +35,7 @@ models:
             combination_of_columns:
               - year
               - month
-              - residence_state
+              - state
               - multiple_cause_of_death_code
 
     columns:
@@ -50,7 +50,7 @@ models:
           - not_null
       
       - name: state
-        description: "State where death occurred"
+        description: "State where the person lived who passed away"
         tests:
           - not_null
       
