@@ -1,0 +1,73 @@
+name: Weekly Data Pipeline & Google Sheets Export
+
+on:
+  schedule:
+    # Run every Monday at 6 AM UTC (adjust timezone as needed)
+    - cron: '0 6 * * 1'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  data-pipeline:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        cd data_engineering
+        pip install -r requirements.txt
+        
+    - name: Set up dbt
+      run: |
+        cd data_engineering/data_build_tool
+        pip install dbt-core dbt-duckdb
+        
+    - name: Run CDC WONDER Data Extraction
+      run: |
+        cd data_engineering/data_sources/cdc_wonder
+        python cdc_wonder_extractor.py
+      continue-on-error: true
+      
+    - name: Run Census Data Extraction
+      run: |
+        cd data_engineering/data_sources/census_acs
+        python census_extractor.py
+      continue-on-error: true
+      
+    - name: Run dbt Models
+      run: |
+        cd data_engineering/data_build_tool
+        dbt run --profiles-dir .
+        
+    - name: Run dbt Tests
+      run: |
+        cd data_engineering/data_build_tool
+        dbt test --profiles-dir .
+        
+    - name: Export to Google Sheets
+      env:
+        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        GOOGLE_SHEETS_CREDENTIALS_FILE: service_account.json
+      run: |
+        cd data_engineering/google_sheets
+        echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > service_account.json
+        python load_gcloud.py
+        
+    - name: Upload Final Dataset
+      uses: actions/upload-artifact@v3
+      with:
+        name: fentanyl-deaths-data
+        path: data_engineering/final_datasets/
+        
+    - name: Clean up credentials
+      if: always()
+      run: |
+        cd data_engineering/google_sheets
+        rm -f service_account.json

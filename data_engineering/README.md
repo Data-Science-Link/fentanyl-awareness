@@ -1,31 +1,34 @@
-# Data_Extraction_and_Transformation
+# data_engineering
 
 This folder contains all the technical components for extracting, processing, and transforming fentanyl-related mortality data from CDC WONDER.
 
 ## 📁 Contents
 
-### Python Scripts
-- `extract_data.py` - CDC WONDER API data extraction
-- `load_gcloud.py` - Google Sheets integration for data loading
-- `manual_download_helper.py` - Helper script for manual data downloads
-- `test_pipeline.py` - Pipeline testing and validation
+### Automation & Integration
+- `google_sheets/` - Google Sheets export automation
+  - `load_gcloud.py` - Main Google Sheets integration script
+  - `setup_gsheets.py` - Interactive setup and configuration
+  - `test_gsheets.py` - Comprehensive test suite
+  - `GOOGLE_SHEETS_README.md` - Complete documentation
 
 ### Data Engineering
-- `dbt/` - Complete dbt project for data transformations
-  - `models/staging/` - Data cleaning and staging models
-  - `models/marts/` - Final analytical models
-  - `seeds/` - Raw data files
-  - `tests/` - Data quality tests
-  - `macros/` - Reusable SQL macros
-- `dbt_project.yml` - dbt configuration
-- `requirements.txt` - Python dependencies
-- `setup.py` - Package setup configuration
+- `data_build_tool/` - Complete dbt project for data transformations
+  - `dbt/` - dbt project files
+    - `models/staging/` - Data cleaning and staging models
+    - `models/marts/` - Final analytical models
+    - `seeds/` - Raw data files
+    - `tests/` - Data quality tests
+    - `macros/` - Reusable SQL macros
+  - `dbt_project.yml` - dbt configuration
+  - `packages.yml` - dbt package dependencies
+  - `fentanyl_awareness.duckdb` - DuckDB database
+  - `logs/` - dbt execution logs
+  - `target/` - dbt compiled artifacts
 
 ### Raw Data Sources
-- `data_sources/CDC_WONDER/` - CDC WONDER XML request files and documentation
-- `data_sources/Census_ACS/` - US Census Bureau data extraction scripts
-- `data_sources/Customs_and_Border_Control/` - Border control data (placeholder)
-- `data_sources/Third_Source/` - Additional data sources (placeholder)
+- `data_sources/cdc_wonder/` - CDC WONDER XML request files and documentation
+- `data_sources/census_acs/` - US Census Bureau data extraction scripts
+- `data_sources/customs_and_border_control/` - Border control data (placeholder)
 
 ### Processed Data
 - `cleaned_datasets/` - Intermediate cleaned data files
@@ -62,7 +65,7 @@ This folder contains all the technical components for extracting, processing, an
 3. **Set up environment variables**:
    ```bash
    cp .env.example .env
-   # Edit .env with your configuration
+   # Edit .env with your configuration (at project root)
    ```
 
 4. **Run the extraction pipeline**:
@@ -72,7 +75,7 @@ This folder contains all the technical components for extracting, processing, an
 
 5. **Transform data with dbt**:
    ```bash
-   cd dbt
+   cd data_build_tool
    dbt deps
    dbt seed
    dbt run
@@ -81,7 +84,7 @@ This folder contains all the technical components for extracting, processing, an
 
 6. **Load to Google Sheets**:
    ```bash
-   cd ..
+   cd google_sheets
    python load_gcloud.py
    ```
 
@@ -93,7 +96,7 @@ Once you've run the pipeline, you can query your data directly using DuckDB CLI:
 
 ```bash
 # Connect to your database
-duckdb fentanyl_awareness.duckdb
+duckdb data_build_tool/fentanyl_awareness.duckdb
 
 # List available tables
 .tables
@@ -128,7 +131,7 @@ python3 query_tool.py
 # Or run individual queries
 python3 -c "
 import duckdb
-conn = duckdb.connect('fentanyl_awareness.duckdb')
+conn = duckdb.connect('data_build_tool/fentanyl_awareness.duckdb')
 result = conn.execute('SELECT COUNT(*) FROM main.d176_provisional_2018_current').fetchdf()
 print(result)
 conn.close()
@@ -156,7 +159,7 @@ The pipeline now includes US Census Bureau data integration for enhanced demogra
 
 2. **Run Census Setup**:
    ```bash
-   cd data_sources/Census_ACS
+   cd data_sources/census_acs
    python3 setup_census.py
    ```
 
@@ -167,7 +170,7 @@ The pipeline now includes US Census Bureau data integration for enhanced demogra
 
 4. **Load into dbt**:
    ```bash
-   cd ../../
+   cd ../../data_build_tool
    dbt seed
    dbt run
    ```
