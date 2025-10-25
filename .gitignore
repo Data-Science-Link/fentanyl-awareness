@@ -42,6 +42,7 @@ profiles.yml
 # Data files
 *.tsv
 *.csv
+!Final_Datasets/*.csv
 *.xlsx
 *.xls
 
