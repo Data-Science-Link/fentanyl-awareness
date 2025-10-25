@@ -15,13 +15,13 @@ This project provides a fully automated, reproducible data pipeline that:
 
 The project is organized into three main folders for different user needs:
 
-### 🔧 Data_Extraction_and_Transformation
+### 🔧 data_extraction_and_transformation
 Contains all technical components for data engineers and developers who want to replicate or modify the pipeline. Includes Python scripts, dbt models, raw data sources, and configuration files.
 
-### 📊 Final_Datasets  
+### 📊 final_datasets  
 Contains polished, ready-to-use CSV files for researchers, analysts, and anyone who just wants the data without technical setup. These files are cleaned, validated, and formatted for immediate analysis.
 
-### 📈 Data_Visualization
+### 📈 data_visualization
 Contains Tableau workbooks and links to interactive dashboards for data visualization and exploration. Perfect for creating presentations and sharing insights.
 
 ## 🏗️ Architecture
@@ -100,21 +100,21 @@ The pipeline will extract data from three complementary sources:
 5. **Run the pipeline**
    ```bash
    # Navigate to the technical folder
-   cd "Data_Extraction_and_Transformation"
+   cd "data_extraction_and_transformation"
    
    # Extract data from CDC WONDER
-   cd "Data_Sources/CDC_WONDER"
+   cd "data_sources/CDC_WONDER"
    python cdc_wonder_extractor.py
    
    # Transform data with dbt
-   cd ../../dbt
+   cd ../../data_engineering
    dbt deps
    dbt seed
    dbt run
    dbt test
    
    # Load to Google Sheets
-   cd ..
+   cd ../google_sheets
    python load_gcloud.py
    ```
 
@@ -122,22 +122,23 @@ The pipeline will extract data from three complementary sources:
 
 ```
 fentanyl-awareness/
-├── Data_Extraction_and_Transformation/    # Technical pipeline components
-│   ├── Data_Sources/                      # Raw data from multiple sources
+├── data_extraction_and_transformation/    # Technical pipeline components
+│   ├── data_sources/                      # Raw data from multiple sources
 │   │   └── CDC_WONDER/                   # Mortality data (1999-present)
 │   │       ├── cdc_wonder_extractor.py   # CDC WONDER data extraction script
 │   │       ├── Official_1999-2020_Synthetic_Opioid_Deaths-req.xml
 │   │       ├── Official_2018-2023_Synthetic_Opioid_Deaths-req.xml
 │   │       ├── Provisional_Mortality_Statistics_2018_through_Last_Week_1760806798363-req.xml
 │   │       └── README.md                 # CDC WONDER documentation
-│   ├── dbt/                              # dbt project for data transformations
-│   │   └── seeds/                        # Raw CSV data files
-│   ├── load_gcloud.py                    # Google Sheets integration
+│   ├── data_engineering/                 # dbt project for data transformations
+│   │   └── dbt/                          # dbt models and seeds
+│   ├── google_sheets/                     # Google Sheets integration
+│   ├── workflow_templates/                # GitHub Actions workflow templates
 │   ├── requirements.txt                  # Python dependencies
 │   └── README.md                         # Technical documentation
-├── Final_Datasets/                       # Ready-to-use CSV files
+├── final_datasets/                       # Ready-to-use CSV files
 │   └── README.md                         # Dataset documentation
-├── Data_Visualization/                   # Tableau workbooks and dashboards
+├── data_visualization/                   # Tableau workbooks and dashboards
 │   └── README.md                         # Visualization documentation
 └── README.md                             # This file
 ```

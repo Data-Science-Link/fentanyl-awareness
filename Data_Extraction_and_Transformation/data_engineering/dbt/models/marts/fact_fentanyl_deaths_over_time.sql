@@ -7,7 +7,7 @@
     , post_hook=[
         """
         COPY (SELECT * FROM {{ this }} ORDER BY year, month, state) 
-        TO '../Final_Datasets/fact_fentanyl_deaths_over_time.csv' 
+        TO '../../final_datasets/fact_fentanyl_deaths_over_time.csv' 
         (HEADER, DELIMITER ',')
         """
     ]

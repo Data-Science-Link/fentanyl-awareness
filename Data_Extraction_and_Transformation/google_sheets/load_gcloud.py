@@ -63,23 +63,21 @@ class GoogleSheetsLoader:
             logger.error(f"Failed to authenticate with Google Sheets: {e}")
             return False
     
-    def export_data_to_csv(self, table_name: str = "fct_synthetic_opioid_deaths") -> Optional[str]:
-        """Export data from DuckDB table to CSV string."""
+    def export_data_to_csv(self, csv_file_path: str = "../../final_datasets/fact_fentanyl_deaths_over_time.csv") -> Optional[str]:
+        """Export data from CSV file to string."""
         try:
-            if not self.conn:
-                logger.error("Not connected to DuckDB")
+            csv_path = Path(csv_file_path)
+            if not csv_path.exists():
+                logger.error(f"CSV file not found: {csv_file_path}")
                 return None
             
-            # Query the data
-            query = f"SELECT * FROM {table_name} ORDER BY year DESC, state, county"
-            df = self.conn.execute(query).fetchdf()
+            # Read the CSV file
+            with open(csv_path, 'r', encoding='utf-8') as file:
+                csv_data = file.read()
             
-            # Convert to CSV string
-            csv_buffer = io.StringIO()
-            df.to_csv(csv_buffer, index=False)
-            csv_data = csv_buffer.getvalue()
-            
-            logger.info(f"Exported {len(df)} rows from {table_name}")
+            # Count rows for logging
+            row_count = csv_data.count('\n')
+            logger.info(f"Exported {row_count} rows from {csv_file_path}")
             return csv_data
             
         except Exception as e:
@@ -129,12 +127,12 @@ class GoogleSheetsLoader:
             logger.error(f"Failed to upload to Google Sheets: {e}")
             return False
     
-    def load_data(self, table_name: str = "fct_synthetic_opioid_deaths", 
-                  worksheet_name: str = "Synthetic Opioid Deaths") -> bool:
+    def load_data(self, csv_file_path: str = "../../final_datasets/fact_fentanyl_deaths_over_time.csv", 
+                  worksheet_name: str = "Fentanyl Deaths Over Time") -> bool:
         """Complete data loading process."""
         try:
-            # Export data from DuckDB
-            csv_data = self.export_data_to_csv(table_name)
+            # Export data from CSV file
+            csv_data = self.export_data_to_csv(csv_file_path)
             if not csv_data:
                 return False
             

@@ -1,25 +1,32 @@
-# Data_Extraction_and_Transformation
+# data_extraction_and_transformation
 
 This folder contains all the technical components for extracting, processing, and transforming fentanyl-related mortality data from CDC WONDER.
 
 ## 📁 Contents
 
-### Python Scripts
-- `extract_data.py` - CDC WONDER API data extraction
-- `load_gcloud.py` - Google Sheets integration for data loading
-- `manual_download_helper.py` - Helper script for manual data downloads
-- `test_pipeline.py` - Pipeline testing and validation
+### Automation & Integration
+- `google_sheets/` - Google Sheets export automation
+  - `load_gcloud.py` - Main Google Sheets integration script
+  - `setup_gsheets.py` - Interactive setup and configuration
+  - `test_gsheets.py` - Comprehensive test suite
+  - `GOOGLE_SHEETS_README.md` - Complete documentation
+- `workflow_templates/` - GitHub Actions workflow templates
+  - `weekly-data-pipeline.yml` - Template for automated weekly data processing
+  - `README.md` - Workflow documentation
 
 ### Data Engineering
-- `dbt/` - Complete dbt project for data transformations
-  - `models/staging/` - Data cleaning and staging models
-  - `models/marts/` - Final analytical models
-  - `seeds/` - Raw data files
-  - `tests/` - Data quality tests
-  - `macros/` - Reusable SQL macros
-- `dbt_project.yml` - dbt configuration
-- `requirements.txt` - Python dependencies
-- `setup.py` - Package setup configuration
+- `data_engineering/` - Complete dbt project for data transformations
+  - `dbt/` - dbt project files
+    - `models/staging/` - Data cleaning and staging models
+    - `models/marts/` - Final analytical models
+    - `seeds/` - Raw data files
+    - `tests/` - Data quality tests
+    - `macros/` - Reusable SQL macros
+  - `dbt_project.yml` - dbt configuration
+  - `packages.yml` - dbt package dependencies
+  - `fentanyl_awareness.duckdb` - DuckDB database
+  - `logs/` - dbt execution logs
+  - `target/` - dbt compiled artifacts
 
 ### Raw Data Sources
 - `data_sources/CDC_WONDER/` - CDC WONDER XML request files and documentation
@@ -72,7 +79,7 @@ This folder contains all the technical components for extracting, processing, an
 
 5. **Transform data with dbt**:
    ```bash
-   cd dbt
+   cd data_engineering
    dbt deps
    dbt seed
    dbt run
@@ -81,7 +88,7 @@ This folder contains all the technical components for extracting, processing, an
 
 6. **Load to Google Sheets**:
    ```bash
-   cd ..
+   cd google_sheets
    python load_gcloud.py
    ```
 
@@ -93,7 +100,7 @@ Once you've run the pipeline, you can query your data directly using DuckDB CLI:
 
 ```bash
 # Connect to your database
-duckdb fentanyl_awareness.duckdb
+duckdb data_engineering/fentanyl_awareness.duckdb
 
 # List available tables
 .tables
@@ -128,7 +135,7 @@ python3 query_tool.py
 # Or run individual queries
 python3 -c "
 import duckdb
-conn = duckdb.connect('fentanyl_awareness.duckdb')
+conn = duckdb.connect('data_engineering/fentanyl_awareness.duckdb')
 result = conn.execute('SELECT COUNT(*) FROM main.d176_provisional_2018_current').fetchdf()
 print(result)
 conn.close()
@@ -167,7 +174,7 @@ The pipeline now includes US Census Bureau data integration for enhanced demogra
 
 4. **Load into dbt**:
    ```bash
-   cd ../../
+   cd ../../data_engineering
    dbt seed
    dbt run
    ```
