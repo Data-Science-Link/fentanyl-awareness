@@ -2,8 +2,15 @@
 -- This model unions all CDC WONDER data sources and prioritizes older, more reliable data
 
 {{ config(
-    materialized='table',
-    order_by=['year', 'month', 'state']
+    materialized='view'
+    , order_by=['year', 'month', 'state']
+    , post_hook=[
+        """
+        COPY (SELECT * FROM {{ this }} ORDER BY year, month, state) 
+        TO '../Final_Datasets/fact_fentanyl_deaths_over_time.csv' 
+        (HEADER, DELIMITER ',')
+        """
+    ]
 ) }}
 
 with stg_census_state_population as (
