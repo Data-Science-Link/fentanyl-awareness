@@ -4,24 +4,55 @@ This directory contains scripts and configuration for automatically exporting fe
 
 ## 🚀 Quick Start
 
-### 1. Run Setup Script
+### 1. Google Cloud Setup
+1. **Create Google Cloud Project**
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create new project or select existing one
+   - Note your Project ID
+
+2. **Enable Required APIs**
+   - Go to "APIs & Services" → "Library"
+   - Enable "Google Sheets API"
+   - Enable "Google Drive API"
+
+3. **Create Service Account**
+   - Go to "APIs & Services" → "Credentials"
+   - Click "Create Credentials" → "Service Account"
+   - Name: `fentanyl-data-loader`
+   - Description: `Service account for automated data loading`
+   - Click "Create and Continue" → "Done"
+
+4. **Create Service Account Key**
+   - Find your service account in the list
+   - Click on it → "Keys" tab
+   - Click "Add Key" → "Create new key"
+   - Choose "JSON" format
+   - Download and rename to `service_account.json`
+   - Place in `data_engineering/google_sheets/` folder
+
+### 2. Google Sheet Setup
+1. **Create Google Sheet**
+   - Go to [Google Sheets](https://sheets.google.com/)
+   - Create new spreadsheet
+   - Name it "Fentanyl Awareness Data"
+   - Copy Sheet ID from URL
+
+2. **Share with Service Account**
+   - Click "Share" button
+   - Add service account email: `fentanyl-data-loader@your-project-id.iam.gserviceaccount.com`
+   - Give "Editor" permissions
+
+### 3. Environment Configuration
+Create `.env` file at project root (copy from `.env.example`):
 ```bash
-cd data_extraction_and_transformation/google_sheets
-python setup_gsheets.py
+GOOGLE_SHEET_ID=your_google_sheet_id_here
+GOOGLE_SHEETS_CREDENTIALS_FILE=service_account.json
+CSV_FILE_PATH=final_datasets/fact_fentanyl_deaths_over_time.csv
 ```
 
-### 2. Follow the Interactive Setup
-The setup script will guide you through:
-- Creating Google Cloud project
-- Enabling APIs
-- Creating service account
-- Setting up credentials
-- Configuring GitHub secrets
-
-### 3. Test Locally
+### 4. Test Setup
 ```bash
-cd data_extraction_and_transformation/google_sheets
-export GOOGLE_SHEET_ID="your_sheet_id_here"
+cd data_engineering/google_sheets
 python test_gsheets.py  # Test everything
 python load_gcloud.py   # Upload data
 ```
@@ -31,9 +62,9 @@ python load_gcloud.py   # Upload data
 | File | Purpose |
 |------|---------|
 | `load_gcloud.py` | Main script for uploading data to Google Sheets |
-| `setup_gsheets.py` | Interactive setup and validation script |
-| `.env.example` | Environment variables template (at project root) |
-| `requirements.txt` | Python dependencies |
+| `test_gsheets.py` | Test script to validate setup and connectivity |
+| `service_account.json` | Google Cloud service account credentials |
+| `README.md` | This documentation |
 
 ## 🔧 Configuration
 

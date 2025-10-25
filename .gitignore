@@ -32,6 +32,25 @@ ENV/
 .env
 .env.local
 .env.production
+.env.*
+!.env.example
+
+# API Keys and Secrets
+*secret*
+*credential*
+*key*
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# Google Cloud / Google Sheets
+service_account.json
+credentials.json
+*-credentials.json
+*-service-account.json
+client_secret*.json
 
 # dbt
 dbt_packages/
@@ -45,10 +64,6 @@ profiles.yml
 !Final_Datasets/*.csv
 *.xlsx
 *.xls
-
-# Google Sheets credentials
-credentials.json
-service_account.json
 
 # IDE
 .vscode/

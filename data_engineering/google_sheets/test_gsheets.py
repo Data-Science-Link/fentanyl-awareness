@@ -10,7 +10,11 @@ import os
 import sys
 import json
 from pathlib import Path
+from dotenv import load_dotenv
 from load_gcloud import GoogleSheetsLoader
+
+# Load environment variables from .env file
+load_dotenv()
 
 def test_configuration():
     """Test if all required configuration is present."""

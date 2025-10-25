@@ -61,6 +61,19 @@ The pipeline will extract data from three complementary sources:
 - **Integration Goal**: Provide upstream indicators and downstream outcomes
 - **Focus**: Comprehensive view of the fentanyl crisis ecosystem
 
+## 🔒 Security
+
+This repository follows security best practices for public repositories:
+
+- **No sensitive data** is committed to git
+- **Environment variables** are used for all credentials
+- **Comprehensive .gitignore** protects sensitive files
+- **Security audit tools** are included for ongoing verification
+
+For detailed security information, see:
+- [`data_engineering/SECURITY_CHECKLIST.md`](data_engineering/SECURITY_CHECKLIST.md) - Security guidelines and checklist
+- [`data_engineering/security_audit.sh`](data_engineering/security_audit.sh) - Automated security audit script
+
 ## 🚀 Quick Start
 
 ### Prerequisites

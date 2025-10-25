@@ -2,13 +2,11 @@
 """
 Google Sheets Data Loader
 
-This script connects to the DuckDB database, exports the final mart table
-to CSV format, and uploads it to Google Sheets for Tableau Public consumption.
+This script reads CSV files and uploads them to Google Sheets for Tableau Public consumption.
 """
 
 import os
 import pandas as pd
-import duckdb
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from pathlib import Path
@@ -16,30 +14,24 @@ import logging
 from typing import Optional
 import csv
 import io
+import argparse
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class GoogleSheetsLoader:
-    """Load data from DuckDB to Google Sheets."""
+    """Load data from CSV files to Google Sheets."""
     
     def __init__(self, credentials_file: str, sheet_id: str):
         self.credentials_file = credentials_file
         self.sheet_id = sheet_id
-        self.conn = None
         self.gc = None
         
-    def connect_to_duckdb(self, db_path: str = "fentanyl_awareness.duckdb") -> bool:
-        """Connect to DuckDB database."""
-        try:
-            self.conn = duckdb.connect(db_path)
-            logger.info(f"Connected to DuckDB database: {db_path}")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to connect to DuckDB: {e}")
-            return False
-    
     def authenticate_google_sheets(self) -> bool:
         """Authenticate with Google Sheets API."""
         try:
@@ -109,6 +101,12 @@ class GoogleSheetsLoader:
             csv_reader = csv.reader(io.StringIO(csv_data))
             rows = list(csv_reader)
             
+            # Resize worksheet to accommodate all data
+            num_rows = len(rows)
+            num_cols = len(rows[0]) if rows else 0
+            worksheet.resize(num_rows, num_cols)
+            logger.info(f"Resized worksheet to {num_rows} rows × {num_cols} columns")
+            
             # Upload data in batches to avoid API limits
             batch_size = 1000
             for i in range(0, len(rows), batch_size):
@@ -116,9 +114,14 @@ class GoogleSheetsLoader:
                 start_row = i + 1
                 end_row = start_row + len(batch) - 1
                 
-                # Update the worksheet
-                worksheet.update(f'A{start_row}:Z{end_row}', batch)
-                logger.info(f"Uploaded batch {i//batch_size + 1}: rows {start_row}-{end_row}")
+                # Calculate the actual range based on data size
+                num_cols = len(batch[0]) if batch else 0
+                col_end = chr(ord('A') + num_cols - 1) if num_cols > 0 else 'A'
+                
+                # Update the worksheet with proper range
+                range_name = f'A{start_row}:{col_end}{end_row}'
+                worksheet.update(range_name, batch)
+                logger.info(f"Uploaded batch {i//batch_size + 1}: rows {start_row}-{end_row}, columns A-{col_end}")
             
             logger.info(f"Successfully uploaded {len(rows)} rows to Google Sheets")
             return True
@@ -145,13 +148,106 @@ class GoogleSheetsLoader:
             return False
     
     def close_connections(self):
-        """Close database connections."""
-        if self.conn:
-            self.conn.close()
-            logger.info("Closed DuckDB connection")
+        """Close any open connections."""
+        # No database connections to close
+        logger.info("No connections to close")
+
+def print_available_exports():
+    """Print available export configurations."""
+    print("📊 Available Export Configurations:")
+    print("=" * 50)
+    
+    exports = [
+        {
+            "name": "CDC Mortality Data",
+            "worksheet": "CDC Mortality",
+            "description": "CDC WONDER mortality data (1999-present)",
+            "csv_file": "../../final_datasets/fact_fentanyl_deaths_over_time.csv"
+        },
+        {
+            "name": "Census Population Data", 
+            "worksheet": "Census Population",
+            "description": "US Census population estimates",
+            "csv_file": "../../final_datasets/census_population.csv"
+        },
+        {
+            "name": "Combined Analysis",
+            "worksheet": "Combined Analysis", 
+            "description": "Combined CDC and Census data",
+            "csv_file": "../../final_datasets/combined_analysis.csv"
+        }
+    ]
+    
+    for i, export in enumerate(exports, 1):
+        print(f"{i}. {export['name']}")
+        print(f"   Worksheet: {export['worksheet']}")
+        print(f"   Description: {export['description']}")
+        print(f"   File: {export['csv_file']}")
+        print()
+
+def export_multiple_datasets(loader):
+    """Export multiple datasets to different worksheets."""
+    logger.info("Starting multi-dataset export to Google Sheets...")
+    
+    # Define export configurations
+    exports = [
+        {
+            "worksheet": "CDC Mortality",
+            "csv_file": "../../final_datasets/fact_fentanyl_deaths_over_time.csv",
+            "description": "CDC WONDER mortality data"
+        },
+        {
+            "worksheet": "Census Population", 
+            "csv_file": "../../final_datasets/census_state_population.csv",
+            "description": "US Census population estimates"
+        },
+        {
+            "worksheet": "Census Economic",
+            "csv_file": "../../final_datasets/census_state_economic.csv", 
+            "description": "US Census economic indicators"
+        }
+    ]
+    
+    success_count = 0
+    total_exports = len(exports)
+    
+    for i, export in enumerate(exports, 1):
+        logger.info(f"Exporting {i}/{total_exports}: {export['description']}")
+        
+        # Check if CSV file exists
+        if not os.path.exists(export['csv_file']):
+            logger.warning(f"CSV file not found: {export['csv_file']} - skipping")
+            continue
+            
+        # Export to worksheet
+        success = loader.load_data(export['csv_file'], export['worksheet'])
+        if success:
+            success_count += 1
+            logger.info(f"✅ Successfully exported to worksheet: {export['worksheet']}")
+        else:
+            logger.error(f"❌ Failed to export to worksheet: {export['worksheet']}")
+    
+    logger.info(f"Multi-export completed: {success_count}/{total_exports} successful")
+    return success_count == total_exports
 
 def main():
     """Main function to run the data loading process."""
+    parser = argparse.ArgumentParser(description='Upload data to Google Sheets')
+    parser.add_argument('--worksheet', '-w', 
+                       default='Fentanyl Deaths Over Time',
+                       help='Name of the worksheet/tab (default: "Fentanyl Deaths Over Time")')
+    parser.add_argument('--csv-file', '-f',
+                       default='../../final_datasets/fact_fentanyl_deaths_over_time.csv',
+                       help='Path to CSV file to upload')
+    parser.add_argument('--multi-export', '-m',
+                       action='store_true',
+                       help='Export multiple datasets to different worksheets')
+    parser.add_argument('--list-exports',
+                       action='store_true',
+                       help='List available export configurations')
+    
+    args = parser.parse_args()
+    
     # Load configuration from environment variables
     credentials_file = os.getenv('GOOGLE_SHEETS_CREDENTIALS_FILE', 'service_account.json')
     sheet_id = os.getenv('GOOGLE_SHEET_ID')
@@ -168,17 +264,20 @@ def main():
     loader = GoogleSheetsLoader(credentials_file, sheet_id)
     
     try:
-        # Connect to DuckDB
-        if not loader.connect_to_duckdb():
-            return 1
-        
         # Authenticate with Google Sheets
         if not loader.authenticate_google_sheets():
             return 1
         
-        # Load data
-        logger.info("Starting data upload to Google Sheets...")
-        success = loader.load_data()
+        if args.list_exports:
+            print_available_exports()
+            return 0
+        
+        if args.multi_export:
+            success = export_multiple_datasets(loader)
+        else:
+            # Single export
+            logger.info(f"Starting data upload to Google Sheets worksheet: {args.worksheet}")
+            success = loader.load_data(args.csv_file, args.worksheet)
         
         if success:
             logger.info("Data upload completed successfully!")
