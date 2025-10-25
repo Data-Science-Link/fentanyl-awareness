@@ -15,7 +15,7 @@ This project provides a fully automated, reproducible data pipeline that:
 
 The project is organized into three main folders for different user needs:
 
-### 🔧 data_extraction_and_transformation
+### 🔧 data_engineering
 Contains all technical components for data engineers and developers who want to replicate or modify the pipeline. Includes Python scripts, dbt models, raw data sources, and configuration files.
 
 ### 📊 final_datasets  
@@ -100,14 +100,14 @@ The pipeline will extract data from three complementary sources:
 5. **Run the pipeline**
    ```bash
    # Navigate to the technical folder
-   cd "data_extraction_and_transformation"
+   cd "data_engineering"
    
    # Extract data from CDC WONDER
-   cd "data_sources/CDC_WONDER"
+   cd "data_sources/cdc_wonder"
    python cdc_wonder_extractor.py
    
    # Transform data with dbt
-   cd ../../data_engineering
+   cd ../../data_build_tool
    dbt deps
    dbt seed
    dbt run
@@ -122,18 +122,17 @@ The pipeline will extract data from three complementary sources:
 
 ```
 fentanyl-awareness/
-├── data_extraction_and_transformation/    # Technical pipeline components
+├── data_engineering/                      # Technical pipeline components
 │   ├── data_sources/                      # Raw data from multiple sources
-│   │   └── CDC_WONDER/                   # Mortality data (1999-present)
+│   │   └── cdc_wonder/                   # Mortality data (1999-present)
 │   │       ├── cdc_wonder_extractor.py   # CDC WONDER data extraction script
 │   │       ├── Official_1999-2020_Synthetic_Opioid_Deaths-req.xml
 │   │       ├── Official_2018-2023_Synthetic_Opioid_Deaths-req.xml
 │   │       ├── Provisional_Mortality_Statistics_2018_through_Last_Week_1760806798363-req.xml
 │   │       └── README.md                 # CDC WONDER documentation
-│   ├── data_engineering/                 # dbt project for data transformations
+│   ├── data_build_tool/                  # dbt project for data transformations
 │   │   └── dbt/                          # dbt models and seeds
 │   ├── google_sheets/                     # Google Sheets integration
-│   ├── workflow_templates/                # GitHub Actions workflow templates
 │   ├── requirements.txt                  # Python dependencies
 │   └── README.md                         # Technical documentation
 ├── final_datasets/                       # Ready-to-use CSV files

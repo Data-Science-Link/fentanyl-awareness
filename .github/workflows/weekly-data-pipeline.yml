@@ -21,34 +21,34 @@ jobs:
         
     - name: Install dependencies
       run: |
-        cd data_extraction_and_transformation
+        cd data_engineering
         pip install -r requirements.txt
         
     - name: Set up dbt
       run: |
-        cd data_extraction_and_transformation/data_engineering
+        cd data_engineering/data_build_tool
         pip install dbt-core dbt-duckdb
         
     - name: Run CDC WONDER Data Extraction
       run: |
-        cd data_extraction_and_transformation/data_sources/CDC_WONDER
+        cd data_engineering/data_sources/cdc_wonder
         python cdc_wonder_extractor.py
       continue-on-error: true
       
     - name: Run Census Data Extraction
       run: |
-        cd data_extraction_and_transformation/data_sources/Census_ACS
+        cd data_engineering/data_sources/census_acs
         python census_extractor.py
       continue-on-error: true
       
     - name: Run dbt Models
       run: |
-        cd data_extraction_and_transformation/data_engineering
+        cd data_engineering/data_build_tool
         dbt run --profiles-dir .
         
     - name: Run dbt Tests
       run: |
-        cd data_extraction_and_transformation/data_engineering
+        cd data_engineering/data_build_tool
         dbt test --profiles-dir .
         
     - name: Export to Google Sheets
@@ -56,7 +56,7 @@ jobs:
         GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
         GOOGLE_SHEETS_CREDENTIALS_FILE: service_account.json
       run: |
-        cd data_extraction_and_transformation/google_sheets
+        cd data_engineering/google_sheets
         echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > service_account.json
         python load_gcloud.py
         
@@ -64,10 +64,10 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: fentanyl-deaths-data
-        path: data_extraction_and_transformation/final_datasets/
+        path: data_engineering/final_datasets/
         
     - name: Clean up credentials
       if: always()
       run: |
-        cd data_extraction_and_transformation/google_sheets
+        cd data_engineering/google_sheets
         rm -f service_account.json

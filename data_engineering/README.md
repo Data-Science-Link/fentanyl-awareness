@@ -1,4 +1,4 @@
-# data_extraction_and_transformation
+# data_engineering
 
 This folder contains all the technical components for extracting, processing, and transforming fentanyl-related mortality data from CDC WONDER.
 
@@ -10,12 +10,9 @@ This folder contains all the technical components for extracting, processing, an
   - `setup_gsheets.py` - Interactive setup and configuration
   - `test_gsheets.py` - Comprehensive test suite
   - `GOOGLE_SHEETS_README.md` - Complete documentation
-- `workflow_templates/` - GitHub Actions workflow templates
-  - `weekly-data-pipeline.yml` - Template for automated weekly data processing
-  - `README.md` - Workflow documentation
 
 ### Data Engineering
-- `data_engineering/` - Complete dbt project for data transformations
+- `data_build_tool/` - Complete dbt project for data transformations
   - `dbt/` - dbt project files
     - `models/staging/` - Data cleaning and staging models
     - `models/marts/` - Final analytical models
@@ -29,10 +26,9 @@ This folder contains all the technical components for extracting, processing, an
   - `target/` - dbt compiled artifacts
 
 ### Raw Data Sources
-- `data_sources/CDC_WONDER/` - CDC WONDER XML request files and documentation
-- `data_sources/Census_ACS/` - US Census Bureau data extraction scripts
-- `data_sources/Customs_and_Border_Control/` - Border control data (placeholder)
-- `data_sources/Third_Source/` - Additional data sources (placeholder)
+- `data_sources/cdc_wonder/` - CDC WONDER XML request files and documentation
+- `data_sources/census_acs/` - US Census Bureau data extraction scripts
+- `data_sources/customs_and_border_control/` - Border control data (placeholder)
 
 ### Processed Data
 - `cleaned_datasets/` - Intermediate cleaned data files
@@ -69,7 +65,7 @@ This folder contains all the technical components for extracting, processing, an
 3. **Set up environment variables**:
    ```bash
    cp .env.example .env
-   # Edit .env with your configuration
+   # Edit .env with your configuration (at project root)
    ```
 
 4. **Run the extraction pipeline**:
@@ -79,7 +75,7 @@ This folder contains all the technical components for extracting, processing, an
 
 5. **Transform data with dbt**:
    ```bash
-   cd data_engineering
+   cd data_build_tool
    dbt deps
    dbt seed
    dbt run
@@ -100,7 +96,7 @@ Once you've run the pipeline, you can query your data directly using DuckDB CLI:
 
 ```bash
 # Connect to your database
-duckdb data_engineering/fentanyl_awareness.duckdb
+duckdb data_build_tool/fentanyl_awareness.duckdb
 
 # List available tables
 .tables
@@ -135,7 +131,7 @@ python3 query_tool.py
 # Or run individual queries
 python3 -c "
 import duckdb
-conn = duckdb.connect('data_engineering/fentanyl_awareness.duckdb')
+conn = duckdb.connect('data_build_tool/fentanyl_awareness.duckdb')
 result = conn.execute('SELECT COUNT(*) FROM main.d176_provisional_2018_current').fetchdf()
 print(result)
 conn.close()
@@ -163,7 +159,7 @@ The pipeline now includes US Census Bureau data integration for enhanced demogra
 
 2. **Run Census Setup**:
    ```bash
-   cd data_sources/Census_ACS
+   cd data_sources/census_acs
    python3 setup_census.py
    ```
 
@@ -174,7 +170,7 @@ The pipeline now includes US Census Bureau data integration for enhanced demogra
 
 4. **Load into dbt**:
    ```bash
-   cd ../../data_engineering
+   cd ../../data_build_tool
    dbt seed
    dbt run
    ```

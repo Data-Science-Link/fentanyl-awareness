@@ -1,11 +1,11 @@
-# Data Engineering
+# Data Build Tool (dbt)
 
 This folder contains the complete dbt project for transforming fentanyl awareness data from raw sources into analytical models.
 
 ## 📁 Structure
 
 ```
-data_engineering/
+data_build_tool/
 ├── dbt/                          # dbt project files
 │   ├── models/
 │   │   ├── staging/              # Data cleaning models

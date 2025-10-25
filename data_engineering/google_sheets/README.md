@@ -32,17 +32,17 @@ python load_gcloud.py   # Upload data
 |------|---------|
 | `load_gcloud.py` | Main script for uploading data to Google Sheets |
 | `setup_gsheets.py` | Interactive setup and validation script |
-| `config.env.example` | Environment variables template |
+| `.env.example` | Environment variables template (at project root) |
 | `requirements.txt` | Python dependencies |
 
 ## 🔧 Configuration
 
 ### Environment Variables
-Create a `.env` file in the `google_sheets` folder with:
+Create a `.env` file at the project root (copy from `.env.example`) with:
 ```bash
 GOOGLE_SHEET_ID=your_google_sheet_id
 GOOGLE_SHEETS_CREDENTIALS_FILE=service_account.json
-CSV_FILE_PATH=../../final_datasets/fact_fentanyl_deaths_over_time.csv
+CSV_FILE_PATH=final_datasets/fact_fentanyl_deaths_over_time.csv
 WORKSHEET_NAME=Fentanyl Deaths Over Time
 ```
 
