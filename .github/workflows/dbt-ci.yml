@@ -1,0 +1,139 @@
+name: dbt CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - 'data_engineering/data_build_tool/**'
+      - 'data_engineering/requirements.txt'
+      - '.github/workflows/dbt-ci.yml'
+  pull_request:
+    branches: [ main, master, develop ]
+    paths:
+      - 'data_engineering/data_build_tool/**'
+      - 'data_engineering/requirements.txt'
+      - '.github/workflows/dbt-ci.yml'
+
+jobs:
+  dbt-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('data_engineering/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install Python dependencies
+      run: |
+        cd data_engineering
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Set up dbt
+      run: |
+        pip install dbt-core dbt-duckdb
+        
+    - name: Create dbt profiles directory
+      run: |
+        mkdir -p ~/.dbt
+        
+    - name: Create profiles.yml for DuckDB
+      run: |
+        cat > ~/.dbt/profiles.yml << EOF
+        fentanyl_awareness:
+          target: dev
+          outputs:
+            dev:
+              type: duckdb
+              path: 'fentanyl_awareness.duckdb'
+              threads: 4
+              schema: 'main'
+        EOF
+        
+    - name: Navigate to dbt project directory
+      run: |
+        cd data_engineering/data_build_tool
+        
+    - name: Install dbt packages
+      run: |
+        dbt deps --profiles-dir ~/.dbt
+        
+    - name: Check dbt project configuration
+      run: |
+        dbt debug --profiles-dir ~/.dbt
+        
+    - name: Run dbt compile
+      run: |
+        dbt compile --profiles-dir ~/.dbt
+        
+    - name: Run dbt models
+      run: |
+        dbt run --profiles-dir ~/.dbt
+        
+    - name: Run dbt tests
+      run: |
+        dbt test --profiles-dir ~/.dbt
+        
+    - name: Generate dbt documentation
+      run: |
+        dbt docs generate --profiles-dir ~/.dbt
+        
+    - name: Upload dbt artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: dbt-artifacts
+        path: |
+          data_engineering/data_build_tool/target/
+          data_engineering/data_build_tool/logs/
+        retention-days: 7
+        
+    - name: Comment on PR with test results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Try to read test results
+          try {
+            const testResultsPath = 'data_engineering/data_build_tool/target/run_results.json';
+            if (fs.existsSync(testResultsPath)) {
+              const testResults = JSON.parse(fs.readFileSync(testResultsPath, 'utf8'));
+              const passed = testResults.results.filter(r => r.status === 'pass').length;
+              const failed = testResults.results.filter(r => r.status === 'fail').length;
+              const total = testResults.results.length;
+              
+              const comment = `## 🧪 dbt Test Results
+              
+              **Summary:**
+              - ✅ Passed: ${passed}
+              - ❌ Failed: ${failed}
+              - 📊 Total: ${total}
+              
+              ${failed > 0 ? '⚠️ Some tests failed. Please check the logs for details.' : '🎉 All tests passed!'}
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          } catch (error) {
+            console.log('Could not read test results:', error.message);
+          }
