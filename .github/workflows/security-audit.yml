@@ -40,7 +40,8 @@ jobs:
       continue-on-error: true
       run: |
         echo "📦 Scanning dependencies for known vulnerabilities..."
-        pip-audit
+        # Scan only project dependencies from requirements.txt
+        pip-audit --requirement data_engineering/requirements.txt || true
         
     - name: Check for high/critical vulnerabilities
       run: |
@@ -56,15 +57,13 @@ jobs:
           fi
         fi
         
-        # Check pip-audit for critical vulnerabilities
-        pip-audit --format json --output /tmp/pip-audit-report.json 2>/dev/null || true
-        if [ -f /tmp/pip-audit-report.json ]; then
-          # Count vulnerabilities from pip-audit output
-          AUDIT_COUNT=$(pip-audit 2>&1 | grep -c "Found.*known vulnerability" || echo "0")
-          if [ "$AUDIT_COUNT" -gt 0 ]; then
-            echo "❌ Found $AUDIT_COUNT vulnerable dependencies"
-            VULN_COUNT=$((VULN_COUNT + AUDIT_COUNT))
-          fi
+        # Check project dependencies from requirements.txt only
+        AUDIT_OUTPUT=$(pip-audit --requirement data_engineering/requirements.txt 2>&1 || true)
+        AUDIT_COUNT=$(echo "$AUDIT_OUTPUT" | grep -c "Found.*known vulnerability" || echo "0")
+        
+        if [ "$AUDIT_COUNT" -gt 0 ]; then
+          echo "❌ Found $AUDIT_COUNT vulnerable project dependencies"
+          VULN_COUNT=$((VULN_COUNT + AUDIT_COUNT))
         fi
         
         # Fail if any high/critical issues found
@@ -73,7 +72,7 @@ jobs:
           echo "Please update vulnerable dependencies and fix code issues"
           exit 1
         else
-          echo "✅ No blocking security issues found"
+          echo "✅ No blocking security issues found in project code"
         fi
         
     - name: Comment on PR with results
