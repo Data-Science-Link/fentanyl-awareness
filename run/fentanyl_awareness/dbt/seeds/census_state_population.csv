@@ -1,0 +1,13 @@
+
+    
+    
+    
+    create table "fentanyl_awareness"."main"."census_state_population" ("year" integer,"state_code" integer,"state_name" text,"population" integer,"date_description" text,"extracted_at" text)
+  ;
+    -- dbt seed --
+    
+          COPY "fentanyl_awareness"."main"."census_state_population" FROM '/home/runner/work/fentanyl-awareness/fentanyl-awareness/data_engineering/data_build_tool/dbt/seeds/census_state_population.csv' (FORMAT CSV, HEADER TRUE, DELIMITER ',')
+        
+
+;
+  

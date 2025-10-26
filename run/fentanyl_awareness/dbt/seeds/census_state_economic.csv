@@ -1,0 +1,13 @@
+
+    
+    
+    
+    create table "fentanyl_awareness"."main"."census_state_economic" ("year" integer,"state_code" integer,"state_name" text,"median_household_income" integer,"per_capita_income" integer,"unemployment_rate" float8,"labor_force_total" integer,"employed" integer,"unemployed" integer,"extracted_at" text)
+  ;
+    -- dbt seed --
+    
+          COPY "fentanyl_awareness"."main"."census_state_economic" FROM '/home/runner/work/fentanyl-awareness/fentanyl-awareness/data_engineering/data_build_tool/dbt/seeds/census_state_economic.csv' (FORMAT CSV, HEADER TRUE, DELIMITER ',')
+        
+
+;
+  

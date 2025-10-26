@@ -1,0 +1,13 @@
+
+    
+    
+    
+    create table "fentanyl_awareness"."main"."Multiple_Cause_of_Death_2018_2023_Single_Race_MANUAL_DOWNLOAD" ("Notes" VARCHAR,"Year" VARCHAR,"Year Code" INTEGER,"Month" VARCHAR,"Month Code" VARCHAR,"State" VARCHAR,"State Code" VARCHAR,"Multiple Cause of death" VARCHAR,"Multiple Cause of death Code" VARCHAR,"Deaths" INTEGER,"Population" VARCHAR,"Crude Rate" VARCHAR)
+  ;
+    -- dbt seed --
+    
+          COPY "fentanyl_awareness"."main"."Multiple_Cause_of_Death_2018_2023_Single_Race_MANUAL_DOWNLOAD" FROM '/home/runner/work/fentanyl-awareness/fentanyl-awareness/data_engineering/data_build_tool/dbt/seeds/Multiple_Cause_of_Death_2018_2023_Single_Race_MANUAL_DOWNLOAD.csv' (FORMAT CSV, HEADER TRUE, DELIMITER ',')
+        
+
+;
+  
