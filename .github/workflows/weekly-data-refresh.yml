@@ -113,7 +113,7 @@ jobs:
         fi
 
     - name: Upload to Google Sheets
-      if: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON != '' }}
+      if: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
       env:
         GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
       run: |
