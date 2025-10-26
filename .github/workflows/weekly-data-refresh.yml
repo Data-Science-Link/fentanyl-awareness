@@ -1,0 +1,157 @@
+name: Weekly Data Refresh & Publishing
+
+on:
+  schedule:
+    # Run every Monday at 12:00 PM UTC (adjust as needed)
+    - cron: '0 12 * * 1'
+  workflow_dispatch: # Allow manual triggering
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  refresh-data:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🔍 Display context
+      run: |
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "📊 Weekly Data Refresh Starting"
+        echo "📝 Commit: ${GITHUB_SHA:0:7}"
+        echo "👤 Triggered by: ${{ github.actor }}"
+        echo "📅 Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        cd data_engineering
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install dbt-core dbt-duckdb
+
+    - name: Set up dbt profiles
+      run: |
+        mkdir -p ~/.dbt
+        cat > ~/.dbt/profiles.yml << EOF
+        fentanyl_awareness:
+          target: dev
+          outputs:
+            dev:
+              type: duckdb
+              path: 'fentanyl_awareness.duckdb'
+              threads: 4
+              schema: 'main'
+        EOF
+
+    - name: Install dbt packages
+      run: |
+        cd data_engineering/data_build_tool
+        dbt deps --profiles-dir ~/.dbt
+
+    - name: Load dbt seeds
+      run: |
+        cd data_engineering/data_build_tool
+        dbt seed --profiles-dir ~/.dbt
+
+    - name: Create final_datasets directory
+      run: |
+        mkdir -p final_datasets
+
+    - name: Run dbt models
+      run: |
+        cd data_engineering/data_build_tool
+        dbt run --profiles-dir ~/.dbt
+
+    - name: Run dbt tests
+      run: |
+        cd data_engineering/data_build_tool
+        dbt test --profiles-dir ~/.dbt
+
+    - name: Generate dbt documentation
+      run: |
+        cd data_engineering/data_build_tool
+        dbt docs generate --profiles-dir ~/.dbt
+
+    - name: Prepare docs for GitHub Pages
+      run: |
+        cd data_engineering/data_build_tool
+        mkdir -p ../../docs
+        cp -r target/* ../../docs/
+        echo "✅ Docs ready for deployment"
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
+        keep_files: false
+
+    - name: Commit updated CSV
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Check if CSV has changed
+        if git diff --quiet final_datasets/fact_fentanyl_deaths_over_time.csv; then
+          echo "📊 No changes to CSV - data is up to date"
+        else
+          echo "📝 CSV updated - committing changes"
+          git add final_datasets/fact_fentanyl_deaths_over_time.csv
+          git commit -m "chore: update fentanyl deaths data [skip ci]" || echo "No changes to commit"
+          git push origin main || echo "Nothing to push"
+        fi
+
+    - name: Upload to Google Sheets
+      if: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON != '' }}
+      env:
+        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+      run: |
+        echo "📊 Uploading data to Google Sheets..."
+        cd data_engineering/google_sheets
+
+        # Create service account file from GitHub secret
+        echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > service_account.json
+
+        # Run upload
+        python load_gcloud.py || echo "⚠️ Google Sheets upload failed"
+
+        # Clean up
+        rm -f service_account.json
+
+    - name: Upload artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: weekly-data-refresh
+        path: |
+          final_datasets/
+          data_engineering/data_build_tool/target/
+        retention-days: 30
+
+    - name: Summary
+      if: always()
+      run: |
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "✅ Weekly Data Refresh Complete"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "📁 Updated CSV: final_datasets/fact_fentanyl_deaths_over_time.csv"
+        echo "📚 Updated docs: https://data-science-link.github.io/fentanyl-awareness/"
+        if [ "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" != "" ]; then
+          echo "📊 Updated Google Sheets"
+        else
+          echo "⚠️ Google Sheets not configured (no secrets set)"
+        fi
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
