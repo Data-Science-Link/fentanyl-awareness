@@ -20,41 +20,41 @@ cleaned_data as (
         , employed
         , unemployed
         , extracted_at
-        
+
         -- Add derived fields
-        , case 
-            when median_household_income > 0 
+        , case
+            when median_household_income > 0
                 then true
             else false
           end as has_income_data
-        
-        , case 
-            when unemployment_rate is not null 
+
+        , case
+            when unemployment_rate is not null
                 then true
             else false
           end as has_employment_data
-        
+
         -- Add data quality flags
-        , case 
-            when median_household_income is null 
+        , case
+            when median_household_income is null
                 then 'missing'
-            when median_household_income < 20000 
+            when median_household_income < 20000
                 then 'low_income'
-            when median_household_income > 150000 
+            when median_household_income > 150000
                 then 'high_income'
             else 'normal'
           end as income_quality_flag
-        
-        , case 
-            when unemployment_rate is null 
+
+        , case
+            when unemployment_rate is null
                 then 'missing'
-            when unemployment_rate < 2.0 
+            when unemployment_rate < 2.0
                 then 'very_low'
-            when unemployment_rate > 10.0 
+            when unemployment_rate > 10.0
                 then 'very_high'
             else 'normal'
           end as unemployment_quality_flag
-        
+
     from source_data
 )
 

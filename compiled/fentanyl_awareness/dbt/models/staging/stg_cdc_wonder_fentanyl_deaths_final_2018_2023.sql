@@ -15,10 +15,10 @@ cleaned_data as (
         , trim("State") as state
         , trim("Multiple Cause of death") as multiple_cause_of_death
         , trim("Multiple Cause of death Code") as multiple_cause_of_death_code
-        
+
         -- Deaths is already an integer, just handle nulls
-        , case 
-            when "Deaths" is null 
+        , case
+            when "Deaths" is null
                 then 0
             else "Deaths"
           end as deaths
@@ -31,7 +31,7 @@ cleaned_data as (
         -- , population -- Almost always "Not Applicable". CDC Wonder attempts to anonymize the data when it is too granular (state, month, etc.)
         -- , crude_rate -- Almost always "Not Applicable". CDC Wonder attempts to anonymize the data when it is too granular (state, month, etc.)
 
-        
+
     from source_data
 )
 
