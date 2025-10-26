@@ -6,8 +6,8 @@
     , order_by=['year', 'month', 'state']
     , post_hook=[
         """
-        COPY (SELECT * FROM {{ this }} ORDER BY year, month, state) 
-        TO '../../final_datasets/fact_fentanyl_deaths_over_time.csv' 
+        COPY (SELECT * FROM {{ this }} ORDER BY year, month, state)
+        TO '../../final_datasets/fact_fentanyl_deaths_over_time.csv'
         (HEADER, DELIMITER ',')
         """
     ]
@@ -40,9 +40,9 @@ wonder_data_union as (
         , 'Official 1999-2020' as data_source
         , 1 as priority
     from {{ ref('stg_cdc_wonder_fentanyl_deaths_final_1999_2020') }}
-    
+
     union all
-    
+
     select
         year
         , month
@@ -51,9 +51,9 @@ wonder_data_union as (
         , 'Official 2018-2023' as data_source
         , 2 as priority
     from {{ ref('stg_cdc_wonder_fentanyl_deaths_final_2018_2023') }}
-    
+
     union all
-    
+
     select
         year
         , month
@@ -75,7 +75,7 @@ deduplicated_data as (
         , data_source
         , priority
         , row_number() over (
-            partition by year, month, state 
+            partition by year, month, state
             order by priority asc
         ) as row_num
     from wonder_data_union
