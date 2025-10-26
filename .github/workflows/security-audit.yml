@@ -28,16 +28,53 @@ jobs:
       run: |
         pip install bandit pip-audit
         pip install -r data_engineering/requirements.txt
+        sudo apt-get update && sudo apt-get install -y jq
         
     - name: Code security scan (Bandit)
+      continue-on-error: true
       run: |
         echo "📋 Scanning Python code for security issues..."
-        bandit -r data_engineering/ -f txt || exit 0
+        bandit -r data_engineering/ -f json -o bandit-report.json
         
     - name: Dependency vulnerability scan (pip-audit)
+      continue-on-error: true
       run: |
         echo "📦 Scanning dependencies for known vulnerabilities..."
-        pip-audit || exit 0
+        pip-audit
+        
+    - name: Check for high/critical vulnerabilities
+      run: |
+        echo "🔍 Analyzing scan results..."
+        VULN_COUNT=0
+        
+        # Check Bandit for high-severity issues
+        if [ -f bandit-report.json ]; then
+          HIGH_COUNT=$(cat bandit-report.json | jq '[.results[]? | select(.issue_severity == "HIGH" or .issue_severity == "MEDIUM")] | length' 2>/dev/null || echo "0")
+          if [ "$HIGH_COUNT" -gt 0 ]; then
+            echo "❌ Found $HIGH_COUNT high/medium severity code issues"
+            VULN_COUNT=$((VULN_COUNT + HIGH_COUNT))
+          fi
+        fi
+        
+        # Check pip-audit for critical vulnerabilities
+        pip-audit --format json --output /tmp/pip-audit-report.json 2>/dev/null || true
+        if [ -f /tmp/pip-audit-report.json ]; then
+          # Count vulnerabilities from pip-audit output
+          AUDIT_COUNT=$(pip-audit 2>&1 | grep -c "Found.*known vulnerability" || echo "0")
+          if [ "$AUDIT_COUNT" -gt 0 ]; then
+            echo "❌ Found $AUDIT_COUNT vulnerable dependencies"
+            VULN_COUNT=$((VULN_COUNT + AUDIT_COUNT))
+          fi
+        fi
+        
+        # Fail if any high/critical issues found
+        if [ "$VULN_COUNT" -gt 0 ]; then
+          echo "❌ BLOCKING: Found $VULN_COUNT security issue(s) that must be fixed"
+          echo "Please update vulnerable dependencies and fix code issues"
+          exit 1
+        else
+          echo "✅ No blocking security issues found"
+        fi
         
     - name: Comment on PR with results
       if: github.event_name == 'pull_request'
