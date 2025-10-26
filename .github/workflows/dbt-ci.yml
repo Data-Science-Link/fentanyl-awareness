@@ -120,6 +120,46 @@ jobs:
       run: |
         cd data_engineering/data_build_tool
         dbt docs generate --profiles-dir ~/.dbt
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "📚 dbt Documentation Generated"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "To view locally:"
+        echo "  1. Download 'dbt-artifacts' artifact from this workflow"
+        echo "  2. Extract and run: cd target && python -m http.server 8080"
+        echo "  3. Open http://localhost:8080/index.html"
+        echo ""
+        echo "Or run locally: dbt docs serve --profiles-dir ~/.dbt"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        
+    - name: Prepare docs for GitHub Pages
+      if: github.ref == 'refs/heads/main'
+      run: |
+        # Create docs directory for GitHub Pages
+        mkdir -p ../docs
+        cp -r data_engineering/data_build_tool/target/* ../docs/
+        echo "✅ Docs prepared for GitHub Pages deployment"
+        
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
+        keep_files: false
+        
+    - name: Show documentation URL
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "📚 dbt Docs Deployed Successfully!"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🔗 View your docs at:"
+        echo "   https://Data-Science-Link.github.io/fentanyl-awareness/"
+        echo ""
+        echo "⏱️  May take 1-2 minutes to go live"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         
     - name: Upload dbt artifacts
       uses: actions/upload-artifact@v4
