@@ -86,12 +86,12 @@ WORKSHEET_NAME=Fentanyl Deaths Over Time
 
 ## 🤖 GitHub Actions Integration
 
-The workflow (`.github/workflows/weekly-data-pipeline.yml`) automatically:
-- Runs every Monday at 6 AM UTC
-- Extracts data from CDC WONDER and Census
-- Processes data through dbt
-- Exports to Google Sheets
-- Can be triggered manually
+The workflow (`.github/workflows/weekly-data-refresh.yml`) automatically:
+- Runs every Monday at 12:00 PM UTC
+- Processes data through dbt transformations
+- Generates final CSV and updates documentation
+- Exports to Google Sheets (only if CSV has changed)
+- Can be triggered manually via workflow_dispatch
 
 ### Required GitHub Secrets
 - `GOOGLE_SHEET_ID`: Your Google Sheet ID
@@ -129,15 +129,15 @@ The exported data includes:
 ### Debug Mode
 Run with verbose logging:
 ```bash
-cd data_extraction_and_transformation/google_sheets
+cd data_engineering/google_sheets
 python load_gcloud.py --verbose
 ```
 
 ## 🔄 Manual Data Refresh
 
 To manually refresh data:
-1. Run dbt models: `cd data_extraction_and_transformation/data_engineering && dbt run`
-2. Export to sheets: `cd data_extraction_and_transformation/google_sheets && python load_gcloud.py`
+1. Run dbt models: `cd data_engineering/data_build_tool && dbt run`
+2. Export to sheets: `cd data_engineering/google_sheets && python load_gcloud.py`
 
 ## 📈 Monitoring
 
