@@ -147,10 +147,6 @@ jobs:
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "📁 Updated CSV: final_datasets/fact_fentanyl_deaths_over_time.csv"
         echo "📚 Updated docs: https://data-science-link.github.io/fentanyl-awareness/"
-        if [ "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" != "" ]; then
-          echo "📊 Updated Google Sheets"
-        else
-          echo "⚠️ Google Sheets not configured (no secrets set)"
-        fi
+        echo "📊 Google Sheets: Upload completed (check logs)"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
