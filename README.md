@@ -251,11 +251,58 @@ All scripts include comprehensive logging:
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions to improve this fentanyl awareness data pipeline! Here's how to get started:
+
+### Development Setup
+
+1. **Fork the repository**
+2. **Clone your fork**
+   ```bash
+   git clone https://github.com/your-username/fentanyl-awareness.git
+   cd fentanyl-awareness
+   ```
+
+3. **Set up development environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r data_engineering/requirements.txt
+   ```
+
+4. **Create a feature branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+5. **Make your changes and test**
+   ```bash
+   # Run tests to ensure everything works
+   cd data_engineering/data_build_tool
+   dbt test
+   ```
+
+6. **Commit and push**
+   ```bash
+   git commit -m 'Add your feature'
+   git push origin feature/your-feature-name
+   ```
+
+7. **Open a Pull Request**
+
+### Contribution Guidelines
+
+- **Data Quality**: All changes must pass dbt tests
+- **Documentation**: Update README and code comments as needed
+- **Testing**: Add tests for new features
+- **Security**: Never commit sensitive data or credentials
+
+### Areas for Contribution
+
+- 🔍 **Data Sources**: Add new data sources (CBP, healthcare, economic)
+- 📊 **Visualizations**: Create new Tableau dashboards
+- 🧪 **Testing**: Improve data quality tests
+- 📚 **Documentation**: Enhance guides and examples
+- 🐛 **Bug Fixes**: Report and fix issues
 
 ## 📄 License
 

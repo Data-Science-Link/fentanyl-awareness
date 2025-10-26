@@ -1,0 +1,38 @@
+# CODEOWNERS file for Fentanyl Awareness Data Pipeline
+# This file defines who should review changes to different parts of the codebase
+
+# Global owners - these people will be requested for review on any change
+* @Data-Science-Link
+
+# Data Engineering Components
+# These require technical review for data quality and pipeline integrity
+/data_engineering/ @Data-Science-Link
+/data_engineering/data_build_tool/ @Data-Science-Link
+/data_engineering/data_sources/ @Data-Science-Link
+/data_engineering/google_sheets/ @Data-Science-Link
+
+# Critical Configuration Files
+# Changes to these files require careful review
+dbt_project.yml @Data-Science-Link
+packages.yml @Data-Science-Link
+requirements.txt @Data-Science-Link
+.github/workflows/ @Data-Science-Link
+
+# Documentation
+# Documentation changes are important for public repositories
+README.md @Data-Science-Link
+*.md @Data-Science-Link
+
+# Security and Compliance
+# Security-related files need careful review
+SECURITY_CHECKLIST.md @Data-Science-Link
+security_audit.sh @Data-Science-Link
+.gitignore @Data-Science-Link
+
+# Final Datasets
+# Changes to processed data need review for accuracy
+/final_datasets/ @Data-Science-Link
+
+# Data Visualization
+# Visualization changes should be reviewed for accuracy and clarity
+/data_visualization/ @Data-Science-Link
