@@ -137,10 +137,12 @@ jobs:
     - name: Prepare docs for GitHub Pages
       if: github.ref == 'refs/heads/main'
       run: |
-        # Create docs directory for GitHub Pages
-        mkdir -p ../docs
-        cp -r data_engineering/data_build_tool/target/* ../docs/
+        cd data_engineering/data_build_tool
+        # Create docs directory at workspace root
+        mkdir -p ../../docs
+        cp -r target/* ../../docs/
         echo "✅ Docs prepared for GitHub Pages deployment"
+        ls -la ../../docs/ | head -10
         
     - name: Deploy to GitHub Pages
       if: github.ref == 'refs/heads/main'
