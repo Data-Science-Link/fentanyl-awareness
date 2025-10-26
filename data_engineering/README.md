@@ -7,9 +7,8 @@ This folder contains all the technical components for extracting, processing, an
 ### Automation & Integration
 - `google_sheets/` - Google Sheets export automation
   - `load_gcloud.py` - Main Google Sheets integration script
-  - `setup_gsheets.py` - Interactive setup and configuration
-  - `test_gsheets.py` - Comprehensive test suite
-  - `GOOGLE_SHEETS_README.md` - Complete documentation
+  - `test_gsheets.py` - Test suite
+  - `README.md` - Complete documentation
 
 ### Data Engineering
 - `data_build_tool/` - Complete dbt project for data transformations
@@ -68,21 +67,22 @@ This folder contains all the technical components for extracting, processing, an
    # Edit .env with your configuration (at project root)
    ```
 
-4. **Run the extraction pipeline**:
-   ```bash
-   python extract_data.py
-   ```
-
-5. **Transform data with dbt**:
+4. **Transform data with dbt**:
    ```bash
    cd data_build_tool
-   dbt deps
-   dbt seed
-   dbt run
-   dbt test
+   dbt deps --profiles-dir ~/.dbt
+   dbt seed --profiles-dir ~/.dbt
+   dbt run --profiles-dir ~/.dbt
+   dbt test --profiles-dir ~/.dbt
    ```
 
-6. **Load to Google Sheets**:
+5. **Generate documentation**:
+   ```bash
+   dbt docs generate --profiles-dir ~/.dbt
+   dbt docs serve --profiles-dir ~/.dbt
+   ```
+
+6. **Load to Google Sheets** (optional):
    ```bash
    cd google_sheets
    python load_gcloud.py
@@ -138,73 +138,68 @@ conn.close()
 "
 ```
 
-## 🏛️ Census Data Integration
+## 📊 Data Sources
 
-### Overview
-The pipeline now includes US Census Bureau data integration for enhanced demographic analysis:
+This pipeline uses data from:
 
-- **Population Estimates Program (PEP)** - State-level population data
-- **American Community Survey (ACS)** - Economic and demographic indicators
-- **Automated extraction** - Python scripts for API data retrieval
-- **dbt integration** - Staging models and mart models for analysis
+1. **CDC WONDER** - Mortality data (seeds in `dbt/seeds/`)
+2. **US Census** - Population and economic data (seeds in `dbt/seeds/`)
 
-### Setup Census Data
+The seed files are automatically loaded when you run `dbt seed`.
 
-1. **Get Census API Key**:
-   ```bash
-   # Visit: https://api.census.gov/data/key_signup.html
-   # Add to environment or .env file:
-   export CENSUS_API_KEY='your_api_key_here'
-   ```
+### Available dbt Models
 
-2. **Run Census Setup**:
-   ```bash
-   cd data_sources/census_acs
-   python3 setup_census.py
-   ```
-
-3. **Extract Census Data**:
-   ```bash
-   python3 census_extractor.py
-   ```
-
-4. **Load into dbt**:
-   ```bash
-   cd ../../data_build_tool
-   dbt seed
-   dbt run
-   ```
-
-### Available Census Models
-
-- `stg_census_state_population` - Cleaned population estimates
+**Staging Models**:
+- `stg_cdc_wonder_fentanyl_deaths_final_1999_2020` - Historical CDC data
+- `stg_cdc_wonder_fentanyl_deaths_final_2018_2023` - Recent CDC data
+- `stg_cdc_wonder_fentanyl_deaths_provisional_2018_current` - Provisional data
+- `stg_census_state_population` - Population estimates
 - `stg_census_state_economic` - Economic indicators
-- `fct_synthetic_opioid_deaths_with_population` - Combined mortality + population data
 
-### Sample Queries with Population Data
+**Mart Models**:
+- `fact_fentanyl_deaths_over_time` - Final fact table with all data sources
+
+### Sample Queries
 
 ```sql
--- Mortality rates per 100,000 population
+-- View final dataset
+SELECT * FROM main.fact_fentanyl_deaths_over_time LIMIT 10;
+
+-- Deaths by state in 2023
 SELECT 
-    residence_state,
+    state,
+    SUM(deaths) as total_deaths
+FROM main.fact_fentanyl_deaths_over_time
+WHERE year = 2023
+GROUP BY state
+ORDER BY total_deaths DESC;
+
+-- Monthly trends
+SELECT 
     year,
-    SUM(deaths) as total_deaths,
-    AVG(population) as avg_population,
-    ROUND(SUM(deaths)::decimal / AVG(population) * 100000, 2) as death_rate_per_100k
-FROM main.fct_synthetic_opioid_deaths_with_population
-WHERE population IS NOT NULL
-GROUP BY residence_state, year
-ORDER BY death_rate_per_100k DESC
-LIMIT 10;
+    SUM(deaths) as total_deaths
+FROM main.fact_fentanyl_deaths_over_time
+GROUP BY year
+ORDER BY year;
 ```
+
+## 🤖 GitHub Actions Automation
+
+This pipeline is fully automated with three GitHub workflows:
+
+- **dbt CI/CD**: Runs tests on every push/PR, deploys docs to GitHub Pages
+- **Security Audit**: Scans code and dependencies for vulnerabilities  
+- **Weekly Data Refresh**: Automated pipeline runs every Monday
+
+All workflows can be manually triggered from the Actions tab.
 
 ## 🔧 Technical Details
 
 This folder contains the complete data engineering pipeline that:
-- Extracts data from CDC WONDER API (datasets D77, D157, D176)
-- Integrates US Census Bureau demographic and economic data
+- **Loads** data from CSV seed files (CDC WONDER and Census data)
 - Transforms data using dbt with DuckDB
 - Implements data quality tests and validation
 - Automates the entire process with GitHub Actions
+- Generates final CSV and documentation
 
-For detailed technical documentation, see the individual script files and dbt model documentation.
+For detailed technical documentation, see the individual dbt model files.

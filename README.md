@@ -37,7 +37,7 @@ CDC WONDER API → Python Extraction → DuckDB → dbt Transformations → Goog
 | **Data Engine** | DuckDB (via dbt-duckdb) | Embedded, zero-setup analytical database |
 | **Transformations** | dbt | SQL-based data modeling with testing & documentation |
 | **Extraction** | Python (requests) | CDC WONDER API integration |
-| **Automation** | GitHub Actions | Monthly pipeline scheduling |
+| **Automation** | GitHub Actions | Automated testing, security, and weekly data updates |
 | **Visualization** | Google Sheets → Tableau Public | Free, auto-refreshing data connector |
 
 ## 📊 Data Sources
@@ -206,18 +206,19 @@ For automated runs, configure these repository secrets:
 
 The pipeline runs automatically via GitHub Actions:
 
-- **Schedule**: Monthly on the 1st day at midnight UTC
-- **Manual Trigger**: Available via GitHub Actions UI
-- **Failure Notifications**: Creates GitHub issues on pipeline failures
-- **Artifact Storage**: Preserves logs and database files for 30 days
+- **dbt CI/CD**: Runs on every push/PR to test data transformations
+- **Security Audit**: Scans code and dependencies for vulnerabilities
+- **Weekly Data Refresh**: Scheduled every Monday at 12:00 PM UTC
+- **Manual Trigger**: All workflows can be triggered manually
+- **Artifact Storage**: Preserves logs and artifacts for 30 days
+- **Live Documentation**: Auto-deploys to GitHub Pages
 
-## 📊 Tableau Public Integration
+## 📊 Live Data & Documentation
 
-1. **Connect Tableau Public** to your Google Sheet
-2. **Enable Auto-Refresh** for daily data updates
-3. **Publish Dashboard** with auto-sync enabled
-
-The Google Sheet acts as a free, non-expiring data bridge that enables automated refreshes on Tableau Public.
+- **GitHub Pages**: Auto-updated docs at https://data-science-link.github.io/fentanyl-awareness/
+- **CSV Download**: Always-available dataset at `final_datasets/fact_fentanyl_deaths_over_time.csv`
+- **Google Sheets**: Automated upload (only updates when data changes)
+- **Tableau Public**: Connect to Google Sheets for visualization
 
 ## 🧪 Testing
 
@@ -235,12 +236,19 @@ Tests include:
 
 ## 🔍 Monitoring
 
+### GitHub Actions Workflows
+
+- **dbt CI/CD**: Tests models on every push/PR, deploys docs
+- **Security Audit**: Scans for vulnerabilities in code and dependencies
+- **Weekly Refresh**: Automated pipeline runs every Monday
+
 ### Data Quality Metrics
 
 The pipeline tracks:
 - **Data Freshness**: When each dataset was last updated
 - **Completeness**: Missing values and zero-population counties
 - **Accuracy**: Calculated vs. provided death rates
+- **Unique Constraints**: Validates primary keys
 
 ### Logging
 
