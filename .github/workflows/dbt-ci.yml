@@ -147,7 +147,7 @@ jobs:
               
               const comment = `## 🧪 dbt Test Results
               
-              ### Summary
+              Summary:
               - ✅ Passed: ${passed}
               - ❌ Failed: ${failed}
               - ⏭️ Skipped: ${skipped}
