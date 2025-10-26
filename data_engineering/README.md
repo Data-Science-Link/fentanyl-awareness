@@ -193,6 +193,91 @@ This pipeline is fully automated with three GitHub workflows:
 
 All workflows can be manually triggered from the Actions tab.
 
+## ⚙️ Configuration
+
+### Environment Variables
+
+Create a `.env` file at the project root with:
+
+```bash
+# Google Sheets API Configuration
+GOOGLE_SHEETS_CREDENTIALS_FILE=service_account.json
+GOOGLE_SHEET_ID=your_google_sheet_id_here
+
+# CDC WONDER API Configuration  
+CDC_WONDER_BASE_URL=https://wonder.cdc.gov/controller/datarequest
+CDC_WONDER_TIMEOUT=600
+
+# Data Configuration
+DATA_DIRECTORY=./data
+SEEDS_DIRECTORY=./data_build_tool/dbt/seeds
+```
+
+### GitHub Secrets (for automated runs)
+
+For GitHub Actions to work, configure these repository secrets:
+- `GOOGLE_SERVICE_ACCOUNT_JSON`: Contents of your service account JSON
+- `GOOGLE_SHEET_ID`: Your Google Sheet ID
+
+## 🧪 Testing
+
+Run data quality tests:
+
+```bash
+cd data_build_tool
+dbt test --profiles-dir ~/.dbt
+```
+
+Tests include:
+- Not null constraints on key fields
+- Data freshness checks
+- Referential integrity between models
+- Unique constraints
+
+## 🤝 Contributing
+
+### Development Setup
+
+1. **Fork and clone the repository**
+   ```bash
+   git clone https://github.com/your-username/fentanyl-awareness.git
+   cd fentanyl-awareness
+   ```
+
+2. **Create a feature branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+3. **Make your changes and test**
+   ```bash
+   cd data_engineering/data_build_tool
+   dbt test --profiles-dir ~/.dbt
+   ```
+
+4. **Commit and push**
+   ```bash
+   git commit -m 'Add your feature'
+   git push origin feature/your-feature-name
+   ```
+
+5. **Open a Pull Request**
+
+### Contribution Guidelines
+
+- **Data Quality**: All changes must pass dbt tests
+- **Documentation**: Update README and code comments as needed
+- **Testing**: Add tests for new features
+- **Security**: Never commit sensitive data or credentials
+
+### Areas for Contribution
+
+- 🔍 **Data Sources**: Add new sources (CBP, healthcare, economic)
+- 📊 **dbt Models**: Improve transformations and add new metrics
+- 🧪 **Testing**: Enhance data quality tests
+- 📚 **Documentation**: Improve guides and examples
+- 🐛 **Bug Fixes**: Report and fix issues
+
 ## 🔧 Technical Details
 
 This folder contains the complete data engineering pipeline that:
