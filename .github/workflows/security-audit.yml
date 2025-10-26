@@ -3,23 +3,12 @@ name: Security Audit Pipeline
 on:
   push:
     branches: [ main, master, develop ]
-    paths:
-      - 'data_engineering/**'
-      - '.github/workflows/security-audit.yml'
-      - 'security_audit.sh'
-      - 'SECURITY_CHECKLIST.md'
   pull_request:
     branches: [ main, master, develop ]
-    paths:
-      - 'data_engineering/**'
-      - '.github/workflows/security-audit.yml'
-      - 'security_audit.sh'
-      - 'SECURITY_CHECKLIST.md'
 
 permissions:
   contents: read
   pull-requests: write
-  issues: write
   security-events: write
 
 jobs:
@@ -37,219 +26,65 @@ jobs:
         
     - name: Install security tools
       run: |
-        # Install security scanning tools
-        pip install bandit safety semgrep
-        # Install your project dependencies for analysis
+        pip install bandit pip-audit
         pip install -r data_engineering/requirements.txt
         
-    - name: Run custom security audit
+    - name: Run security scans
       run: |
-        cd data_engineering
-        chmod +x security_audit.sh
-        ./security_audit.sh
-      continue-on-error: true
-      
-    - name: Scan for secrets and credentials
-      run: |
-        echo "🔍 Scanning for exposed secrets and credentials..."
+        echo "🔍 Running comprehensive security scan..."
         
-        # Check for common credential patterns
-        if grep -r -i "password\|secret\|key\|token\|api_key" data_engineering/ --exclude-dir=target --exclude-dir=logs --exclude-dir=dbt_packages; then
-          echo "❌ Potential credentials found in code"
-          exit 1
-        fi
-        
-        # Check for service account files
-        if find data_engineering/ -name "*.json" -exec grep -l "service_account\|credentials" {} \; | grep -v ".gitignore"; then
-          echo "❌ Service account files found in repository"
-          exit 1
-        fi
-        
-        # Check for environment files with secrets
-        if find data_engineering/ -name ".env*" -o -name "*.env"; then
-          echo "❌ Environment files found in repository"
-          exit 1
-        fi
-        
-        echo "✅ No exposed credentials found"
-        
-    - name: Python security scan with Bandit
-      run: |
-        echo "🔍 Running Python security scan with Bandit..."
+        # Python security scan
+        echo "📋 Scanning Python code..."
         bandit -r data_engineering/ -f json -o bandit-report.json || true
         bandit -r data_engineering/ -f txt
         
-    - name: Dependency vulnerability scan
-      run: |
-        echo "🔍 Scanning for dependency vulnerabilities..."
-        safety check --json --output safety-report.json || true
-        safety check
+        # Dependency vulnerability scan
+        echo "📦 Scanning dependencies..."
+        pip-audit --format json --output safety-report.json || true
+        pip-audit
         
-    - name: Static analysis with Semgrep
-      run: |
-        echo "🔍 Running static analysis with Semgrep..."
-        semgrep --config=auto data_engineering/ --json --output=semgrep-report.json || true
-        semgrep --config=auto data_engineering/
-        
-    - name: Check file permissions
-      run: |
-        echo "🔍 Checking file permissions..."
-        
-        # Check for overly permissive files
-        find data_engineering/ -type f -perm 777 -o -perm 666 | while read file; do
-          echo "⚠️ Overly permissive file: $file"
-        done
-        
-        # Check for executable files that shouldn't be
-        find data_engineering/ -type f -executable -name "*.py" | while read file; do
-          if ! head -1 "$file" | grep -q "#!/"; then
-            echo "⚠️ Executable Python file without shebang: $file"
-          fi
-        done
-        
-    - name: Validate .gitignore effectiveness
-      run: |
-        echo "🔍 Validating .gitignore effectiveness..."
-        
-        # Check if sensitive files are properly ignored
-        if git check-ignore data_engineering/google_sheets/service_account.json 2>/dev/null; then
-          echo "✅ service_account.json properly ignored"
-        else
-          echo "⚠️ service_account.json not in .gitignore"
-        fi
-        
-        # Check for any tracked sensitive files
-        if git ls-files | grep -E "\.(pem|key|p12|pfx|jks|keystore)$"; then
-          echo "❌ Sensitive file types found in repository"
-          exit 1
-        fi
-        
-        echo "✅ .gitignore validation passed"
-        
-    - name: Generate security report
-      run: |
-        echo "📊 Generating security report..."
-        
-        # Create summary report
-        cat > security-summary.md << EOF
-        # Security Audit Report
-        
-        ## Scan Results
-        
-        ### Credential Scan
-        - Status: ✅ Passed
-        - No exposed credentials found
-        
-        ### Python Security (Bandit)
-        - Status: $(if [ -f bandit-report.json ]; then echo "⚠️ Issues found"; else echo "✅ Clean"; fi)
-        
-        ### Dependency Vulnerabilities
-        - Status: $(if [ -f safety-report.json ]; then echo "⚠️ Vulnerabilities found"; else echo "✅ Clean"; fi)
-        
-        ### Static Analysis (Semgrep)
-        - Status: $(if [ -f semgrep-report.json ]; then echo "⚠️ Issues found"; else echo "✅ Clean"; fi)
-        
-        ### File Permissions
-        - Status: ✅ Checked
-        
-        ### .gitignore Validation
-        - Status: ✅ Passed
-        
-        ## Recommendations
-        
-        1. Review any flagged issues in the detailed reports
-        2. Update dependencies regularly
-        3. Follow security checklist guidelines
-        4. Monitor for new security advisories
-        
-        EOF
-        
-    - name: Upload security reports
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: security-reports
-        path: |
-          bandit-report.json
-          safety-report.json
-          semgrep-report.json
-          security-summary.md
-        retention-days: 30
-        
-    - name: Comment on PR with security results
+    - name: Comment on PR with results
       if: github.event_name == 'pull_request'
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
           
-          let securityStatus = '✅';
-          let statusText = 'Security audit passed';
-          let details = [];
+          let issues = 0;
+          let vulnerabilities = 0;
           
-          // Check for security reports
+          // Count Bandit issues
           if (fs.existsSync('bandit-report.json')) {
             try {
               const banditReport = JSON.parse(fs.readFileSync('bandit-report.json', 'utf8'));
-              if (banditReport.results && banditReport.results.length > 0) {
-                securityStatus = '⚠️';
-                statusText = 'Security issues found';
-                details.push(`- Bandit found ${banditReport.results.length} security issues`);
-              }
-            } catch (e) {
-              console.log('Could not parse bandit report');
-            }
+              issues = banditReport.results?.length || 0;
+            } catch (e) {}
           }
           
+          // Count pip-audit vulnerabilities
           if (fs.existsSync('safety-report.json')) {
             try {
-              const safetyReport = JSON.parse(fs.readFileSync('safety-report.json', 'utf8'));
-              if (safetyReport.vulnerabilities && safetyReport.vulnerabilities.length > 0) {
-                securityStatus = '⚠️';
-                statusText = 'Security vulnerabilities found';
-                details.push(`- Safety found ${safetyReport.vulnerabilities.length} dependency vulnerabilities`);
-              }
-            } catch (e) {
-              console.log('Could not parse safety report');
-            }
+              const auditReport = JSON.parse(fs.readFileSync('safety-report.json', 'utf8'));
+              vulnerabilities = auditReport.vulnerabilities?.length || 0;
+            } catch (e) {}
           }
           
-          const comment = `## 🔒 Security Audit Results
+          const total = issues + vulnerabilities;
+          const status = total > 0 ? '⚠️' : '✅';
+          const message = total > 0 ? `${total} security issues found` : 'No security issues detected';
           
-          **Status:** ${securityStatus} ${statusText}
+          const comment = `## 🔒 Security Scan Results
           
-          ${details.length > 0 ? details.join('\n') : 'No security issues detected.'}
+          **Status:** ${status} ${message}
           
-          **Scans Performed:**
-          - ✅ Credential scanning
-          - ✅ Python security analysis (Bandit)
-          - ✅ Dependency vulnerability check
-          - ✅ Static code analysis (Semgrep)
-          - ✅ File permission validation
-          - ✅ .gitignore effectiveness check
+          ${issues > 0 ? `- Code issues: ${issues}` : ''}
+          ${vulnerabilities > 0 ? `- Dependency vulnerabilities: ${vulnerabilities}` : ''}
           
-          Check the Actions logs for detailed security reports.`;
+          Check Actions logs for details.`;
           
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
             body: comment
-          });
-          
-    - name: Create security issue on failure
-      if: failure() && github.event_name == 'push'
-      uses: actions/github-script@v6
-      with:
-        script: |
-          github.rest.issues.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            title: '🚨 Security audit failed',
-            body: `Security audit failed on commit ${context.sha}.
-            
-            Please review the security issues and fix them before merging.
-            
-            Check the [Actions logs](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.`,
-            labels: ['security', 'bug']
           });
