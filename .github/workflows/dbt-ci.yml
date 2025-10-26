@@ -72,6 +72,10 @@ jobs:
         cd data_engineering/data_build_tool
         dbt debug --profiles-dir ~/.dbt
         
+    - name: Create final_datasets directory
+      run: |
+        mkdir -p ../../final_datasets
+        
     - name: Load dbt seeds
       run: |
         cd data_engineering/data_build_tool
