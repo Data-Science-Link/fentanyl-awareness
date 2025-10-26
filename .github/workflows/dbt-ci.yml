@@ -131,17 +131,43 @@ jobs:
               const testResults = JSON.parse(fs.readFileSync(testResultsPath, 'utf8'));
               const passed = testResults.results.filter(r => r.status === 'pass').length;
               const failed = testResults.results.filter(r => r.status === 'fail').length;
+              const skipped = testResults.results.filter(r => r.status === 'skip').length;
               const total = testResults.results.length;
+              
+              let statusEmoji = '🎉';
+              let statusText = 'All tests passed!';
+              
+              if (failed > 0) {
+                statusEmoji = '❌';
+                statusText = 'Some tests failed. Please check the logs for details.';
+              } else if (skipped > 0 && passed === 0) {
+                statusEmoji = '⚠️';
+                statusText = 'All tests were skipped.';
+              }
               
               const comment = `## 🧪 dbt Test Results
               
-              **Summary:**
+              ### Summary
               - ✅ Passed: ${passed}
               - ❌ Failed: ${failed}
+              - ⏭️ Skipped: ${skipped}
               - 📊 Total: ${total}
               
-              ${failed > 0 ? '⚠️ Some tests failed. Please check the logs for details.' : '🎉 All tests passed!'}
-              `;
+              ${statusEmoji} ${statusText}`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } else {
+              // Fallback if run_results.json doesn't exist
+              const comment = `## 🧪 dbt Test Results
+              
+              **Status:** ✅ Workflow completed successfully
+              
+              Note: Detailed test results not available. Check the Actions logs for more information.`;
               
               github.rest.issues.createComment({
                 issue_number: context.issue.number,
@@ -152,4 +178,19 @@ jobs:
             }
           } catch (error) {
             console.log('Could not read test results:', error.message);
+            
+            const comment = `## 🧪 dbt Test Results
+            
+            **Status:** ⚠️ Could not parse test results
+            
+            Error: ${error.message}
+            
+            Please check the Actions logs for detailed information.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
           }
