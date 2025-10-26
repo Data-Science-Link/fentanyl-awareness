@@ -6,13 +6,13 @@ on:
     paths:
       - 'data_engineering/data_build_tool/**'
       - 'data_engineering/requirements.txt'
-      - '.github/workflows/dbt-ci.yml'
+      - '.github/workflows/*.yml'
   pull_request:
     branches: [ main, master, develop ]
     paths:
       - 'data_engineering/data_build_tool/**'
       - 'data_engineering/requirements.txt'
-      - '.github/workflows/dbt-ci.yml'
+      - '.github/workflows/*.yml'
 
 permissions:
   contents: write  # Needed to deploy to GitHub Pages
