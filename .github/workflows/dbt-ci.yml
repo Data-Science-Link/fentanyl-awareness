@@ -14,6 +14,11 @@ on:
       - 'data_engineering/requirements.txt'
       - '.github/workflows/dbt-ci.yml'
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   dbt-test:
     runs-on: ubuntu-latest
