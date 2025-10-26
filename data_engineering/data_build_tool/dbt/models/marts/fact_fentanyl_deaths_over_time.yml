@@ -4,20 +4,20 @@ models:
   - name: fact_fentanyl_deaths_over_time
     description: |
       Fact table for comprehensive CDC WONDER fentanyl deaths analysis with census demographic data.
-      
-      This model unions all CDC WONDER data sources (official 1999-2020, official 2018-2023, 
-      and provisional 2018-current) and prioritizes older, more reliable data sources. It 
-      combines mortality data with US Census demographic and economic indicators to enable 
-      comprehensive analysis of fentanyl-related deaths across time, geography, and 
+
+      This model unions all CDC WONDER data sources (official 1999-2020, official 2018-2023,
+      and provisional 2018-current) and prioritizes older, more reliable data sources. It
+      combines mortality data with US Census demographic and economic indicators to enable
+      comprehensive analysis of fentanyl-related deaths across time, geography, and
       socioeconomic factors.
-      
+
       **Data Characteristics:**
       - **Time Period**: 1999-current (comprehensive coverage)
       - **Geographic Level**: State-level aggregation
       - **Cause of Death**: Synthetic opioid deaths (T40.4)
       - **Data Sources**: Multiple CDC WONDER datasets with prioritization
       - **Demographics**: Population, income, and unemployment data from US Census
-      
+
       **Key Transformations:**
       - Unions all CDC WONDER data sources using UNION ALL
       - Deduplicates records based on primary keys (year, month, state)
@@ -25,9 +25,9 @@ models:
       - Coalesces death counts to handle null values
       - Enriches with census demographic and economic data
       - Maintains data source traceability for audit purposes
-      
-      This fact table serves as the primary dataset for comprehensive fentanyl mortality 
-      analysis, enabling correlation studies between death rates and socioeconomic factors 
+
+      This fact table serves as the primary dataset for comprehensive fentanyl mortality
+      analysis, enabling correlation studies between death rates and socioeconomic factors
       while maintaining data quality through source prioritization.
 
     tests:
@@ -43,32 +43,32 @@ models:
         description: "Year of death occurrence"
         tests:
           - not_null
-      
+
       - name: month
         description: "Date representation of the month (first day of month)"
         tests:
           - not_null
-      
+
       - name: state
         description: "State where death occurred"
         tests:
           - not_null
-      
+
       - name: deaths
         description: "Number of fentanyl-related deaths (coalesced to 0 for missing values)"
         tests:
           - not_null
-      
+
       - name: data_source
         description: "Source dataset identifier ('Official 1999-2020', 'Official 2018-2023', or 'Provisional 2018-current')"
         tests:
           - not_null
-      
+
       - name: population
         description: "State population count from US Census Population Estimates Program"
-      
+
       - name: median_household_income
         description: "Median household income in current dollars from US Census ACS"
-      
+
       - name: unemployment_rate
         description: "Unemployment rate as percentage from US Census ACS"

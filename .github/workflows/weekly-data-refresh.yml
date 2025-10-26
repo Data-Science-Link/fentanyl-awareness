@@ -97,7 +97,9 @@ jobs:
         publish_dir: ./docs
         keep_files: false
 
-    - name: Commit updated CSV
+    - name: Commit and Upload CSV if Changed
+      env:
+        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -105,28 +107,26 @@ jobs:
         # Check if CSV has changed
         if git diff --quiet final_datasets/fact_fentanyl_deaths_over_time.csv; then
           echo "📊 No changes to CSV - data is up to date"
+          echo "⏭️  Skipping Google Sheets upload (no changes)"
         else
           echo "📝 CSV updated - committing changes"
           git add final_datasets/fact_fentanyl_deaths_over_time.csv
           git commit -m "chore: update fentanyl deaths data [skip ci]" || echo "No changes to commit"
           git push origin main || echo "Nothing to push"
+
+          # Upload to Google Sheets only if CSV changed
+          echo "📊 Uploading data to Google Sheets..."
+          cd data_engineering/google_sheets
+
+          # Create service account file from GitHub secret
+          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > service_account.json
+
+          # Run upload
+          python load_gcloud.py || echo "⚠️ Google Sheets upload failed"
+
+          # Clean up
+          rm -f service_account.json
         fi
-
-    - name: Upload to Google Sheets
-      env:
-        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
-      run: |
-        echo "📊 Uploading data to Google Sheets..."
-        cd data_engineering/google_sheets
-
-        # Create service account file from GitHub secret
-        echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > service_account.json
-
-        # Run upload (fail gracefully if credentials invalid)
-        python load_gcloud.py || echo "⚠️ Google Sheets upload failed"
-
-        # Clean up
-        rm -f service_account.json
 
     - name: Upload artifacts
       if: always()
@@ -147,10 +147,6 @@ jobs:
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "📁 Updated CSV: final_datasets/fact_fentanyl_deaths_over_time.csv"
         echo "📚 Updated docs: https://data-science-link.github.io/fentanyl-awareness/"
-        if [ "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" != "" ]; then
-          echo "📊 Updated Google Sheets"
-        else
-          echo "⚠️ Google Sheets not configured (no secrets set)"
-        fi
+        echo "📊 Google Sheets: Upload completed (check logs)"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
