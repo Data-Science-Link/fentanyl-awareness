@@ -16,6 +16,21 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: 🔍 Display context
+      run: |
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          echo "🔵 Pull Request: ${{ github.event.pull_request.title }}"
+          echo "   PR Number: #${{ github.event.pull_request.number }}"
+        else
+          echo "🔵 Push to: ${{ github.ref_name }}"
+        fi
+        COMMIT_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+        echo "📝 Commit: $COMMIT_SHORT"
+        echo "👤 Author: ${{ github.actor }}"
+        echo "📅 Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        
     - name: Checkout repository
       uses: actions/checkout@v4
       
