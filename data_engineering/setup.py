@@ -11,11 +11,17 @@ import subprocess
 import shutil
 from pathlib import Path
 
-def run_command(command, description):
-    """Run a command and handle errors."""
+def run_command(cmd_list, description):
+    """Run a command and handle errors.
+    
+    Args:
+        cmd_list: List of command and arguments (e.g., ['pip', 'install', 'package'])
+        description: Human-readable description of what this command does
+    """
     print(f"🔄 {description}...")
     try:
-        result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+        # Use explicit command list with shell=False to prevent injection
+        result = subprocess.run(cmd_list, check=True, capture_output=True, text=True)
         print(f"✅ {description} completed successfully")
         return True
     except subprocess.CalledProcessError as e:
@@ -41,7 +47,7 @@ def setup_environment():
         return False
     
     # Install dependencies
-    if not run_command("pip install -r requirements.txt", "Installing Python dependencies"):
+    if not run_command(['pip', 'install', '-r', 'requirements.txt'], "Installing Python dependencies"):
         return False
     
     # Create necessary directories
@@ -58,7 +64,7 @@ def setup_environment():
         print(f"✅ Created directory: {directory}")
     
     # Check if dbt is working
-    if not run_command("dbt --version", "Checking dbt installation"):
+    if not run_command(['dbt', '--version'], "Checking dbt installation"):
         return False
     
     print("\n🎉 Setup completed successfully!")
@@ -76,17 +82,17 @@ def test_pipeline():
     print("\n🧪 Testing pipeline components...")
     
     # Test data extraction (dry run)
-    if not run_command("python -c 'from extract_data import CDCWonderExtractor; print(\"Extraction module OK\")'", 
+    if not run_command(['python', '-c', 'from extract_data import CDCWonderExtractor; print("Extraction module OK")'], 
                       "Testing extraction module"):
         return False
     
     # Test Google Sheets integration (dry run)
-    if not run_command("python -c 'from load_gcloud import GoogleSheetsLoader; print(\"Google Sheets module OK\")'", 
+    if not run_command(['python', '-c', 'from load_gcloud import GoogleSheetsLoader; print("Google Sheets module OK")'], 
                       "Testing Google Sheets module"):
         return False
     
     # Test dbt configuration
-    if not run_command("cd dbt && dbt debug", "Testing dbt configuration"):
+    if not run_command(['dbt', 'debug'], "Testing dbt configuration"):
         return False
     
     print("✅ All tests passed!")
