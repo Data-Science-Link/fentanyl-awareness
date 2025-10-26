@@ -72,6 +72,11 @@ jobs:
         cd data_engineering/data_build_tool
         dbt debug --profiles-dir ~/.dbt
         
+    - name: Load dbt seeds
+      run: |
+        cd data_engineering/data_build_tool
+        dbt seed --profiles-dir ~/.dbt
+        
     - name: Run dbt compile
       run: |
         cd data_engineering/data_build_tool
