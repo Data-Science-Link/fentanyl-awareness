@@ -4,29 +4,29 @@ models:
   - name: stg_cdc_wonder_fentanyl_deaths_provisional_2018_current
     description: |
       Staging model for CDC WONDER D176 Provisional Mortality Statistics (2018-current).
-      
-      This model cleans and standardizes synthetic opioid mortality data from the CDC WONDER 
-      database, specifically focusing on ICD-10 code T40.4 (Other synthetic narcotics) which 
-      includes fentanyl-related deaths. The data represents provisional mortality statistics 
-      that are updated monthly and may be subject to revision as more complete information 
+
+      This model cleans and standardizes synthetic opioid mortality data from the CDC WONDER
+      database, specifically focusing on ICD-10 code T40.4 (Other synthetic narcotics) which
+      includes fentanyl-related deaths. The data represents provisional mortality statistics
+      that are updated monthly and may be subject to revision as more complete information
       becomes available.
-      
+
       **Data Characteristics:**
       - **Time Period**: 2018 through current (provisional and partial data)
       - **Geographic Level**: State-level aggregation
       - **Cause of Death**: Synthetic opioid deaths (T40.4)
       - **Update Frequency**: Monthly provisional updates
-      - **Data Quality**: Population and crude rate often marked as "Not Applicable" 
+      - **Data Quality**: Population and crude rate often marked as "Not Applicable"
         for provisional data
-      
+
       **Key Transformations:**
       - Standardizes column names and data types
       - Handles "Not Applicable" values appropriately
       - Preserves data quality flags for downstream analysis
       - Maintains referential integrity with source data
-      
-      This staging model serves as the foundation for downstream mart models that will 
-      combine this provisional data with official mortality datasets (D77, D157) to 
+
+      This staging model serves as the foundation for downstream mart models that will
+      combine this provisional data with official mortality datasets (D77, D157) to
       provide comprehensive synthetic opioid mortality analysis.
 
     tests:
@@ -43,32 +43,32 @@ models:
         description: "Year of death occurrence (derived from Year Code)"
         tests:
           - not_null
-      
+
       - name: month
         description: "Date representation of the month (first day of month, e.g., '2018-01-01')"
         tests:
           - not_null
-      
+
       - name: state
         description: "State where the person lived who passed away"
         tests:
           - not_null
-      
+
       - name: multiple_cause_of_death
         description: "Cause of death description (e.g., 'Other synthetic narcotics')"
         tests:
           - not_null
-      
+
       - name: multiple_cause_of_death_code
         description: "Cause of death code (e.g., 'T40.4')"
         tests:
           - not_null
-      
+
       - name: deaths
         description: "Number of deaths (integer, defaults to 0 for missing values)"
-      
+
       - name: population
         description: "Population count (null when 'Not Applicable')"
-      
+
       - name: crude_rate
         description: "Crude death rate per 100,000 population (null when 'Not Applicable')"

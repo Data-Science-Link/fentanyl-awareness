@@ -14,7 +14,7 @@ An open-source data pipeline that automatically updates and publishes comprehens
 ### 🔧 **Data Engineers & Developers**
 Want to modify or run the pipeline? See [`data_engineering/`](data_engineering/README.md) for complete technical documentation, setup instructions, and architecture details.
 
-### 📊 **Researchers & Analysts**  
+### 📊 **Researchers & Analysts**
 Need the data without technical setup? Download [`fact_fentanyl_deaths_over_time.csv`](final_datasets/) - updated weekly with the latest CDC data combined with census demographics.
 
 ### 📈 **Visualizers & Presenters**
@@ -50,7 +50,7 @@ Everything runs on GitHub Actions - no manual intervention needed.
 ## 🤖 Reliability & Security
 
 - **✅ Automated Testing**: Every code change is automatically tested
-- **🔒 Security Scanning**: Code and dependencies scanned weekly for vulnerabilities  
+- **🔒 Security Scanning**: Code and dependencies scanned weekly for vulnerabilities
 - **📝 Full History**: Git maintains complete history of all data changes
 - **🔄 Automatic Updates**: Fresh data published every week
 

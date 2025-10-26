@@ -51,13 +51,13 @@ This folder contains all the technical components for extracting, processing, an
    ```bash
    # On macOS with Homebrew
    brew install duckdb
-   
+
    # On Ubuntu/Debian
    sudo apt-get install duckdb
-   
+
    # On Windows with Chocolatey
    choco install duckdb
-   
+
    # Or download from: https://duckdb.org/docs/installation/
    ```
 
@@ -108,10 +108,10 @@ SELECT * FROM main.d176_provisional_2018_current LIMIT 5;
 SELECT * FROM main.stg_cdc_wonder_fentanyl_deaths_provisional_2018_current LIMIT 5;
 
 # Top states by deaths
-SELECT residence_state, SUM(deaths) as total_deaths 
-FROM main.stg_cdc_wonder_fentanyl_deaths_provisional_2018_current 
-GROUP BY residence_state 
-ORDER BY total_deaths DESC 
+SELECT residence_state, SUM(deaths) as total_deaths
+FROM main.stg_cdc_wonder_fentanyl_deaths_provisional_2018_current
+GROUP BY residence_state
+ORDER BY total_deaths DESC
 LIMIT 10;
 
 # Export results to CSV
@@ -166,7 +166,7 @@ The seed files are automatically loaded when you run `dbt seed`.
 SELECT * FROM main.fact_fentanyl_deaths_over_time LIMIT 10;
 
 -- Deaths by state in 2023
-SELECT 
+SELECT
     state,
     SUM(deaths) as total_deaths
 FROM main.fact_fentanyl_deaths_over_time
@@ -175,7 +175,7 @@ GROUP BY state
 ORDER BY total_deaths DESC;
 
 -- Monthly trends
-SELECT 
+SELECT
     year,
     SUM(deaths) as total_deaths
 FROM main.fact_fentanyl_deaths_over_time
@@ -188,7 +188,7 @@ ORDER BY year;
 This pipeline is fully automated with three GitHub workflows:
 
 - **dbt CI/CD**: Runs tests on every push/PR, deploys docs to GitHub Pages
-- **Security Audit**: Scans code and dependencies for vulnerabilities  
+- **Security Audit**: Scans code and dependencies for vulnerabilities
 - **Weekly Data Refresh**: Automated pipeline runs every Monday
 
 All workflows can be manually triggered from the Actions tab.
@@ -204,7 +204,7 @@ Create a `.env` file at the project root with:
 GOOGLE_SHEETS_CREDENTIALS_FILE=service_account.json
 GOOGLE_SHEET_ID=your_google_sheet_id_here
 
-# CDC WONDER API Configuration  
+# CDC WONDER API Configuration
 CDC_WONDER_BASE_URL=https://wonder.cdc.gov/controller/datarequest
 CDC_WONDER_TIMEOUT=600
 

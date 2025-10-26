@@ -4,14 +4,14 @@ sources:
   - name: cdc_wonder_raw
     description: "Raw CDC WONDER synthetic opioid mortality data"
     schema: main
-    tables:           
+    tables:
       - name: provisional_mortality_statistics_2018_through_last_week_manual_download
         description: "Provisional mortality data from 2018-current (manual download)"
       - name: multiple_cause_of_death_1999_2020_manual_download
         description: "Multiple cause of death data from 1999-2020 (manual download)"
       - name: multiple_cause_of_death_2018_2023_single_race_manual_download
         description: "Multiple cause of death data from 2018-2023, single race (manual download)"
-  
+
   - name: census_raw
     description: "Raw US Census Bureau data (Population Estimates Program and ACS)"
     schema: main

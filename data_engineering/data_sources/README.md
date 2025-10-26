@@ -11,7 +11,7 @@ This directory contains all data sources for the fentanyl awareness pipeline, in
 
 **Datasets**:
 - **D77**: Official mortality data (1999-2020) - Multiple Cause of Death
-- **D157**: Official mortality data (2018-2023) - Multiple Cause of Death, Single Race  
+- **D157**: Official mortality data (2018-2023) - Multiple Cause of Death, Single Race
 - **D176**: Provisional mortality data (2018-current) - Provisional Mortality Statistics
 
 **Key Features**:
@@ -118,7 +118,7 @@ CBP Data   → Python Extraction → DuckDB → dbt Transformations → Google S
    # CDC WONDER data
    cd data_sources/cdc_wonder
    python cdc_wonder_extractor.py
-   
+
    # Census ACS data
    cd ../census_acs
    python census_extractor.py
