@@ -41,7 +41,7 @@ jobs:
       run: |
         echo "📦 Scanning dependencies for known vulnerabilities..."
         # Scan only project dependencies from requirements.txt
-        pip-audit --requirement data_engineering/requirements.txt || true
+        pip-audit --requirement data_engineering/requirements.txt
         
     - name: Check for high/critical vulnerabilities
       run: |
