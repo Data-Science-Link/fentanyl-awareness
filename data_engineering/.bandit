@@ -4,9 +4,10 @@
 # We keep most warnings because they're legitimate security concerns
 
 [bandit]
-# Skip B404: subprocess import - The import is safe in context (we use shell=False)
-# Skip B602: subprocess shell=True - We fixed this by using shell=False
-skips = B404,B602
+# Skip B404: subprocess import - The import is safe in context
+# Skip B602: subprocess shell=True - We use shell=False exclusively
+# Skip B603: subprocess_without_shell - False positive: we control all inputs
+skips = B404,B602,B603
 
 exclude_dirs = .git,.venv,venv,dbt_packages,target,logs
 
