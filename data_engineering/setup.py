@@ -15,7 +15,10 @@ def run_command(command, description):
     """Run a command and handle errors."""
     print(f"🔄 {description}...")
     try:
-        result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+        # Use shell=False and pass command as list to avoid shell injection
+        # Split command into list for safer execution
+        cmd_parts = command.split()
+        result = subprocess.run(cmd_parts, check=True, capture_output=True, text=True)
         print(f"✅ {description} completed successfully")
         return True
     except subprocess.CalledProcessError as e:

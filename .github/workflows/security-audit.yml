@@ -77,10 +77,10 @@ jobs:
           
           **Status:** ${status} ${message}
           
-          ${issues > 0 ? `- Code issues: ${issues}` : ''}
-          ${vulnerabilities > 0 ? `- Dependency vulnerabilities: ${vulnerabilities}` : ''}
+          ${issues > 0 ? `- **Code issues:** ${issues} security issues found in Python code` : ''}
+          ${vulnerabilities > 0 ? `- **Dependencies:** ${vulnerabilities} vulnerable packages found` : ''}
           
-          Check Actions logs for details.`;
+          ${total > 0 ? '**Next Steps:** Check the Actions logs for details and fix the issues before merging.' : '✅ All security checks passed!'}`;
           
           github.rest.issues.createComment({
             issue_number: context.issue.number,

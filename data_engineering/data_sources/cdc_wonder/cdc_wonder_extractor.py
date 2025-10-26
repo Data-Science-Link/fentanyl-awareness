@@ -17,12 +17,12 @@ Usage:
 
 import os
 import requests
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 from pathlib import Path
 import time
 from typing import Dict, Any
 import logging
-import random
+import secrets
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -141,7 +141,7 @@ class CDCWonderExtractor:
                 elif response.status_code == 502:
                     logger.warning(f"502 Bad Gateway - CDC WONDER API might be temporarily unavailable (attempt {attempt + 1})")
                     if attempt < max_retries - 1:
-                        wait_time = (2 ** attempt) + random.uniform(0, 1)  # Exponential backoff with jitter
+                        wait_time = (2 ** attempt) + secrets.randbelow(100) / 100  # Exponential backoff with cryptographically secure jitter  # nosec B311
                         logger.info(f"Retrying in {wait_time:.1f} seconds...")
                         time.sleep(wait_time)
                         continue
@@ -152,7 +152,7 @@ class CDCWonderExtractor:
                 elif response.status_code == 504:
                     logger.warning(f"504 Gateway Timeout - Request is taking too long (attempt {attempt + 1})")
                     if attempt < max_retries - 1:
-                        wait_time = (2 ** attempt) + random.uniform(0, 1)  # Exponential backoff with jitter
+                        wait_time = (2 ** attempt) + secrets.randbelow(100) / 100  # Exponential backoff with cryptographically secure jitter  # nosec B311
                         logger.info(f"Retrying in {wait_time:.1f} seconds...")
                         time.sleep(wait_time)
                         continue
@@ -170,7 +170,7 @@ class CDCWonderExtractor:
             except requests.exceptions.RequestException as e:
                 logger.error(f"Request failed on attempt {attempt + 1}: {e}")
                 if attempt < max_retries - 1:
-                    wait_time = (2 ** attempt) + random.uniform(0, 1)  # Exponential backoff with jitter
+                    wait_time = (2 ** attempt) + secrets.randbelow(100) / 100  # Exponential backoff with cryptographically secure jitter  # nosec B311
                     logger.info(f"Retrying in {wait_time:.1f} seconds...")
                     time.sleep(wait_time)
                     continue
