@@ -74,7 +74,7 @@ jobs:
         
     - name: Create final_datasets directory
       run: |
-        mkdir -p ../../final_datasets
+        mkdir -p final_datasets
         
     - name: Load dbt seeds
       run: |
