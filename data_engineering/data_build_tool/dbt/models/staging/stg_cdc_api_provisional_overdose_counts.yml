@@ -32,5 +32,5 @@ models:
         tests:
           - not_null
 
-      - name: deaths
+      - name: rolling_12_month_deaths
         description: "Number of deaths (12-month ending count)"
