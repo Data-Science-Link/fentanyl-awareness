@@ -1,6 +1,6 @@
-# data_engineering
+# Data Engineering
 
-This folder contains all the technical components for extracting, processing, and transforming fentanyl-related mortality data from CDC WONDER.
+This folder contains the technical infrastructure for the Fentanyl Awareness Project. While the work here is technical, its purpose is deeply serious: to provide accurate data that helps us understand and address the tragic synthetic opioid crisis claiming lives across our country.
 
 ## 📁 Contents
 

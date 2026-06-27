@@ -1,6 +1,6 @@
-# Data Build Tool (dbt)
+# Data Build Tool (dbt) Transformations
 
-This folder contains the complete dbt project for transforming fentanyl awareness data from raw sources into analytical models.
+This directory contains the dbt (Data Build Tool) project used to transform raw mortality and demographic data into the refined datasets used by the Fentanyl Awareness Project. We approach this data with the gravity it deserves, ensuring that each transformation is accurate and meaningful in the context of the national crisis we are tracking.
 
 ## 📁 Structure
 
