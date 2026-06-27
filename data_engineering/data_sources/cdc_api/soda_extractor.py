@@ -48,24 +48,27 @@ class CDCSodaExtractor:
             logger.error(f"Error fetching data from CDC API: {e}")
             raise
 
-    def save_to_csv(self, df: pd.DataFrame, output_path: str):
+    def save_to_csv(self, df: pd.DataFrame, output_path: Path):
         """Save the DataFrame to a CSV file."""
         logger.info(f"Saving data to {output_path}")
-        output_dir = os.path.dirname(output_path)
-        Path(output_dir).mkdir(parents=True, exist_ok=True)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
         df.to_csv(output_path, index=False)
         logger.info("Data saved successfully.")
 
 def main():
-    # Set up paths
-    script_dir = Path(__file__).parent
-    output_path = script_dir.parent.parent / "data_build_tool" / "dbt" / "seeds" / "cdc_api_provisional_overdose_counts.csv"
+    # Set up paths using robust resolution
+    script_path = Path(__file__).resolve()
+    # Path is: data_engineering/data_sources/cdc_api/soda_extractor.py
+    # Need to go up 3 levels to data_engineering/
+    # Then into data_build_tool/dbt/seeds/
+    output_dir = script_path.parent.parent.parent / "data_build_tool" / "dbt" / "seeds"
+    output_path = output_dir / "cdc_api_provisional_overdose_counts.csv"
 
     extractor = CDCSodaExtractor()
     try:
         df = extractor.fetch_data()
-        extractor.save_to_csv(df, str(output_path))
+        extractor.save_to_csv(df, output_path)
         return 0
     except Exception:
         return 1

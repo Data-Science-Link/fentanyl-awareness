@@ -40,6 +40,16 @@ jobs:
         pip install -r requirements.txt
         pip install dbt-core dbt-duckdb
 
+    - name: 🔄 Extract Latest Data
+      env:
+        CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+      run: |
+        echo "📥 Extracting CDC SODA API data..."
+        python data_engineering/data_sources/cdc_api/soda_extractor.py
+
+        echo "📥 Extracting US Census demographic data..."
+        python data_engineering/data_sources/census_acs/census_extractor.py
+
     - name: Set up dbt profiles
       run: |
         mkdir -p ~/.dbt
@@ -98,19 +108,22 @@ jobs:
         publish_dir: ./docs
         keep_files: false
 
-    - name: Commit CSV if Changed
+    - name: Commit Updated Data if Changed
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
-        # Check if CSV has changed
-        if git diff --quiet Final_Datasets/fact_fentanyl_deaths_over_time.csv; then
-          echo "📊 No changes to CSV - data is up to date"
+        # Track multiple files
+        git add Final_Datasets/fact_fentanyl_deaths_over_time.csv
+        git add data_engineering/data_build_tool/dbt/seeds/*.csv
+
+        # Check if there are changes to commit
+        if git diff --staged --quiet; then
+          echo "📊 No changes to data - everything is up to date"
         else
-          echo "📝 CSV updated - committing changes"
-          git add Final_Datasets/fact_fentanyl_deaths_over_time.csv
-          git commit -m "chore: update fentanyl deaths data [skip ci]" || echo "No changes to commit"
-          git push origin main || echo "Nothing to push"
+          echo "📝 Data updated - committing changes"
+          git commit -m "chore: update datasets and seeds [skip ci]"
+          git push origin main
         fi
 
     - name: Upload artifacts
@@ -133,4 +146,3 @@ jobs:
         echo "📁 Updated CSV: Final_Datasets/fact_fentanyl_deaths_over_time.csv"
         echo "📚 Updated docs: https://data-science-link.github.io/fentanyl-awareness/"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
