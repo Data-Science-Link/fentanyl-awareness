@@ -13,9 +13,9 @@
 
 
 
-select month
-from "fentanyl_awareness"."main"."stg_cdc_wonder_fentanyl_deaths_final_2018_2023"
-where month is null
+select rolling_12_month_deaths
+from "fentanyl_awareness"."main"."fact_fentanyl_deaths_over_time"
+where rolling_12_month_deaths is null
 
 
 

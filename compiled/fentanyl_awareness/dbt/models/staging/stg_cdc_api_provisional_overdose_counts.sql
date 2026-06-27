@@ -35,7 +35,8 @@ cleaned_data as (
         , 'T40.4' as multiple_cause_of_death_code
 
         -- Handle nulls in data_value
-        , coalesce(cast(data_value as integer), 0) as deaths
+        -- This represents the 12-month rolling total of deaths ending in the given month
+        , coalesce(cast(data_value as integer), 0) as rolling_12_month_deaths
 
     from source_data
     -- The API includes "12 month-ending" and "Monthly" periods sometimes.

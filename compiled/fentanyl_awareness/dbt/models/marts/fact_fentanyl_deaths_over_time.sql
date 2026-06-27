@@ -1,5 +1,5 @@
--- Fact table for CDC WONDER Fentanyl Deaths
--- This model unions all CDC WONDER data sources and prioritizes older, more reliable data
+-- Fact table for CDC Fentanyl Deaths
+-- This model now uses the CDC SODA API as the single source of truth for fentanyl deaths
 
 
 
@@ -20,87 +20,34 @@ stg_census_state_economic as (
     from "fentanyl_awareness"."main"."stg_census_state_economic"
 ),
 
-wonder_data_union as (
-    -- Union all CDC WONDER data sources (union all since no duplicates expected)
+api_data as (
     select
         year
         , month
         , state
-        , deaths
-        , 'Official 1999-2020' as data_source
-        , 1 as priority
-    from "fentanyl_awareness"."main"."stg_cdc_wonder_fentanyl_deaths_final_1999_2020"
-
-    union all
-
-    select
-        year
-        , month
-        , state
-        , deaths
-        , 'Official 2018-2023' as data_source
-        , 2 as priority
-    from "fentanyl_awareness"."main"."stg_cdc_wonder_fentanyl_deaths_final_2018_2023"
-
-    union all
-
-    select
-        year
-        , month
-        , state
-        , deaths
-        , 'Provisional 2018-current' as data_source
-        , 3 as priority
-    from "fentanyl_awareness"."main"."stg_cdc_wonder_fentanyl_deaths_provisional_2018_current"
-
-    union all
-
-    select
-        year
-        , month
-        , state
-        , deaths
-        , 'Provisional API' as data_source
-        , 4 as priority
+        , rolling_12_month_deaths
+        , 'CDC SODA API' as data_source
     from "fentanyl_awareness"."main"."stg_cdc_api_provisional_overdose_counts"
 ),
 
--- Remove duplicates based on primary keys (year, month, state)
--- Prioritize older data sources (lower priority number = higher priority)
-deduplicated_data as (
-    select
-        year
-        , month
-        , state
-        , deaths
-        , data_source
-        , priority
-        , row_number() over (
-            partition by year, month, state
-            order by priority asc
-        ) as row_num
-    from wonder_data_union
-),
-
--- Final format with coalesced deaths, prioritized data source, and census data
+-- Final format with census data
 final_format as (
     select
-        deduplicated_data.year
-        , deduplicated_data.month
-        , deduplicated_data.state
-        , coalesce(deduplicated_data.deaths, 0) as deaths
-        , deduplicated_data.data_source
+        api_data.year
+        , api_data.month
+        , api_data.state
+        , api_data.rolling_12_month_deaths
+        , api_data.data_source
         , stg_census_state_population.population
         , stg_census_state_economic.median_household_income
         , stg_census_state_economic.unemployment_rate
-    from deduplicated_data
+    from api_data
     left join stg_census_state_population
-        on deduplicated_data.year = stg_census_state_population.year
-        and deduplicated_data.state = stg_census_state_population.state
+        on api_data.year = stg_census_state_population.year
+        and api_data.state = stg_census_state_population.state
     left join stg_census_state_economic
-        on deduplicated_data.year = stg_census_state_economic.year
-        and deduplicated_data.state = stg_census_state_economic.state
-    where deduplicated_data.row_num = 1  -- Keep only the highest priority record for each key
+        on api_data.year = stg_census_state_economic.year
+        and api_data.state = stg_census_state_economic.state
 )
 
 select * from final_format
