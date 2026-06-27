@@ -57,9 +57,7 @@ dbt docs serve
 ## 📊 Data Models
 
 ### Staging Models
-- `stg_cdc_wonder_fentanyl_deaths_final_1999_2020` - Historical CDC data
-- `stg_cdc_wonder_fentanyl_deaths_final_2018_2023` - Recent CDC data
-- `stg_cdc_wonder_fentanyl_deaths_provisional_2018_current` - Provisional data
+- `stg_cdc_api_provisional_overdose_counts` - Provisional drug overdose death counts from CDC API
 - `stg_census_state_population` - Population estimates
 - `stg_census_state_economic` - Economic indicators
 
@@ -85,7 +83,7 @@ Defines external package dependencies:
 ```
 Raw Data Sources → Seeds → Staging Models → Mart Models → Final Dataset
      ↓               ↓           ↓              ↓            ↓
-CDC WONDER      → CSV Files → Cleaned Data → Analytics → CSV Export
+CDC SODA API    → Seeds     → Cleaned Data → Analytics → CSV Export
 Census Data     → Seeds     → Validated    → Combined  → Google Sheets
 Other Sources  → Raw Data  → Standardized → Enriched  → Final Output
 ```

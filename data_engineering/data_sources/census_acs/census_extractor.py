@@ -19,6 +19,7 @@ import time
 from datetime import datetime
 from typing import Dict, List, Optional
 import logging
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -45,7 +46,9 @@ class CensusExtractor:
         """Initialize Census extractor with API key"""
         self.api_key = api_key or os.getenv('CENSUS_API_KEY')
         if not self.api_key:
-            raise ValueError("Census API key required. Set CENSUS_API_KEY environment variable or pass api_key parameter")
+            # We don't raise error here to allow the script to be imported/tested
+            # but methods will fail if they need the key
+            logger.warning("CENSUS_API_KEY not found in environment. API requests will likely fail.")
 
         self.base_url = CENSUS_API_BASE_URL
         self.session = requests.Session()
@@ -58,13 +61,14 @@ class CensusExtractor:
         Extract state-level population estimates from ACS
 
         Args:
-            years: List of years to extract (default: 2005-2023)
+            years: List of years to extract (default: 2005 to current year)
 
         Returns:
             DataFrame with state population data
         """
         if years is None:
-            years = list(range(2005, 2024))  # 2005-2023 (ACS 5-year estimates)
+            current_year = datetime.now().year
+            years = list(range(2005, current_year + 1))
 
         logger.info(f"Extracting state population estimates for years: {years}")
 
@@ -72,17 +76,25 @@ class CensusExtractor:
 
         for year in years:
             try:
-                # ACS 5-Year Estimates endpoint (more reliable than PEP)
+                # ACS 5-Year Estimates endpoint
                 url = f"{self.base_url}/{year}/acs/acs5"
 
                 params = {
                     'get': 'NAME,B01001_001E',  # B01001_001E is total population
                     'for': 'state:*',
                     'key': self.api_key
+                } if self.api_key else {
+                    'get': 'NAME,B01001_001E',
+                    'for': 'state:*'
                 }
 
                 logger.info(f"Fetching data for year {year}...")
                 response = self.session.get(url, params=params, timeout=30)
+
+                if response.status_code == 404:
+                    logger.warning(f"Data for year {year} not available yet (404). Skipping.")
+                    continue
+
                 response.raise_for_status()
 
                 data = response.json()
@@ -102,7 +114,7 @@ class CensusExtractor:
                 continue
 
         if not all_data:
-            raise Exception("No data extracted successfully")
+            raise Exception("No population data extracted successfully")
 
         # Combine all years
         combined_df = pd.concat(all_data, ignore_index=True)
@@ -118,13 +130,14 @@ class CensusExtractor:
         Extract state-level economic data from ACS
 
         Args:
-            years: List of years to extract (default: 2009-2023)
+            years: List of years to extract (default: 2009 to current year)
 
         Returns:
             DataFrame with state economic data
         """
         if years is None:
-            years = list(range(2009, 2024))  # 2009-2023 (ACS 5-year estimates)
+            current_year = datetime.now().year
+            years = list(range(2009, current_year + 1))
 
         logger.info(f"Extracting state economic data for years: {years}")
 
@@ -139,10 +152,18 @@ class CensusExtractor:
                     'get': 'B19013_001E,B19301_001E,B23025_002E,B23025_003E,B23025_004E,B23025_005E,NAME',
                     'for': 'state:*',
                     'key': self.api_key
+                } if self.api_key else {
+                    'get': 'B19013_001E,B19301_001E,B23025_002E,B23025_003E,B23025_004E,B23025_005E,NAME',
+                    'for': 'state:*'
                 }
 
                 logger.info(f"Fetching economic data for year {year}...")
                 response = self.session.get(url, params=params, timeout=30)
+
+                if response.status_code == 404:
+                    logger.warning(f"Economic data for year {year} not available yet (404). Skipping.")
+                    continue
+
                 response.raise_for_status()
 
                 data = response.json()
@@ -247,7 +268,7 @@ def test_census_api():
         extractor = CensusExtractor()
         print("🧪 Testing Census data extraction...")
 
-        # Test with a small dataset
+        # Test with a small dataset (using a year likely to be available)
         df = extractor.get_state_population_estimates(years=[2021])
         print(f"✅ Successfully extracted {len(df)} records")
         print("🎉 Census API test successful!")
@@ -272,16 +293,18 @@ def main():
         economic_df = extractor.get_state_economic_data()
 
         # Save to CSV files (overwrite if they exist)
-        output_dir = "../../dbt/seeds"
-        os.makedirs(output_dir, exist_ok=True)
+        # Using Path(__file__) for robust resolution
+        script_path = Path(__file__).resolve()
+        output_dir = script_path.parent.parent.parent / "data_build_tool" / "dbt" / "seeds"
+        output_dir.mkdir(parents=True, exist_ok=True)
 
-        population_file = f"{output_dir}/census_state_population.csv"
-        economic_file = f"{output_dir}/census_state_economic.csv"
+        population_file = output_dir / "census_state_population.csv"
+        economic_file = output_dir / "census_state_economic.csv"
 
         # Remove existing files if they exist to ensure clean overwrite
         for file_path in [population_file, economic_file]:
-            if os.path.exists(file_path):
-                os.remove(file_path)
+            if file_path.exists():
+                file_path.unlink()
                 logger.info(f"Removed existing file: {file_path}")
 
         population_df.to_csv(population_file, index=False)

@@ -88,21 +88,21 @@ duckdb data_build_tool/fentanyl_awareness.duckdb
 .tables
 
 # Explore raw data
-SELECT * FROM main.d176_provisional_2018_current LIMIT 5;
+SELECT * FROM main.cdc_api_provisional_overdose_counts LIMIT 5;
 
 # Query cleaned staging data (after dbt run)
-SELECT * FROM main.stg_cdc_wonder_fentanyl_deaths_provisional_2018_current LIMIT 5;
+SELECT * FROM main.stg_cdc_api_provisional_overdose_counts LIMIT 5;
 
 # Top states by deaths
-SELECT residence_state, SUM(deaths) as total_deaths
-FROM main.stg_cdc_wonder_fentanyl_deaths_provisional_2018_current
-GROUP BY residence_state
+SELECT state, SUM(rolling_12_month_deaths) as total_deaths
+FROM main.stg_cdc_api_provisional_overdose_counts
+GROUP BY state
 ORDER BY total_deaths DESC
 LIMIT 10;
 
 # Export results to CSV
 .output results.csv
-SELECT * FROM main.stg_cdc_wonder_fentanyl_deaths_provisional_2018_current;
+SELECT * FROM main.stg_cdc_api_provisional_overdose_counts;
 .output stdout
 ```
 
@@ -132,9 +132,7 @@ The seed files are automatically loaded when you run `dbt seed`.
 ### Available dbt Models
 
 **Staging Models**:
-- `stg_cdc_wonder_fentanyl_deaths_final_1999_2020` - Historical CDC data
-- `stg_cdc_wonder_fentanyl_deaths_final_2018_2023` - Recent CDC data
-- `stg_cdc_wonder_fentanyl_deaths_provisional_2018_current` - Provisional data
+- `stg_cdc_api_provisional_overdose_counts` - Provisional drug overdose death counts from CDC API
 - `stg_census_state_population` - Population estimates
 - `stg_census_state_economic` - Economic indicators
 
