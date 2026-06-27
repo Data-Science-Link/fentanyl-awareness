@@ -62,6 +62,17 @@ wonder_data_union as (
         , 'Provisional 2018-current' as data_source
         , 3 as priority
     from {{ ref('stg_cdc_wonder_fentanyl_deaths_provisional_2018_current') }}
+
+    union all
+
+    select
+        year
+        , month
+        , state
+        , deaths
+        , 'Provisional API' as data_source
+        , 4 as priority
+    from {{ ref('stg_cdc_api_provisional_overdose_counts') }}
 ),
 
 -- Remove duplicates based on primary keys (year, month, state)

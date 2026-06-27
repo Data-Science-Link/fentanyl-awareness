@@ -12,6 +12,13 @@ sources:
       - name: multiple_cause_of_death_2018_2023_single_race_manual_download
         description: "Multiple cause of death data from 2018-2023, single race (manual download)"
 
+  - name: cdc_api_raw
+    description: "Raw CDC SODA API drug overdose data"
+    schema: main
+    tables:
+      - name: cdc_api_provisional_overdose_counts
+        description: "Provisional drug overdose death counts from CDC API"
+
   - name: census_raw
     description: "Raw US Census Bureau data (Population Estimates Program and ACS)"
     schema: main
