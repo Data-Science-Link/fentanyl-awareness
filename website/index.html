@@ -97,7 +97,12 @@
             <div class="card-header bg-white pt-3 px-4">
                 <ul class="nav nav-tabs card-header-tabs" id="portalTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="explorer-tab" data-bs-toggle="tab" data-bs-target="#explorer" type="button" role="tab">
+                        <button class="nav-link active" id="readme-tab" data-bs-toggle="tab" data-bs-target="#readme" type="button" role="tab">
+                            <i class="fas fa-info-circle me-2"></i>Read Me
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="explorer-tab" data-bs-toggle="tab" data-bs-target="#explorer" type="button" role="tab">
                             <i class="fas fa-table me-2"></i>Data Explorer
                         </button>
                     </li>
@@ -116,8 +121,49 @@
             <div class="card-body p-0">
                 <div class="tab-content" id="portalTabsContent">
 
+                    <!-- Read Me Tab -->
+                    <div class="tab-pane fade show active p-5" id="readme" role="tabpanel">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-10">
+                                <h2 class="mb-4">About the Fentanyl Awareness Project</h2>
+                                <p class="lead">
+                                    This project was born out of a grave concern for the fentanyl crisis in the United States.
+                                    I had heard how devastating the situation was, but when I tried to find granular, state-level, monthly data
+                                    to understand if it was getting better or worse, I couldn't find a single, easily accessible, cleaned national source.
+                                </p>
+                                <p>
+                                    While some states have excellent local dashboards, a comprehensive national view that surfaces accurate and
+                                    regularly refreshed information was missing. To make it easier for others and to answer the basic question
+                                    of how bad the fentanyl situation is and how it is trending, I wanted to make the raw data and
+                                    visualizations available to the public.
+                                </p>
+                                <div class="alert alert-secondary mt-4 py-4 px-4">
+                                    <h4 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>A Serious Tragedy</h4>
+                                    <p class="mb-0">
+                                        We must note that any life lost early to something like this is a tragedy.
+                                        We feel for the victims' families, we mourn the lost lives, and we hope that this situation gets under
+                                        control so our loved ones are not taken from us too soon. This project is dedicated to providing
+                                        the transparency needed to address this serious and important issue.
+                                    </p>
+                                </div>
+                                <hr class="my-5">
+                                <h5>Data Sources & Granularity</h5>
+                                <p>
+                                    We extract data from official sources including the CDC SODA API and US Census Bureau.
+                                    Our goal is to provide the lowest level of granularity possible—monthly death counts—to
+                                    enable precise analysis of trends over time and per capita impact.
+                                </p>
+                                <div class="mt-4">
+                                    <button class="btn btn-primary btn-lg" onclick="$('#explorer-tab').tab('show');">
+                                        <i class="fas fa-table me-2"></i>Go to Data Explorer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Data Explorer Tab -->
-                    <div class="tab-pane fade show active p-4" id="explorer" role="tabpanel">
+                    <div class="tab-pane fade p-4" id="explorer" role="tabpanel">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
                                 <h3 class="mb-1">Interactive Data Explorer</h3>

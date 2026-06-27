@@ -1,14 +1,16 @@
 # Fentanyl Awareness Data Pipeline
 
-An open-source data pipeline that automatically updates and publishes comprehensive fentanyl mortality data from CDC WONDER and the US Census.
+This project was born out of a grave concern for the fentanyl crisis in the United States. I had heard how devastating the situation was, but when I tried to find granular, state-level, monthly data to understand if it was getting better or worse, I couldn't find a single, easily accessible, cleaned national source. While some states have excellent dashboards, a comprehensive national view was missing.
+
+Every life lost to this epidemic is a tragedy. We remember the victims, we feel for their families, and we hope that by making this data transparent and accessible, we can contribute to getting this situation under control so that fewer loved ones are taken from us too soon. This is not just a data project; it is an effort to bring visibility to a serious public health crisis.
 
 ## 🎯 What This Project Provides
 
-- **📊 Ready-to-use CSV file**: Clean, validated fentanyl death data (1999-current)
-- **Interactive Data Portal**: Browse, filter, and export data directly from your browser
-- **📚 Live Documentation**: Complete pipeline and data lineage docs updated weekly
-- **🔄 Automated Updates**: Fresh data published every Monday at 12:00 PM UTC
-- **📈 Easy Access**: Download CSV, explore online, or analyze with your preferred tool
+- **📊 Granular Data**: State-level monthly death counts (provisional and official).
+- **Interactive Data Portal**: Browse, filter, and export data directly from your browser.
+- **📚 Live Documentation**: Complete pipeline and data lineage docs updated weekly.
+- **🔄 Automated Updates**: Fresh data published every Monday at 12:00 PM UTC.
+- **📈 Easy Access**: Download CSV, explore online, or analyze with your preferred tool.
 
 ## 📂 For Different Users
 
@@ -42,18 +44,11 @@ See [`Final_Datasets/README.md`](Final_Datasets/README.md) for the complete data
 ## 🔄 How It Works
 
 This repository automatically:
-1. Processes CDC SODA API mortality data and US Census demographics
-2. Validates and tests the data using automated checks
-3. Updates the CSV, interactive portal, and documentation every Monday
+1. Processes CDC SODA API mortality data and US Census demographics.
+2. Validates and tests the data using automated checks.
+3. Updates the CSV, interactive portal, and documentation every Monday.
 
 Everything runs on GitHub Actions - no manual intervention needed.
-
-## 🤖 Reliability & Security
-
-- **✅ Automated Testing**: Every code change is automatically tested
-- **🔒 Security Scanning**: Code and dependencies scanned weekly for vulnerabilities
-- **📝 Full History**: Git maintains complete history of all data changes
-- **🔄 Automatic Updates**: Fresh data published every week
 
 ## 📄 License
 
@@ -61,10 +56,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **CDC WONDER**: For providing comprehensive mortality data
-- **US Census Bureau**: For population and economic data
-- **GitHub**: For hosting and automation infrastructure
+- **CDC WONDER**: For providing comprehensive mortality data.
+- **US Census Bureau**: For population and economic data.
+- **GitHub**: For hosting and automation infrastructure.
 
 ---
 
-**Note**: This data is for educational and awareness purposes. Always verify data accuracy and consult official sources for policy decisions.
+**Note**: This data is for educational and awareness purposes. Every death represented here is a human tragedy. Always verify data accuracy and consult official sources for policy decisions.

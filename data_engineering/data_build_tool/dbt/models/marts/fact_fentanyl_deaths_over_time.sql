@@ -35,7 +35,7 @@ api_data as (
         year
         , month
         , state
-        , rolling_12_month_deaths
+        , deaths
         , 'CDC SODA API' as data_source
     from {{ ref('stg_cdc_api_provisional_overdose_counts') }}
 ),
@@ -46,7 +46,7 @@ final_format as (
         api_data.year
         , api_data.month
         , api_data.state
-        , api_data.rolling_12_month_deaths
+        , api_data.deaths
         , api_data.data_source
         , stg_census_state_population.population
         , stg_census_state_economic.median_household_income
