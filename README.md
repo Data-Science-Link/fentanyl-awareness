@@ -5,9 +5,10 @@ An open-source data pipeline that automatically updates and publishes comprehens
 ## 🎯 What This Project Provides
 
 - **📊 Ready-to-use CSV file**: Clean, validated fentanyl death data (1999-current)
-- **📚 Live Documentation**: Interactive docs automatically updated every week
+- **Interactive Data Portal**: Browse, filter, and export data directly from your browser
+- **📚 Live Documentation**: Complete pipeline and data lineage docs updated weekly
 - **🔄 Automated Updates**: Fresh data published every Monday at 12:00 PM UTC
-- **📈 Easy Access**: Download CSV, view docs, or analyze with your preferred tool
+- **📈 Easy Access**: Download CSV, explore online, or analyze with your preferred tool
 
 ## 📂 For Different Users
 
@@ -15,17 +16,18 @@ An open-source data pipeline that automatically updates and publishes comprehens
 Want to modify or run the pipeline? See [`data_engineering/`](data_engineering/README.md) for complete technical documentation, setup instructions, and architecture details.
 
 ### 📊 **Researchers & Analysts**
-Need the data without technical setup? Download [`fact_fentanyl_deaths_over_time.csv`](Final_Datasets/) - updated weekly with the latest CDC data combined with census demographics.
+Need the data without technical setup? Use our **[Interactive Data Explorer](https://data-science-link.github.io/fentanyl-awareness/)** to browse the data or download [`fact_fentanyl_deaths_over_time.csv`](Final_Datasets/).
 
 ### 📈 **Visualizers & Presenters**
-Create visualizations in your preferred tool (Excel, Tableau, Python, etc.) using the CSV file. Interactive documentation available at:
+Explore the data online or download for use in Excel, R, or Python. Interactive documentation and data portal available at:
 **https://data-science-link.github.io/fentanyl-awareness/**
 
 ## 🚀 Quick Access
 
+- **🌐 Data Portal**: https://data-science-link.github.io/fentanyl-awareness/
 - **📁 Download Data**: [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Final_Datasets/fact_fentanyl_deaths_over_time.csv)
-- **📚 View Docs**: https://data-science-link.github.io/fentanyl-awareness/
 - **🏗️ Explore Code**: https://github.com/Data-Science-Link/fentanyl-awareness
+- **💻 Frontend Source**: [`website/`](website/)
 
 ## 📊 What's In The Data
 
@@ -40,10 +42,9 @@ See [`Final_Datasets/README.md`](Final_Datasets/README.md) for the complete data
 ## 🔄 How It Works
 
 This repository automatically:
-1. Processes CDC WONDER mortality data and US Census demographics
+1. Processes CDC SODA API mortality data and US Census demographics
 2. Validates and tests the data using automated checks
-3. Updates the CSV and documentation every Monday
-4. Uploads to Google Sheets (optional, for Tableau connections)
+3. Updates the CSV, interactive portal, and documentation every Monday
 
 Everything runs on GitHub Actions - no manual intervention needed.
 
