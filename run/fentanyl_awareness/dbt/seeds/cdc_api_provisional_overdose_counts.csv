@@ -1,0 +1,13 @@
+
+    
+    
+    
+    create table "fentanyl_awareness"."main"."cdc_api_provisional_overdose_counts" ("state" text,"year" integer,"month" text,"period" text,"indicator" text,"percent_complete" float8,"percent_pending_investigation" float8,"state_name" text,"footnote" text,"footnote_symbol" text,"data_value" integer,"predicted_value" integer)
+  ;
+    -- dbt seed --
+    
+          COPY "fentanyl_awareness"."main"."cdc_api_provisional_overdose_counts" FROM '/home/runner/work/fentanyl-awareness/fentanyl-awareness/data_engineering/data_build_tool/dbt/seeds/cdc_api_provisional_overdose_counts.csv' (FORMAT CSV, HEADER TRUE, DELIMITER ',')
+        
+
+;
+  
