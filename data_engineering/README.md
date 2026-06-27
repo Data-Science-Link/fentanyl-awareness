@@ -4,14 +4,9 @@ This folder contains all the technical components for extracting, processing, an
 
 ## 📁 Contents
 
-### Automation & Integration
-- `google_sheets/` - Google Sheets export automation
-  - `load_gcloud.py` - Main Google Sheets integration script
-  - `test_gsheets.py` - Test suite
-  - `README.md` - Complete documentation
-
 ### Data Engineering
 - `data_build_tool/` - Complete dbt project for data transformations
+  - `project_page/` - Source for the interactive GitHub Pages landing page
   - `dbt/` - dbt project files
     - `models/staging/` - Data cleaning and staging models
     - `models/marts/` - Final analytical models
@@ -78,12 +73,6 @@ This folder contains all the technical components for extracting, processing, an
    ```bash
    dbt docs generate --profiles-dir ~/.dbt
    dbt docs serve --profiles-dir ~/.dbt
-   ```
-
-6. **Load to Google Sheets** (optional):
-   ```bash
-   cd google_sheets
-   python load_gcloud.py
    ```
 
 ## 🔍 Querying Your Data
@@ -194,10 +183,6 @@ All workflows can be manually triggered from the Actions tab.
 Create a `.env` file at the project root with:
 
 ```bash
-# Google Sheets API Configuration
-GOOGLE_SHEETS_CREDENTIALS_FILE=service_account.json
-GOOGLE_SHEET_ID=your_google_sheet_id_here
-
 # CDC WONDER API Configuration
 CDC_WONDER_BASE_URL=https://wonder.cdc.gov/controller/datarequest
 CDC_WONDER_TIMEOUT=600
@@ -206,12 +191,6 @@ CDC_WONDER_TIMEOUT=600
 DATA_DIRECTORY=./data
 SEEDS_DIRECTORY=./data_build_tool/dbt/seeds
 ```
-
-### GitHub Secrets (for automated runs)
-
-For GitHub Actions to work, configure these repository secrets:
-- `GOOGLE_SERVICE_ACCOUNT_JSON`: Contents of your service account JSON
-- `GOOGLE_SHEET_ID`: Your Google Sheet ID
 
 ## 🧪 Testing
 

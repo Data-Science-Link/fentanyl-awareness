@@ -1,14 +1,15 @@
 # Data Visualization
 
-**Status**: Placeholder for future Tableau workbooks and dashboards
+**Status**: Placeholder for future Python-based dashboards
 
-This folder will contain interactive visualizations for exploring fentanyl mortality data.
+This folder will contain interactive visualizations for exploring fentanyl mortality data. We are transitioning away from Tableau and Google Sheets to a more open-source approach using Python-generated visualizations.
 
 ## 🔗 Available Resources
 
-### Live Documentation
-- **dbt Docs**: https://data-science-link.github.io/fentanyl-awareness/
-- **Interactive Documentation**: Explore models, relationships, and data lineage
+### Data Portal
+- **Interactive Portal**: https://data-science-link.github.io/fentanyl-awareness/
+- **Interactive Explorer**: Browse and filter data online without any setup.
+- **dbt Docs**: Technical documentation and data lineage.
 
 ### Data Access
 - **CSV File**: Available at `Final_Datasets/fact_fentanyl_deaths_over_time.csv`
@@ -18,26 +19,23 @@ This folder will contain interactive visualizations for exploring fentanyl morta
 ## 📊 Current Visualization Options
 
 You can use the CSV file to create visualizations in:
-- **Tableau**: Connect directly to the CSV file
-- **Power BI**: Import the CSV file
-- **Python**: Use pandas to read and visualize
-- **R**: Import and analyze with ggplot2
-- **Excel/Google Sheets**: Open directly
+- **Data Portal**: Use our built-in explorer at the link above.
+- **Python/R**: Use provided datasets with Plotly, Matplotlib, or ggplot2.
+- **Excel**: Open the CSV directly for local charts.
 
 ## 🔄 Data Updates
 
-The CSV is automatically updated every Monday at 12:00 PM UTC via GitHub Actions.
+The CSV and interactive portal are automatically updated every Monday at 12:00 PM UTC via GitHub Actions.
 
 ## 📥 Quick Start
 
-1. **Download** `fact_fentanyl_deaths_over_time.csv` from the repository
-2. **Import** into your preferred visualization tool
+1. **Browse** the data on our [Interactive Portal](https://data-science-link.github.io/fentanyl-awareness/)
+2. **Download** `fact_fentanyl_deaths_over_time.csv` for local analysis
 3. **Explore** trends over time by state
 4. **Analyze** correlations between deaths and economic indicators
 
 ## 💡 Future Plans
 
-- Interactive Tableau Public dashboards
-- Automated visualization updates
-- Pre-built charts and maps
-- Mobile-optimized views
+- Python-based interactive dashboards (Streamlit/Plotly)
+- Automated static chart generation for the project page
+- Integrated map visualizations for geographic trends

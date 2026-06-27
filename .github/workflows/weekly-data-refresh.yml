@@ -85,9 +85,10 @@ jobs:
 
     - name: Prepare docs for GitHub Pages
       run: |
-        cd data_engineering/data_build_tool
-        mkdir -p ../../docs
-        cp -r target/* ../../docs/
+        mkdir -p docs/dbt
+        cp -r data_engineering/data_build_tool/target/* docs/dbt/
+        cp data_engineering/data_build_tool/project_page/index.html docs/
+        cp Final_Datasets/fact_fentanyl_deaths_over_time.csv docs/
         echo "✅ Docs ready for deployment"
 
     - name: Deploy to GitHub Pages
@@ -97,9 +98,7 @@ jobs:
         publish_dir: ./docs
         keep_files: false
 
-    - name: Commit and Upload CSV if Changed
-      env:
-        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+    - name: Commit CSV if Changed
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -107,25 +106,11 @@ jobs:
         # Check if CSV has changed
         if git diff --quiet Final_Datasets/fact_fentanyl_deaths_over_time.csv; then
           echo "📊 No changes to CSV - data is up to date"
-          echo "⏭️  Skipping Google Sheets upload (no changes)"
         else
           echo "📝 CSV updated - committing changes"
           git add Final_Datasets/fact_fentanyl_deaths_over_time.csv
           git commit -m "chore: update fentanyl deaths data [skip ci]" || echo "No changes to commit"
           git push origin main || echo "Nothing to push"
-
-          # Upload to Google Sheets only if CSV changed
-          echo "📊 Uploading data to Google Sheets..."
-          cd data_engineering/google_sheets
-
-          # Create service account file from GitHub secret
-          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > service_account.json
-
-          # Run upload
-          python load_gcloud.py || echo "⚠️ Google Sheets upload failed"
-
-          # Clean up
-          rm -f service_account.json
         fi
 
     - name: Upload artifacts
@@ -147,6 +132,5 @@ jobs:
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "📁 Updated CSV: Final_Datasets/fact_fentanyl_deaths_over_time.csv"
         echo "📚 Updated docs: https://data-science-link.github.io/fentanyl-awareness/"
-        echo "📊 Google Sheets: Upload completed (check logs)"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 

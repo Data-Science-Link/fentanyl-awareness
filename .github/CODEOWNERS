@@ -9,7 +9,6 @@
 /data_engineering/ @Data-Science-Link
 /data_engineering/data_build_tool/ @Data-Science-Link
 /data_engineering/data_sources/ @Data-Science-Link
-/data_engineering/google_sheets/ @Data-Science-Link
 
 # Critical Configuration Files
 # Changes to these files require careful review

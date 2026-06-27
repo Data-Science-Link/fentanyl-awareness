@@ -70,10 +70,8 @@ def setup_environment():
     print("\n🎉 Setup completed successfully!")
     print("\n📋 Next steps:")
     print("1. Copy .env.example to .env and configure your settings")
-    print("2. Set up Google Sheets API credentials")
-    print("3. Run: python extract_data.py")
-    print("4. Run: cd dbt && dbt run")
-    print("5. Run: python load_gcloud.py")
+    print("2. Run: python extract_data.py")
+    print("3. Run: cd dbt && dbt run")
 
     return True
 
@@ -84,11 +82,6 @@ def test_pipeline():
     # Test data extraction (dry run)
     if not run_command(['python', '-c', 'from extract_data import CDCWonderExtractor; print("Extraction module OK")'],
                       "Testing extraction module"):
-        return False
-
-    # Test Google Sheets integration (dry run)
-    if not run_command(['python', '-c', 'from load_gcloud import GoogleSheetsLoader; print("Google Sheets module OK")'],
-                      "Testing Google Sheets module"):
         return False
 
     # Test dbt configuration
