@@ -34,7 +34,30 @@ cd cdc_wonder
 python cdc_wonder_extractor.py
 ```
 
-### 2. Census ACS (`census_acs/`)
+### 2. CDC SODA API (`cdc_api/`)
+**Status**: ✅ Active - Fully implemented and operational
+
+**Overview**: The CDC SODA (Socrata Open Data API) provides modern REST API access to provisional drug overdose death counts.
+
+**Datasets**:
+- **VSRR**: Vital Statistics Rapid Release Provisional Drug Overdose Death Counts
+
+**Key Features**:
+- **Focus**: Synthetic opioids, excl. methadone (T40.4)
+- **Granularity**: National and State-level
+- **Programmatic Access**: Uses REST API (SODA) for automated workflows
+- **Update Frequency**: Regular provisional updates
+
+**Files**:
+- `soda_extractor.py` - Automated extraction script using the SODA API
+
+**Usage**:
+```bash
+cd cdc_api
+python3 soda_extractor.py
+```
+
+### 3. Census ACS (`census_acs/`)
 **Status**: ✅ Active - Fully implemented and operational
 
 **Overview**: US Census American Community Survey (ACS) provides demographic and economic data for mortality rate calculations.
@@ -62,7 +85,7 @@ python3 census_extractor.py
 - `census_state_population.csv` - Population estimates by state/year
 - `census_state_economic.csv` - Economic indicators by state
 
-### 3. Customs and Border Control (`customs_and_border_control/`)
+### 4. Customs and Border Control (`customs_and_border_control/`)
 **Status**: 🚧 Planned - Placeholder for future implementation
 
 **Overview**: U.S. Customs and Border Protection (CBP) data related to fentanyl seizures and interdictions.

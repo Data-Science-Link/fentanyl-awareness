@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: stg_cdc_api_provisional_overdose_counts
+    description: |
+      Staging model for CDC SODA API Provisional Overdose Counts.
+
+      This data is pulled directly from data.cdc.gov and represents the most recent
+      provisional counts for synthetic opioid overdoses.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - year
+              - month
+              - state
+
+    columns:
+      - name: year
+        description: "Year of death occurrence"
+        tests:
+          - not_null
+
+      - name: month
+        description: "First day of the month"
+        tests:
+          - not_null
+
+      - name: state
+        description: "Full state name"
+        tests:
+          - not_null
+
+      - name: deaths
+        description: "Number of deaths (12-month ending count)"
