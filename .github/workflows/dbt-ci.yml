@@ -117,6 +117,7 @@ jobs:
       run: |
         cd data_engineering/data_build_tool
         dbt test --profiles-dir ~/.dbt
+        cp target/run_results.json target/dbt_test_results.json
         
     - name: Generate dbt documentation
       run: |
@@ -183,36 +184,23 @@ jobs:
           const fs = require('fs');
           const path = require('path');
           
-          // Try to read test results
-          try {
-            const testResultsPath = 'data_engineering/data_build_tool/target/run_results.json';
-            if (fs.existsSync(testResultsPath)) {
-              const testResults = JSON.parse(fs.readFileSync(testResultsPath, 'utf8'));
-              const passed = testResults.results.filter(r => r.status === 'pass').length;
-              const failed = testResults.results.filter(r => r.status === 'fail').length;
-              const skipped = testResults.results.filter(r => r.status === 'skip').length;
-              const total = testResults.results.length;
-              
-              let statusEmoji = '🎉';
-              let statusText = 'All tests passed!';
-              
-              if (failed > 0) {
-                statusEmoji = '❌';
-                statusText = 'Some tests failed. Please check the logs for details.';
-              } else if (skipped > 0 && passed === 0) {
-                statusEmoji = '⚠️';
-                statusText = 'All tests were skipped.';
-              }
-              
+          async function handleTestResults() {
+            // Check if dbt files were modified
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const dbtFilesModified = files.some(file =>
+              file.filename.startsWith('data_engineering/data_build_tool/') ||
+              file.filename === 'data_engineering/requirements.txt'
+            );
+
+            if (!dbtFilesModified) {
               const comment = `## 🧪 dbt Test Results
               
-              Summary:
-              - ✅ Passed: ${passed}
-              - ❌ Failed: ${failed}
-              - ⏭️ Skipped: ${skipped}
-              - 📊 Total: ${total}
-              
-              ${statusEmoji} ${statusText}`;
+              **Status:** ⏭️ No dbt files were adjusted in this PR. Skipping detailed test reporting.`;
               
               github.rest.issues.createComment({
                 issue_number: context.issue.number,
@@ -220,13 +208,76 @@ jobs:
                 repo: context.repo.repo,
                 body: comment
               });
-            } else {
-              // Fallback if run_results.json doesn't exist
+              return;
+            }
+
+            // Try to read test results
+            try {
+              const testResultsPath = 'data_engineering/data_build_tool/target/dbt_test_results.json';
+              if (fs.existsSync(testResultsPath)) {
+                const testResults = JSON.parse(fs.readFileSync(testResultsPath, 'utf8'));
+                const passed = testResults.results.filter(r => r.status === 'pass').length;
+                const failed = testResults.results.filter(r => r.status === 'fail' || r.status === 'error').length;
+                const warned = testResults.results.filter(r => r.status === 'warn').length;
+                const skipped = testResults.results.filter(r => r.status === 'skip').length;
+                const total = testResults.results.length;
+
+                let statusEmoji = '🎉';
+                let statusText = 'All tests passed!';
+
+                if (failed > 0) {
+                  statusEmoji = '❌';
+                  statusText = 'Some tests failed or encountered errors. Please check the logs for details.';
+                } else if (warned > 0) {
+                  statusEmoji = '⚠️';
+                  statusText = 'Tests passed with warnings.';
+                } else if (skipped > 0 && passed === 0) {
+                  statusEmoji = '⏭️';
+                  statusText = 'All tests were skipped.';
+                }
+
+                const comment = `## 🧪 dbt Test Results
+
+                Summary:
+                - ✅ Passed: ${passed}
+                - ⚠️ Warnings: ${warned}
+                - ❌ Failed/Errors: ${failed}
+                - ⏭️ Skipped: ${skipped}
+                - 📊 Total: ${total}
+
+                ${statusEmoji} ${statusText}`;
+
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              } else {
+                // Fallback if dbt_test_results.json doesn't exist
+                const comment = `## 🧪 dbt Test Results
+
+                **Status:** ✅ Workflow completed successfully
+
+                Note: Detailed test results not available. Check the Actions logs for more information.`;
+
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              }
+            } catch (error) {
+              console.log('Could not read test results:', error.message);
+
               const comment = `## 🧪 dbt Test Results
               
-              **Status:** ✅ Workflow completed successfully
+              **Status:** ⚠️ Could not parse test results
+
+              Error: ${error.message}
               
-              Note: Detailed test results not available. Check the Actions logs for more information.`;
+              Please check the Actions logs for detailed information.`;
               
               github.rest.issues.createComment({
                 issue_number: context.issue.number,
@@ -235,21 +286,6 @@ jobs:
                 body: comment
               });
             }
-          } catch (error) {
-            console.log('Could not read test results:', error.message);
-            
-            const comment = `## 🧪 dbt Test Results
-            
-            **Status:** ⚠️ Could not parse test results
-            
-            Error: ${error.message}
-            
-            Please check the Actions logs for detailed information.`;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
           }
+
+          handleTestResults();
