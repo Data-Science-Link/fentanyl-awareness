@@ -23,9 +23,9 @@ This directory contains all data sources for the fentanyl awareness pipeline, in
 
 **Files**:
 - `cdc_wonder_extractor.py` - Automated data extraction script
-- `Official_1999-2020_Synthetic_Opioid_Deaths-req.xml` - Historical data request
-- `Official_2018-2023_Synthetic_Opioid_Deaths-req.xml` - Recent official data request
-- `Provisional_Mortality_Statistics_2018_through_Last_Week_1760806798363-req.xml` - Provisional data request
+- `Multiple Cause of Death, 1999-2020_1760923374111-req.xml` - Historical data request
+- `Multiple Cause of Death, 2018-2023, Single Race_1760923356309-req.xml` - Recent official data request
+- `Official_2018-2023_Synthetic_Opioid_Deaths-req.xml` - Official data request (Alternative)
 - Screenshots documenting the CDC WONDER interface and configuration
 
 **Usage**:

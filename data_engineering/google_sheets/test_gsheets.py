@@ -42,7 +42,7 @@ def test_configuration():
     print(f"✅ Google Sheet ID: {sheet_id[:10]}...")
 
     # Check for CSV file
-    csv_file = Path("../../final_datasets/fact_fentanyl_deaths_over_time.csv")
+    csv_file = Path("../../Final_Datasets/fact_fentanyl_deaths_over_time.csv")
     if not csv_file.exists():
         print("❌ Data CSV file not found")
         return False

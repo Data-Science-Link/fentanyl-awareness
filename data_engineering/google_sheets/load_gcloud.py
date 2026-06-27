@@ -55,7 +55,7 @@ class GoogleSheetsLoader:
             logger.error(f"Failed to authenticate with Google Sheets: {e}")
             return False
 
-    def export_data_to_csv(self, csv_file_path: str = "../../final_datasets/fact_fentanyl_deaths_over_time.csv") -> Optional[str]:
+    def export_data_to_csv(self, csv_file_path: str = "../../Final_Datasets/fact_fentanyl_deaths_over_time.csv") -> Optional[str]:
         """Export data from CSV file to string."""
         try:
             csv_path = Path(csv_file_path)
@@ -130,7 +130,7 @@ class GoogleSheetsLoader:
             logger.error(f"Failed to upload to Google Sheets: {e}")
             return False
 
-    def load_data(self, csv_file_path: str = "../../final_datasets/fact_fentanyl_deaths_over_time.csv",
+    def load_data(self, csv_file_path: str = "../../Final_Datasets/fact_fentanyl_deaths_over_time.csv",
                   worksheet_name: str = "Fentanyl Deaths Over Time") -> bool:
         """Complete data loading process."""
         try:
@@ -162,19 +162,19 @@ def print_available_exports():
             "name": "CDC Mortality Data",
             "worksheet": "CDC Mortality",
             "description": "CDC WONDER mortality data (1999-present)",
-            "csv_file": "../../final_datasets/fact_fentanyl_deaths_over_time.csv"
+            "csv_file": "../../Final_Datasets/fact_fentanyl_deaths_over_time.csv"
         },
         {
             "name": "Census Population Data",
             "worksheet": "Census Population",
             "description": "US Census population estimates",
-            "csv_file": "../../final_datasets/census_population.csv"
+            "csv_file": "../../Final_Datasets/census_population.csv"
         },
         {
             "name": "Combined Analysis",
             "worksheet": "Combined Analysis",
             "description": "Combined CDC and Census data",
-            "csv_file": "../../final_datasets/combined_analysis.csv"
+            "csv_file": "../../Final_Datasets/combined_analysis.csv"
         }
     ]
 
@@ -193,17 +193,17 @@ def export_multiple_datasets(loader):
     exports = [
         {
             "worksheet": "CDC Mortality",
-            "csv_file": "../../final_datasets/fact_fentanyl_deaths_over_time.csv",
+            "csv_file": "../../Final_Datasets/fact_fentanyl_deaths_over_time.csv",
             "description": "CDC WONDER mortality data"
         },
         {
             "worksheet": "Census Population",
-            "csv_file": "../../final_datasets/census_state_population.csv",
+            "csv_file": "../../Final_Datasets/census_state_population.csv",
             "description": "US Census population estimates"
         },
         {
             "worksheet": "Census Economic",
-            "csv_file": "../../final_datasets/census_state_economic.csv",
+            "csv_file": "../../Final_Datasets/census_state_economic.csv",
             "description": "US Census economic indicators"
         }
     ]
@@ -237,7 +237,7 @@ def main():
                        default='Fentanyl Deaths Over Time',
                        help='Name of the worksheet/tab (default: "Fentanyl Deaths Over Time")')
     parser.add_argument('--csv-file', '-f',
-                       default='../../final_datasets/fact_fentanyl_deaths_over_time.csv',
+                       default='../../Final_Datasets/fact_fentanyl_deaths_over_time.csv',
                        help='Path to CSV file to upload')
     parser.add_argument('--multi-export', '-m',
                        action='store_true',

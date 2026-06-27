@@ -11,7 +11,7 @@ This folder will contain interactive visualizations for exploring fentanyl morta
 - **Interactive Documentation**: Explore models, relationships, and data lineage
 
 ### Data Access
-- **CSV File**: Available at `final_datasets/fact_fentanyl_deaths_over_time.csv`
+- **CSV File**: Available at `Final_Datasets/fact_fentanyl_deaths_over_time.csv`
 - **GitHub**: https://github.com/Data-Science-Link/fentanyl-awareness
 - **Raw Data**: See `data_engineering/` folder for source data
 

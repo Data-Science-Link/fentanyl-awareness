@@ -47,7 +47,7 @@ Create `.env` file at project root (copy from `.env.example`):
 ```bash
 GOOGLE_SHEET_ID=your_google_sheet_id_here
 GOOGLE_SHEETS_CREDENTIALS_FILE=service_account.json
-CSV_FILE_PATH=final_datasets/fact_fentanyl_deaths_over_time.csv
+CSV_FILE_PATH=Final_Datasets/fact_fentanyl_deaths_over_time.csv
 ```
 
 ### 4. Test Setup
@@ -63,26 +63,25 @@ python load_gcloud.py   # Upload data
 |------|---------|
 | `load_gcloud.py` | Main script for uploading data to Google Sheets |
 | `test_gsheets.py` | Test script to validate setup and connectivity |
-| `service_account.json` | Google Cloud service account credentials |
+| `service_account.json` | Google Cloud service account credentials (not committed) |
 | `README.md` | This documentation |
 
 ## 🔧 Configuration
 
 ### Environment Variables
-Create a `.env` file at the project root (copy from `.env.example`) with:
+Ensure your `.env` file at the project root contains:
 ```bash
 GOOGLE_SHEET_ID=your_google_sheet_id
 GOOGLE_SHEETS_CREDENTIALS_FILE=service_account.json
-CSV_FILE_PATH=final_datasets/fact_fentanyl_deaths_over_time.csv
+CSV_FILE_PATH=Final_Datasets/fact_fentanyl_deaths_over_time.csv
 WORKSHEET_NAME=Fentanyl Deaths Over Time
 ```
 
-### Google Sheets Setup
-1. **Create Google Cloud Project**
-2. **Enable APIs**: Google Sheets API, Google Drive API
-3. **Create Service Account** with JSON key
-4. **Create Google Sheet** and share with service account
-5. **Set GitHub Secrets** for automated runs
+### Google Sheets Setup Summary
+1. **Create Google Cloud Project** and enable **Google Sheets** and **Google Drive** APIs.
+2. **Create Service Account** with a JSON key, rename to `service_account.json` and place it in this directory.
+3. **Create Google Sheet** and share it with the service account email as "Editor".
+4. **Set GitHub Secrets** (`GOOGLE_SHEET_ID`, `GOOGLE_SERVICE_ACCOUNT_JSON`) for automated runs.
 
 ## 🤖 GitHub Actions Integration
 
@@ -130,7 +129,7 @@ The exported data includes:
 Run with verbose logging:
 ```bash
 cd data_engineering/google_sheets
-python load_gcloud.py --verbose
+python load_gcloud.py
 ```
 
 ## 🔄 Manual Data Refresh
@@ -159,5 +158,5 @@ The GitHub Action provides:
 For issues with Google Sheets integration:
 1. Check the troubleshooting section
 2. Review GitHub Action logs
-3. Validate setup with `python setup_gsheets.py`
+3. Validate setup with `python test_gsheets.py`
 4. Open a GitHub issue with error details

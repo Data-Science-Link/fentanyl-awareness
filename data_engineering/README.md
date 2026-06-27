@@ -29,9 +29,6 @@ This folder contains all the technical components for extracting, processing, an
 - `data_sources/census_acs/` - US Census Bureau data extraction scripts
 - `data_sources/customs_and_border_control/` - Border control data (placeholder)
 
-### Processed Data
-- `cleaned_datasets/` - Intermediate cleaned data files
-
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -39,6 +36,7 @@ This folder contains all the technical components for extracting, processing, an
 - Python 3.10+
 - Git
 - DuckDB CLI (optional, for direct database queries)
+- **Note**: `fentanyl_awareness.duckdb` is a generated file that will be created after running the dbt transformations.
 
 ### Installation
 
@@ -122,13 +120,9 @@ SELECT * FROM main.stg_cdc_wonder_fentanyl_deaths_provisional_2018_current;
 
 ### Using Python Scripts
 
-We've included query tools for programmatic access:
+You can run individual queries using Python:
 
 ```bash
-# Interactive query tool
-python3 query_tool.py
-
-# Or run individual queries
 python3 -c "
 import duckdb
 conn = duckdb.connect('data_build_tool/fentanyl_awareness.duckdb')

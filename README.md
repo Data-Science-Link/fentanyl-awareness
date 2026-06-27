@@ -15,7 +15,7 @@ An open-source data pipeline that automatically updates and publishes comprehens
 Want to modify or run the pipeline? See [`data_engineering/`](data_engineering/README.md) for complete technical documentation, setup instructions, and architecture details.
 
 ### 📊 **Researchers & Analysts**
-Need the data without technical setup? Download [`fact_fentanyl_deaths_over_time.csv`](final_datasets/) - updated weekly with the latest CDC data combined with census demographics.
+Need the data without technical setup? Download [`fact_fentanyl_deaths_over_time.csv`](Final_Datasets/) - updated weekly with the latest CDC data combined with census demographics.
 
 ### 📈 **Visualizers & Presenters**
 Create visualizations in your preferred tool (Excel, Tableau, Python, etc.) using the CSV file. Interactive documentation available at:
@@ -23,7 +23,7 @@ Create visualizations in your preferred tool (Excel, Tableau, Python, etc.) usin
 
 ## 🚀 Quick Access
 
-- **📁 Download Data**: [`final_datasets/fact_fentanyl_deaths_over_time.csv`](final_datasets/fact_fentanyl_deaths_over_time.csv)
+- **📁 Download Data**: [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Final_Datasets/fact_fentanyl_deaths_over_time.csv)
 - **📚 View Docs**: https://data-science-link.github.io/fentanyl-awareness/
 - **🏗️ Explore Code**: https://github.com/Data-Science-Link/fentanyl-awareness
 
@@ -35,7 +35,7 @@ The CSV includes:
 - **Metrics**: Death counts, population data, income, unemployment rates
 - **Sources**: Official CDC mortality data (1999-2023) + provisional data (2018-current)
 
-See [`final_datasets/README.md`](final_datasets/README.md) for the complete data dictionary.
+See [`Final_Datasets/README.md`](Final_Datasets/README.md) for the complete data dictionary.
 
 ## 🔄 How It Works
 
