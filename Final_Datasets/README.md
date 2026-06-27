@@ -22,14 +22,14 @@ This folder contains polished, ready-to-use CSV files with fentanyl-related mort
 
 | Column | Description | Type |
 |--------|-------------|------|
-| `year` | Year of data | Integer |
-| `month` | Month (first day of month) | Date |
+| `year` | Year of data (e.g., 2023) | Integer |
+| `month` | Month represented as the first day of the month (e.g., 2023-01-01) | Date |
 | `state` | State name | String |
-| `deaths` | Number of synthetic opioid deaths | Integer |
-| `data_source` | Source dataset (Official 1999-2020, Official 2018-2023, or Provisional 2018-current) | String |
-| `population` | State population from US Census | Integer |
-| `median_household_income` | Median household income (dollars) from US Census | Float |
-| `unemployment_rate` | Unemployment rate (percentage) from US Census | Float |
+| `deaths` | Number of synthetic opioid deaths (ICD-10 code T40.4) | Integer |
+| `data_source` | Source dataset (e.g., "Official 1999-2020", "Official 2018-2023", or "Provisional 2018-current") | String |
+| `population` | State population from US Census Bureau | Integer |
+| `median_household_income` | Median household income in dollars from US Census Bureau | Float |
+| `unemployment_rate` | Unemployment rate percentage from US Census Bureau | Float |
 
 ## 🎯 Use Cases
 

@@ -64,9 +64,9 @@ jobs:
         cd data_engineering/data_build_tool
         dbt seed --profiles-dir ~/.dbt
 
-    - name: Create final_datasets directory
+    - name: Create Final_Datasets directory
       run: |
-        mkdir -p final_datasets
+        mkdir -p Final_Datasets
 
     - name: Run dbt models
       run: |
@@ -105,12 +105,12 @@ jobs:
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
         # Check if CSV has changed
-        if git diff --quiet final_datasets/fact_fentanyl_deaths_over_time.csv; then
+        if git diff --quiet Final_Datasets/fact_fentanyl_deaths_over_time.csv; then
           echo "📊 No changes to CSV - data is up to date"
           echo "⏭️  Skipping Google Sheets upload (no changes)"
         else
           echo "📝 CSV updated - committing changes"
-          git add final_datasets/fact_fentanyl_deaths_over_time.csv
+          git add Final_Datasets/fact_fentanyl_deaths_over_time.csv
           git commit -m "chore: update fentanyl deaths data [skip ci]" || echo "No changes to commit"
           git push origin main || echo "Nothing to push"
 
@@ -134,7 +134,7 @@ jobs:
       with:
         name: weekly-data-refresh
         path: |
-          final_datasets/
+          Final_Datasets/
           data_engineering/data_build_tool/target/
         retention-days: 30
 
@@ -145,7 +145,7 @@ jobs:
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "✅ Weekly Data Refresh Complete"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "📁 Updated CSV: final_datasets/fact_fentanyl_deaths_over_time.csv"
+        echo "📁 Updated CSV: Final_Datasets/fact_fentanyl_deaths_over_time.csv"
         echo "📚 Updated docs: https://data-science-link.github.io/fentanyl-awareness/"
         echo "📊 Google Sheets: Upload completed (check logs)"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
