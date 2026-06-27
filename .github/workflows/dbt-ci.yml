@@ -140,7 +140,7 @@ jobs:
       run: |
         mkdir -p docs/dbt
         cp -r data_engineering/data_build_tool/target/* docs/dbt/
-        cp data_engineering/data_build_tool/project_page/index.html docs/
+        cp website/index.html docs/
         cp Final_Datasets/fact_fentanyl_deaths_over_time.csv docs/
         echo "✅ Docs prepared for GitHub Pages deployment"
         ls -la docs/ | head -10

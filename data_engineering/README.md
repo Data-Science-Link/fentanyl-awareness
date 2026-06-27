@@ -6,7 +6,6 @@ This folder contains all the technical components for extracting, processing, an
 
 ### Data Engineering
 - `data_build_tool/` - Complete dbt project for data transformations
-  - `project_page/` - Source for the interactive GitHub Pages landing page
   - `dbt/` - dbt project files
     - `models/staging/` - Data cleaning and staging models
     - `models/marts/` - Final analytical models
