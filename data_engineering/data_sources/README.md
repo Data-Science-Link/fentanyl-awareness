@@ -1,6 +1,6 @@
 # Data Sources
 
-This directory contains all data sources for the fentanyl awareness pipeline, including extraction scripts, documentation, and configuration files.
+This directory identifies the primary sources of information used to track the fentanyl crisis. Accuracy is paramount because we are documenting a human tragedy; we rely on official sources like the CDC and US Census Bureau to ensure the information we provide is as reliable as possible.
 
 ## 📊 Available Data Sources
 

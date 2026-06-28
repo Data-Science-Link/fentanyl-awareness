@@ -1,6 +1,6 @@
 # Final Datasets
 
-This folder contains polished, ready-to-use CSV files with fentanyl-related mortality data. These datasets are cleaned, validated, and formatted for immediate analysis without requiring any technical setup.
+This folder contains the finalized datasets of the Fentanyl Awareness Project. These files represent more than just numbers; they represent the lives of individuals lost to a devastating crisis. We provide these cleaned and validated datasets to ensure that researchers, policymakers, and the public have the clear information needed to address this ongoing tragedy.
 
 ## 📊 Available Dataset
 

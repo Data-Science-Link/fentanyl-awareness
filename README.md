@@ -1,6 +1,10 @@
 # Fentanyl Awareness Data Pipeline
 
-An open-source data pipeline that automatically updates and publishes comprehensive fentanyl mortality data from CDC WONDER and the US Census.
+The fentanyl crisis in the United States is a profound tragedy that touches every corner of our country. This project began from a personal need to understand the scale of this epidemic. I had heard how devastating fentanyl was, but I didn't know if the situation was improving or worsening, or how it impacted different states on a per-capita basis.
+
+Upon searching for answers, I found it difficult to find granular, state-level, month-by-month cleaned data from a single official source. While there are excellent local dashboards, a comprehensive national view that is both accessible and regularly updated was not easily available. This project is a serious effort to provide that clarity.
+
+**A Note on the Data**: We must never lose sight of the fact that every statistic in these datasets represents a human life lost too soon. Each death is a heartbreak for families, friends, and communities. We hope that by providing accurate, refreshing information, we can contribute to getting this crisis under control so that our loved ones are not taken from us too early.
 
 ## 🎯 What This Project Provides
 
