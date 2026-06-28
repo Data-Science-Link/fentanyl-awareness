@@ -5,10 +5,8 @@ Setup script for Fentanyl Awareness Data Pipeline
 This script helps users set up the project environment and run initial tests.
 """
 
-import os
 import sys
 import subprocess
-import shutil
 from pathlib import Path
 
 def run_command(cmd_list, description):
