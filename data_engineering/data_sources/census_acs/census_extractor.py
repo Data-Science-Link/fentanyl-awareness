@@ -61,14 +61,15 @@ class CensusExtractor:
         Extract state-level population estimates from ACS
 
         Args:
-            years: List of years to extract (default: 2005 to current year)
+            years: List of years to extract (default: 2009 to current year)
 
         Returns:
             DataFrame with state population data
         """
         if years is None:
             current_year = datetime.now().year
-            years = list(range(2005, current_year + 1))
+            # ACS 5-year estimates started in 2009
+            years = list(range(2009, current_year + 1))
 
         logger.info(f"Extracting state population estimates for years: {years}")
 
@@ -97,7 +98,17 @@ class CensusExtractor:
 
                 response.raise_for_status()
 
-                data = response.json()
+                # Check if the response is actually JSON
+                if 'application/json' not in response.headers.get('Content-Type', ''):
+                    logger.error(f"Error fetching data for year {year}: Expected JSON but received {response.headers.get('Content-Type')}. "
+                                 f"This often indicates a missing API key or an invalid endpoint.")
+                    continue
+
+                try:
+                    data = response.json()
+                except Exception as e:
+                    logger.error(f"Error parsing JSON for year {year}: {e}")
+                    continue
 
                 # Convert to DataFrame
                 df = pd.DataFrame(data[1:], columns=data[0])
@@ -166,7 +177,17 @@ class CensusExtractor:
 
                 response.raise_for_status()
 
-                data = response.json()
+                # Check if the response is actually JSON
+                if 'application/json' not in response.headers.get('Content-Type', ''):
+                    logger.error(f"Error fetching economic data for year {year}: Expected JSON but received {response.headers.get('Content-Type')}. "
+                                 f"This often indicates a missing API key or an invalid endpoint.")
+                    continue
+
+                try:
+                    data = response.json()
+                except Exception as e:
+                    logger.error(f"Error parsing economic JSON for year {year}: {e}")
+                    continue
 
                 # Convert to DataFrame
                 df = pd.DataFrame(data[1:], columns=data[0])

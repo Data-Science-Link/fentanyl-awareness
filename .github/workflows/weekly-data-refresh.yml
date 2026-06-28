@@ -40,13 +40,26 @@ jobs:
         pip install -r requirements.txt
         pip install dbt-core dbt-duckdb
 
-    - name: 🔄 Extract Latest Data
-      env:
-        CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+    - name: 📥 Extract CDC SODA Data
       run: |
         echo "📥 Extracting CDC SODA API data..."
         python data_engineering/data_sources/cdc_api/soda_extractor.py
 
+    - name: 🔑 Check for Census API Key
+      id: check_key
+      run: |
+        if [ -z "${{ secrets.CENSUS_API_KEY }}" ]; then
+          echo "⚠️ WARNING: CENSUS_API_KEY is missing. Census data extraction will be skipped."
+          echo "has_key=false" >> $GITHUB_OUTPUT
+        else
+          echo "has_key=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: 📥 Extract US Census Data
+      if: steps.check_key.outputs.has_key == 'true'
+      env:
+        CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+      run: |
         echo "📥 Extracting US Census demographic data..."
         python data_engineering/data_sources/census_acs/census_extractor.py
 
