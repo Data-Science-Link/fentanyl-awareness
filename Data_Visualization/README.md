@@ -2,7 +2,7 @@
 
 **Status**: Placeholder for future Python-based dashboards
 
-This folder will contain interactive visualizations for exploring fentanyl mortality data. We are transitioning away from Tableau and Google Sheets to a more open-source approach using Python-generated visualizations.
+This directory is dedicated to visualizing the impact of the fentanyl crisis. Our goal is to create clear, respectful visualizations that help tell the story of the lives affected by this epidemic and reveal where the need for intervention is most urgent.
 
 ## 🔗 Available Resources
 

@@ -87,7 +87,7 @@
     <div class="hero-section">
         <div class="container text-center">
             <h1 class="display-5 fw-bold">Fentanyl Awareness Data Portal</h1>
-            <p class="lead">Open-source tracking of synthetic opioid mortality and socioeconomic indicators</p>
+            <p class="lead">A serious undertaking to track and understand the synthetic opioid crisis</p>
         </div>
     </div>
 
@@ -97,7 +97,12 @@
             <div class="card-header bg-white pt-3 px-4">
                 <ul class="nav nav-tabs card-header-tabs" id="portalTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="explorer-tab" data-bs-toggle="tab" data-bs-target="#explorer" type="button" role="tab">
+                        <button class="nav-link active" id="readme-tab" data-bs-toggle="tab" data-bs-target="#readme" type="button" role="tab">
+                            <i class="fas fa-info-circle me-2"></i>Read Me
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="explorer-tab" data-bs-toggle="tab" data-bs-target="#explorer" type="button" role="tab">
                             <i class="fas fa-table me-2"></i>Data Explorer
                         </button>
                     </li>
@@ -116,8 +121,34 @@
             <div class="card-body p-0">
                 <div class="tab-content" id="portalTabsContent">
 
+                    <!-- Read Me Tab -->
+                    <div class="tab-pane fade show active p-4" id="readme" role="tabpanel">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-10">
+                                <h3 class="mb-4">About the Fentanyl Awareness Project</h3>
+                                <div class="project-motivation text-secondary" style="line-height: 1.8;">
+                                    <p>The fentanyl crisis in the United States is a profound tragedy that touches every corner of our country. This project began from a personal need to understand the scale of this epidemic. I had heard how devastating fentanyl was, but I didn't know if the situation was improving or worsening, or how it impacted different states on a per-capita basis.</p>
+
+                                    <p>Upon searching for answers, I found it difficult to find granular, state-level, month-by-month cleaned data from a single official source. While there are excellent local dashboards, a comprehensive national view that is both accessible and regularly updated was not easily available. To bridge this gap, I wanted to make the raw data and clear visualizations available to everyone—surfacing accurate information that refreshes automatically.</p>
+
+                                    <div class="alert alert-info border-0 bg-light p-4 my-4">
+                                        <h5 class="alert-heading text-dark"><i class="fas fa-heart me-2 text-danger"></i> A Serious Mission</h5>
+                                        <p class="mb-0">We must never lose sight of the fact that every statistic in these datasets represents a human life lost too soon. Each death is a heartbreak for families, friends, and communities. This project is a serious effort to honor those lives by providing the clarity needed to understand and, hopefully, get this crisis under control so that our loved ones are not taken from us too early.</p>
+                                    </div>
+
+                                    <h5 class="text-dark">Project Objectives</h5>
+                                    <ul>
+                                        <li><strong>Clarity</strong>: Transform complex official data into a format that clearly shows trends over time.</li>
+                                        <li><strong>Granularity</strong>: Provide state-level insights that reveal the local impact of the national crisis.</li>
+                                        <li><strong>Openness</strong>: Ensure the raw, cleaned data is always available for researchers, policymakers, and the public.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Data Explorer Tab -->
-                    <div class="tab-pane fade show active p-4" id="explorer" role="tabpanel">
+                    <div class="tab-pane fade p-4" id="explorer" role="tabpanel">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
                                 <h3 class="mb-1">Interactive Data Explorer</h3>
@@ -171,6 +202,7 @@
     <!-- Footer -->
     <footer class="footer mt-5">
         <div class="container text-center">
+            <p class="mb-3 text-muted">Each life lost is a tragedy. We hope this data contributes to saving others.</p>
             <p class="text-muted mb-0">© 2026 Fentanyl Awareness Project. Data sourced from CDC SODA API and US Census Bureau.</p>
             <p class="text-muted small">Updated weekly via GitHub Actions.</p>
         </div>
