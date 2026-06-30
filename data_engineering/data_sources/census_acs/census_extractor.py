@@ -17,7 +17,7 @@ import requests
 import pandas as pd
 import time
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import List, Optional
 import logging
 from pathlib import Path
 from dotenv import load_dotenv
@@ -55,6 +55,13 @@ class CensusExtractor:
         self.session.headers.update({
             'User-Agent': 'Fentanyl-Awareness-Pipeline/1.0'
         })
+
+    def _sanitize_error(self, e: Exception) -> str:
+        """Sanitize error messages to prevent leaking API keys."""
+        error_msg = str(e)
+        if self.api_key:
+            error_msg = error_msg.replace(self.api_key, "***REDACTED***")
+        return error_msg
 
     def get_state_population_estimates(self, years: List[int] = None) -> pd.DataFrame:
         """
@@ -107,7 +114,7 @@ class CensusExtractor:
                 try:
                     data = response.json()
                 except Exception as e:
-                    logger.error(f"Error parsing JSON for year {year}: {e}")
+                    logger.error(f"Error parsing JSON for year {year}: {self._sanitize_error(e)}")
                     continue
 
                 # Convert to DataFrame
@@ -121,7 +128,7 @@ class CensusExtractor:
                 time.sleep(RATE_LIMITS["delay_between_requests"])
 
             except Exception as e:
-                logger.error(f"Error fetching data for year {year}: {e}")
+                logger.error(f"Error fetching data for year {year}: {self._sanitize_error(e)}")
                 continue
 
         if not all_data:
@@ -186,7 +193,7 @@ class CensusExtractor:
                 try:
                     data = response.json()
                 except Exception as e:
-                    logger.error(f"Error parsing economic JSON for year {year}: {e}")
+                    logger.error(f"Error parsing economic JSON for year {year}: {self._sanitize_error(e)}")
                     continue
 
                 # Convert to DataFrame
@@ -200,7 +207,7 @@ class CensusExtractor:
                 time.sleep(RATE_LIMITS["delay_between_requests"])
 
             except Exception as e:
-                logger.error(f"Error fetching economic data for year {year}: {e}")
+                logger.error(f"Error fetching economic data for year {year}: {self._sanitize_error(e)}")
                 continue
 
         if not all_data:
@@ -250,8 +257,7 @@ class CensusExtractor:
         numeric_columns = ['B19013_001E', 'B19301_001E', 'B23025_002E',
                           'B23025_003E', 'B23025_004E', 'B23025_005E']
 
-        for col in numeric_columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
+        df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
 
         # Convert state code to numeric
         df['state'] = pd.to_numeric(df['state'], errors='coerce')
@@ -296,7 +302,11 @@ def test_census_api():
         return True
 
     except Exception as e:
-        print(f"❌ Error during test: {e}")
+        error_msg = str(e)
+        api_key = os.getenv('CENSUS_API_KEY')
+        if api_key:
+            error_msg = error_msg.replace(api_key, "***REDACTED***")
+        print(f"❌ Error during test: {error_msg}")
         return False
 
 def main():
@@ -342,7 +352,11 @@ def main():
         print(f"States covered: {population_df['state_name'].nunique()}")
 
     except Exception as e:
-        logger.error(f"Error in main execution: {e}")
+        error_msg = str(e)
+        api_key = os.getenv('CENSUS_API_KEY')
+        if api_key:
+            error_msg = error_msg.replace(api_key, "***REDACTED***")
+        logger.error(f"Error in main execution: {error_msg}")
         return 1
 
     return 0
