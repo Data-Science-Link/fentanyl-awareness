@@ -17,7 +17,7 @@ import requests
 import pandas as pd
 import time
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import List, Optional
 import logging
 from pathlib import Path
 from dotenv import load_dotenv
