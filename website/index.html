@@ -261,8 +261,22 @@
             });
 
             // Fix iframe height on tab switch
+            function resizeIframe() {
+                const iframe = $('#docs iframe');
+                if (iframe.length) {
+                    const newHeight = Math.max(800, window.innerHeight - 250);
+                    iframe.css('height', newHeight + 'px');
+                }
+            }
+
             $('#docs-tab').on('shown.bs.tab', function (e) {
-                // Potential to auto-resize iframe if needed
+                resizeIframe();
+            });
+
+            $(window).resize(function() {
+                if ($('#docs-tab').hasClass('active')) {
+                    resizeIframe();
+                }
             });
         });
     </script>
