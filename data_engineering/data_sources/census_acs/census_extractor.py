@@ -257,8 +257,7 @@ class CensusExtractor:
         numeric_columns = ['B19013_001E', 'B19301_001E', 'B23025_002E',
                           'B23025_003E', 'B23025_004E', 'B23025_005E']
 
-        for col in numeric_columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
+        df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
 
         # Convert state code to numeric
         df['state'] = pd.to_numeric(df['state'], errors='coerce')
