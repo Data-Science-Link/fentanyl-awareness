@@ -7,7 +7,6 @@ Specifically, it extracts data for "Synthetic opioids, excl. methadone (T40.4)".
 The data is saved as a CSV file in the dbt seeds directory.
 """
 
-import os
 import requests
 import pandas as pd
 from pathlib import Path
