@@ -1,26 +1,15 @@
 #!/usr/bin/env python3
-"""
-Setup script for Fentanyl Awareness Data Pipeline
+"""Set up a local environment for the Fentanyl Awareness data pipeline."""
 
-This script helps users set up the project environment and run initial tests.
-"""
-
-import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
-def run_command(cmd_list, description):
-    """Run a command and handle errors.
 
-    Args:
-        cmd_list: List of command and arguments (e.g., ['pip', 'install', 'package'])
-        description: Human-readable description of what this command does
-    """
+def run_command(cmd_list, description):
     print(f"🔄 {description}...")
     try:
-        # Use explicit command list with shell=False to prevent injection
-        result = subprocess.run(cmd_list, check=True, capture_output=True, text=True)
+        subprocess.run(cmd_list, check=True, capture_output=True, text=True)
         print(f"✅ {description} completed successfully")
         return True
     except subprocess.CalledProcessError as e:
@@ -28,8 +17,8 @@ def run_command(cmd_list, description):
         print(f"Error output: {e.stderr}")
         return False
 
+
 def check_python_version():
-    """Check if Python version is compatible."""
     version = sys.version_info
     if version.major < 3 or (version.major == 3 and version.minor < 10):
         print("❌ Python 3.10+ is required")
@@ -37,66 +26,50 @@ def check_python_version():
     print(f"✅ Python {version.major}.{version.minor}.{version.micro} is compatible")
     return True
 
+
 def setup_environment():
-    """Set up the Python environment."""
     print("🚀 Setting up Fentanyl Awareness Data Pipeline...")
 
-    # Check Python version
     if not check_python_version():
         return False
 
-    # Install dependencies
-    if not run_command(['pip', 'install', '-r', 'requirements.txt'], "Installing Python dependencies"):
+    if not run_command(["pip", "install", "-r", "requirements.txt"], "Installing Python dependencies"):
         return False
 
-    # Create necessary directories
-    directories = [
-        "dbt/seeds",
-        "dbt/models/staging",
-        "dbt/models/marts",
-        "data",
-        "logs"
-    ]
-
-    for directory in directories:
+    for directory in ["data_build_tool/dbt/seeds", "data_build_tool/logs"]:
         Path(directory).mkdir(parents=True, exist_ok=True)
         print(f"✅ Created directory: {directory}")
 
-    # Check if dbt is working
-    if not run_command(['dbt', '--version'], "Checking dbt installation"):
+    if not run_command(["dbt", "--version"], "Checking dbt installation"):
         return False
 
     print("\n🎉 Setup completed successfully!")
     print("\n📋 Next steps:")
-    print("1. Copy .env.example to .env and configure your settings")
-    print("2. Run: python extract_data.py")
-    print("3. Run: cd dbt && dbt run")
-
+    print("1. Copy ../.env.example to ../.env and add CENSUS_API_KEY if you need a census refresh")
+    print("2. Run: python data_sources/cdc_api/soda_extractor.py")
+    print("3. Run: python data_sources/census_acs/census_extractor.py")
+    print("4. Run: cd data_build_tool && dbt seed && dbt run && dbt test")
     return True
 
+
 def test_pipeline():
-    """Test the pipeline components."""
     print("\n🧪 Testing pipeline components...")
-
-    # Test data extraction (dry run)
-    if not run_command(['python', '-c', 'from extract_data import CDCWonderExtractor; print("Extraction module OK")'],
-                      "Testing extraction module"):
+    if not run_command(
+        ["python", "-c", "from data_sources.cdc_api.soda_extractor import CDCSodaExtractor; print('CDC extractor OK')"],
+        "Testing CDC extractor import",
+    ):
         return False
-
-    # Test dbt configuration
-    if not run_command(['dbt', 'debug'], "Testing dbt configuration"):
+    if not run_command(["dbt", "--version"], "Checking dbt installation"):
         return False
-
     print("✅ All tests passed!")
     return True
 
+
 def main():
-    """Main setup function."""
     if len(sys.argv) > 1 and sys.argv[1] == "test":
         return test_pipeline()
-    else:
-        return setup_environment()
+    return setup_environment()
+
 
 if __name__ == "__main__":
-    success = main()
-    sys.exit(0 if success else 1)
+    sys.exit(0 if main() else 1)

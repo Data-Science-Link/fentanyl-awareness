@@ -1,74 +1,56 @@
 # Fentanyl Awareness Data Pipeline
 
-The fentanyl crisis in the United States is a profound tragedy that touches every corner of our country. This project began from a personal need to understand the scale of this epidemic. I had heard how devastating fentanyl was, but I didn't know if the situation was improving or worsening, or how it impacted different states on a per-capita basis.
+The fentanyl crisis in the United States is a profound tragedy. This project republishes one official CDC series so it is easier to see whether synthetic-opioid deaths are rising or falling, and how states compare per capita.
 
-Upon searching for answers, I found it difficult to find granular, state-level, month-by-month cleaned data from a single official source. While there are excellent local dashboards, a comprehensive national view that is both accessible and regularly updated was not easily available. This project is a serious effort to provide that clarity.
+**A note on the data**: Every count is a life lost too soon. The files here are for awareness and research. Confirm figures with CDC before using them for policy.
 
-**A Note on the Data**: We must never lose sight of the fact that every statistic in these datasets represents a human life lost too soon. Each death is a heartbreak for families, friends, and communities. We hope that by providing accurate, refreshing information, we can contribute to getting this crisis under control so that our loved ones are not taken from us too early.
+## What this project provides
 
-## 🎯 What This Project Provides
+- A cleaned CSV of **provisional CDC 12-month ending T40.4 counts** (2015–current)
+- An [interactive portal](https://data-science-link.github.io/fentanyl-awareness/) with methodology, charts, and a downloadable table
+- Weekly extracts via GitHub Actions
+- dbt tests and lineage docs
 
-- **📊 Ready-to-use CSV file**: Clean, validated fentanyl death data (1999-current)
-- **Interactive Data Portal**: Browse, filter, and export data directly from your browser
-- **📚 Live Documentation**: Complete pipeline and data lineage docs updated weekly
-- **🔄 Automated Updates**: Fresh data published every Monday at 12:00 PM UTC
-- **📈 Easy Access**: Download CSV, explore online, or analyze with your preferred tool
+## What the numbers are
 
-## 📂 For Different Users
+| Topic | Fact |
+|--------|------|
+| Source | CDC VSRR SODA dataset `xkb8-kh2a` |
+| Indicator | Synthetic opioids, excl. methadone (**T40.4**). Includes fentanyl and other synthetics such as tramadol |
+| Metric | **12-month ending** provisional counts. Do not sum monthly rows |
+| Geography | States, DC, New York City, Puerto Rico, and a United States total. Filter on `geo_type` |
+| Known gap | Louisiana is often missing from T40.4 VSRR when CDC quality thresholds are not met |
+| Blank deaths | CDC withheld the number. That is not a zero |
+| Demographics | Census ACS 5-year population and economics; last available year is carried forward when needed |
 
-### 🔧 **Data Engineers & Developers**
-Want to modify or run the pipeline? See [`data_engineering/`](data_engineering/README.md) for complete technical documentation, setup instructions, and architecture details.
+The published file is [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Final_Datasets/fact_fentanyl_deaths_over_time.csv). See [`Final_Datasets/README.md`](Final_Datasets/README.md) for the data dictionary.
 
-### 📊 **Researchers & Analysts**
-Need the data without technical setup? Use our **[Interactive Data Explorer](https://data-science-link.github.io/fentanyl-awareness/)** to browse the data or download [`fact_fentanyl_deaths_over_time.csv`](Final_Datasets/).
+## Quick access
 
-### 📈 **Visualizers & Presenters**
-Explore the data online or download for use in Excel, R, or Python. Interactive documentation and data portal available at:
-**https://data-science-link.github.io/fentanyl-awareness/**
+- **Portal**: https://data-science-link.github.io/fentanyl-awareness/
+- **CSV**: [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Final_Datasets/fact_fentanyl_deaths_over_time.csv)
+- **Pipeline docs**: [`data_engineering/`](data_engineering/README.md)
 
-## 🚀 Quick Access
+## How it works
 
-- **🌐 Data Portal**: https://data-science-link.github.io/fentanyl-awareness/
-- **📁 Download Data**: [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Final_Datasets/fact_fentanyl_deaths_over_time.csv)
-- **🏗️ Explore Code**: https://github.com/Data-Science-Link/fentanyl-awareness
-- **💻 Frontend Source**: [`website/`](website/)
+1. `soda_extractor.py` pulls T40.4 rows from the CDC SODA API
+2. `census_extractor.py` pulls ACS 5-year population and economic estimates when a Census API key is present
+3. dbt + DuckDB stages the seeds, joins the latest ACS year on or before each death year, and writes the fact CSV
+4. GitHub Actions deploys the portal every Monday. If `main` is protected, the refreshed seeds are opened as a pull request instead of a direct push
 
-## 📊 What's In The Data
+## Reliability
 
-The CSV includes:
-- **Time Range**: 1999 - current
-- **Geographic Level**: State-level
-- **Metrics**: Death counts, population data, income, unemployment rates
-- **Sources**: Official CDC mortality data (1999-2023) + provisional data (2018-current)
+- dbt tests cover keys, geography coverage, and suppression handling
+- Python unit tests run in CI
+- Security scanning runs on pushes and pull requests
+- Git history is the audit trail for each published extract
 
-See [`Final_Datasets/README.md`](Final_Datasets/README.md) for the complete data dictionary.
+## License
 
-## 🔄 How It Works
+MIT. See [LICENSE](LICENSE).
 
-This repository automatically:
-1. Processes CDC SODA API mortality data and US Census demographics
-2. Validates and tests the data using automated checks
-3. Updates the CSV, interactive portal, and documentation every Monday
+## Acknowledgments
 
-Everything runs on GitHub Actions - no manual intervention needed.
-
-## 🤖 Reliability & Security
-
-- **✅ Automated Testing**: Every code change is automatically tested
-- **🔒 Security Scanning**: Code and dependencies scanned weekly for vulnerabilities
-- **📝 Full History**: Git maintains complete history of all data changes
-- **🔄 Automatic Updates**: Fresh data published every week
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **CDC WONDER**: For providing comprehensive mortality data
-- **US Census Bureau**: For population and economic data
-- **GitHub**: For hosting and automation infrastructure
-
----
-
-**Note**: This data is for educational and awareness purposes. Always verify data accuracy and consult official sources for policy decisions.
+- CDC National Center for Health Statistics (VSRR)
+- U.S. Census Bureau (ACS)
+- GitHub (hosting and automation)

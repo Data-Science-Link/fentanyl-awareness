@@ -2,12 +2,12 @@ name: Weekly Data Refresh & Publishing
 
 on:
   schedule:
-    # Run every Monday at 12:00 PM UTC
     - cron: '0 12 * * 1'
-  workflow_dispatch: # Allow manual triggering
+  workflow_dispatch:
 
 permissions:
   contents: write
+  pull-requests: write
   pages: write
   id-token: write
 
@@ -16,14 +16,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 🔍 Display context
+    - name: Display context
       run: |
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "📊 Weekly Data Refresh Starting"
-        echo "📝 Commit: ${GITHUB_SHA:0:7}"
-        echo "👤 Triggered by: ${{ github.actor }}"
-        echo "📅 Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "Weekly data refresh starting"
+        echo "Commit: ${GITHUB_SHA:0:7}"
+        echo "Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -40,28 +37,24 @@ jobs:
         pip install -r requirements.txt
         pip install dbt-core dbt-duckdb
 
-    - name: 📥 Extract CDC SODA Data
-      run: |
-        echo "📥 Extracting CDC SODA API data..."
-        python data_engineering/data_sources/cdc_api/soda_extractor.py
+    - name: Extract CDC SODA data
+      run: python data_engineering/data_sources/cdc_api/soda_extractor.py
 
-    - name: 🔑 Check for Census API Key
+    - name: Check for Census API key
       id: check_key
       run: |
         if [ -z "${{ secrets.CENSUS_API_KEY }}" ]; then
-          echo "⚠️ WARNING: CENSUS_API_KEY is missing. Census data extraction will be skipped."
+          echo "WARNING: CENSUS_API_KEY is missing. Census extraction will be skipped and existing ACS seeds will be reused."
           echo "has_key=false" >> $GITHUB_OUTPUT
         else
           echo "has_key=true" >> $GITHUB_OUTPUT
         fi
 
-    - name: 📥 Extract US Census Data
+    - name: Extract US Census data
       if: steps.check_key.outputs.has_key == 'true'
       env:
         CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
-      run: |
-        echo "📥 Extracting US Census demographic data..."
-        python data_engineering/data_sources/census_acs/census_extractor.py
+      run: python data_engineering/data_sources/census_acs/census_extractor.py
 
     - name: Set up dbt profiles
       run: |
@@ -88,8 +81,7 @@ jobs:
         dbt seed --profiles-dir ~/.dbt
 
     - name: Create Final_Datasets directory
-      run: |
-        mkdir -p Final_Datasets
+      run: mkdir -p Final_Datasets
 
     - name: Run dbt models
       run: |
@@ -112,7 +104,6 @@ jobs:
         cp -r data_engineering/data_build_tool/target/* docs/dbt/
         cp website/index.html docs/
         cp Final_Datasets/fact_fentanyl_deaths_over_time.csv docs/
-        echo "✅ Docs ready for deployment"
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
@@ -121,22 +112,33 @@ jobs:
         publish_dir: ./docs
         keep_files: false
 
-    - name: Commit Updated Data if Changed
+    - name: Open or update data refresh pull request
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
-        # Track multiple files
         git add Final_Datasets/fact_fentanyl_deaths_over_time.csv
         git add data_engineering/data_build_tool/dbt/seeds/*.csv
 
-        # Check if there are changes to commit
         if git diff --staged --quiet; then
-          echo "📊 No changes to data - everything is up to date"
+          echo "No seed or published CSV changes."
+          exit 0
+        fi
+
+        git checkout -B automated/weekly-data-refresh
+        git commit -m "chore: refresh CDC and census datasets"
+        git push origin automated/weekly-data-refresh --force
+
+        if gh pr list --head automated/weekly-data-refresh --state open --json number --jq 'length' | grep -qx '0'; then
+          gh pr create \
+            --base main \
+            --head automated/weekly-data-refresh \
+            --title "chore: weekly data refresh" \
+            --body "Automated refresh of CDC VSRR T40.4 seeds and the published fact table. Pages was updated from this workflow; merge this PR to keep main in sync. Branch protection on main blocks a direct bot push."
         else
-          echo "📝 Data updated - committing changes"
-          git commit -m "chore: update datasets and seeds [skip ci]"
-          git push origin main
+          echo "Updated existing weekly data refresh PR."
         fi
 
     - name: Upload artifacts
@@ -150,12 +152,7 @@ jobs:
         retention-days: 30
 
     - name: Summary
-      if: always()
+      if: success()
       run: |
-        echo ""
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "✅ Weekly Data Refresh Complete"
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "📁 Updated CSV: Final_Datasets/fact_fentanyl_deaths_over_time.csv"
-        echo "📚 Updated docs: https://data-science-link.github.io/fentanyl-awareness/"
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "Weekly data refresh succeeded."
+        echo "Portal: https://data-science-link.github.io/fentanyl-awareness/"

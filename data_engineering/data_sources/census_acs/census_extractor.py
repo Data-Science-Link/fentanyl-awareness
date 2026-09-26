@@ -2,14 +2,9 @@
 """
 Census ACS Data Extractor
 
-This script extracts US Census American Community Survey (ACS) and Population Estimates Program (PEP) data
-for integration with the fentanyl awareness data pipeline.
-
-Key Features:
-- State-level population estimates
-- Age-adjusted population data
-- Economic indicators
-- Automated data validation and cleaning
+Extracts US Census American Community Survey (ACS) 5-year estimates for
+population and economic indicators. These are multi-year survey estimates,
+not Population Estimates Program (PEP) point-in-time counts.
 """
 
 import os
@@ -65,13 +60,14 @@ class CensusExtractor:
 
     def get_state_population_estimates(self, years: List[int] = None) -> pd.DataFrame:
         """
-        Extract state-level population estimates from ACS
+        Extract state-level ACS 5-year population estimates.
 
         Args:
             years: List of years to extract (default: 2009 to current year)
 
         Returns:
-            DataFrame with state population data
+            DataFrame with state population data. The year label is the ACS
+            5-year end year, not a single-year population count.
         """
         if years is None:
             current_year = datetime.now().year
@@ -273,9 +269,8 @@ class CensusExtractor:
             'NAME': 'state_name'
         })
 
-        # Calculate unemployment rate (handle division by zero and NaN)
+        # Keep unemployment null when labor force is missing; do not coerce to 0.
         df['unemployment_rate'] = (df['unemployed'] / df['labor_force_civilian'] * 100).round(2)
-        df['unemployment_rate'] = df['unemployment_rate'].fillna(0)
 
         # Use the state field directly (already converted to numeric above)
         df['state_code'] = df['state'].astype(int)
@@ -287,7 +282,8 @@ class CensusExtractor:
             'employed', 'unemployed', 'extracted_at'
         ]
 
-        return df[final_columns].dropna()
+        # Keep rows that have identity fields even if some economic measures are null.
+        return df[final_columns].dropna(subset=['year', 'state_code', 'state_name'])
 
 def test_census_api():
     """Test Census API connection and data extraction"""

@@ -3,27 +3,25 @@ version: 2
 models:
   - name: fact_fentanyl_deaths_over_time
     description: |
-      Fact table for comprehensive fentanyl deaths analysis with census demographic data.
+      Published fact table for provisional synthetic-opioid (T40.4) mortality.
 
-      This model uses the CDC SODA API as its single source of truth for fentanyl-related deaths.
-      It combines mortality data (12-month rolling totals) with US Census demographic and
-      economic indicators to enable comprehensive analysis of fentanyl-related deaths across
-      time, geography, and socioeconomic factors.
+      **What this is**
+      - CDC VSRR 12-month ending counts from SODA dataset xkb8-kh2a
+      - Indicator: Synthetic opioids, excl. methadone (T40.4). This includes
+        fentanyl and other synthetics such as tramadol. It is not fentanyl-only.
+      - Time span: 2015 through the latest month CDC has published
+      - Geography: states, DC, New York City, Puerto Rico, and a national total
 
-      **Data Characteristics:**
-      - **Time Period**: 2015-current (as provided by CDC SODA API)
-      - **Geographic Level**: State-level aggregation
-      - **Cause of Death**: Synthetic opioid deaths (T40.4)
-      - **Metric**: 12-month rolling total of deaths ending in the given month
-      - **Demographics**: Population, income, and unemployment data from US Census
+      **What this is not**
+      - Monthly incident deaths. Do not sum `rolling_12_month_deaths` across months.
+      - Final vital statistics. Counts are provisional and are revised.
+      - Complete state coverage. Louisiana is commonly absent from T40.4 VSRR
+        when CDC quality thresholds are not met.
 
-      **Key Transformations:**
-      - Standardizes date and state formats from API source
-      - Renames deaths to rolling_12_month_deaths for clarity
-      - Enriches with census demographic and economic data
-
-      This fact table serves as the primary dataset for comprehensive fentanyl mortality
-      analysis, enabling correlation studies between death rates and socioeconomic factors.
+      Census ACS 5-year population and economic fields are joined on geography
+      name using the latest ACS end-year on or before the death-year label.
+      When the death year is newer than the latest ACS year, `population_is_carried_forward`
+      is true.
 
     tests:
       - dbt_utils.unique_combination_of_columns:
@@ -35,35 +33,81 @@ models:
 
     columns:
       - name: year
-        description: "Year of death occurrence"
+        description: "End year of the 12-month reporting window"
         tests:
           - not_null
 
       - name: month
-        description: "Date representation of the month (first day of month)"
+        description: "First day of the month that ends the 12-month window"
         tests:
           - not_null
 
       - name: state
-        description: "State where death occurred"
+        description: "Geography name"
         tests:
           - not_null
+
+      - name: geo_type
+        description: "nation, state, city, or territory"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['nation', 'state', 'city', 'territory']
 
       - name: rolling_12_month_deaths
-        description: "12-month rolling total of fentanyl-related deaths"
+        description: "Reported 12-month ending T40.4 deaths; null when suppressed"
+
+      - name: predicted_12_month_deaths
+        description: "CDC predicted 12-month ending count when published"
+
+      - name: is_suppressed
+        description: "True when CDC withheld the reported count"
         tests:
           - not_null
 
+      - name: footnote
+        description: "CDC footnote text"
+
+      - name: footnote_symbol
+        description: "CDC footnote symbol (* or **)"
+
+      - name: percent_complete
+        description: "CDC percent completeness of death reporting"
+
+      - name: percent_pending_investigation
+        description: "CDC percent of records pending investigation"
+
       - name: data_source
-        description: "Source dataset identifier ('CDC SODA API')"
+        description: "Always 'CDC SODA API'"
         tests:
           - not_null
 
       - name: population
-        description: "State population count from US Census Population Estimates Program"
+        description: "ACS 5-year total population for the matched population_year"
+
+      - name: population_year
+        description: "ACS 5-year end year used for population"
 
       - name: median_household_income
-        description: "Median household income in current dollars from US Census ACS"
+        description: "ACS 5-year median household income for demographics_year"
 
       - name: unemployment_rate
-        description: "Unemployment rate as percentage from US Census ACS"
+        description: "ACS 5-year unemployment rate percentage for demographics_year"
+
+      - name: demographics_year
+        description: "ACS 5-year end year used for income and unemployment"
+
+      - name: deaths_per_100k
+        description: "rolling_12_month_deaths per 100,000 population when both are present"
+
+      - name: predicted_deaths_per_100k
+        description: "predicted_12_month_deaths per 100,000 population when both are present"
+
+      - name: population_is_carried_forward
+        description: "True when population_year is earlier than the death-year label"
+        tests:
+          - not_null
+
+      - name: extracted_at
+        description: "UTC timestamp when the CDC seed was extracted"
