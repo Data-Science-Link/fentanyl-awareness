@@ -5,13 +5,21 @@ on:
     branches: [ main, master, develop ]
     paths:
       - 'data_engineering/data_build_tool/**'
+      - 'data_engineering/data_sources/**'
       - 'data_engineering/requirements.txt'
+      - 'tests/**'
+      - 'website/**'
+      - 'Final_Datasets/**'
       - '.github/workflows/*.yml'
   pull_request:
     branches: [ main, master, develop ]
     paths:
       - 'data_engineering/data_build_tool/**'
+      - 'data_engineering/data_sources/**'
       - 'data_engineering/requirements.txt'
+      - 'tests/**'
+      - 'website/**'
+      - 'Final_Datasets/**'
       - '.github/workflows/*.yml'
 
 permissions:
@@ -62,6 +70,10 @@ jobs:
         cd data_engineering
         pip install --upgrade pip
         pip install -r requirements.txt
+
+    - name: Run Python unit tests
+      run: |
+        python -m pytest tests -q
         
     - name: Set up dbt
       run: |

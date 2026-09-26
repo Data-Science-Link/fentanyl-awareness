@@ -35,7 +35,7 @@ models:
           - not_null
 
       - name: state_code
-        description: "Two-letter state code"
+        description: "US Census FIPS state code (numeric)"
         tests:
           - not_null
 

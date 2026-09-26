@@ -3,10 +3,11 @@ version: 2
 models:
   - name: stg_cdc_api_provisional_overdose_counts
     description: |
-      Staging model for CDC SODA API Provisional Overdose Counts.
+      Staging model for CDC VSRR provisional T40.4 (synthetic opioids, excl. methadone)
+      12-month ending counts from the SODA dataset xkb8-kh2a.
 
-      This data is pulled directly from data.cdc.gov and represents the most recent
-      provisional counts for synthetic opioid overdoses.
+      Empty `data_value` cells stay null. They are suppressed or withheld for data
+      quality, not true zeros.
 
     tests:
       - dbt_utils.unique_combination_of_columns:
@@ -18,19 +19,35 @@ models:
 
     columns:
       - name: year
-        description: "Year of death occurrence"
+        description: "End year of the 12-month reporting window, not a single calendar year of deaths"
         tests:
           - not_null
 
       - name: month
-        description: "First day of the month"
+        description: "First day of the month that ends the 12-month window"
         tests:
           - not_null
 
       - name: state
-        description: "Full state name"
+        description: "Geography name (state, DC, NYC, Puerto Rico, or United States)"
         tests:
           - not_null
 
+      - name: geo_type
+        description: "nation, state, city, or territory"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['nation', 'state', 'city', 'territory']
+
       - name: rolling_12_month_deaths
-        description: "Number of deaths (12-month ending count)"
+        description: "Reported 12-month ending death count; null when CDC withholds the number"
+
+      - name: predicted_12_month_deaths
+        description: "CDC predicted (delay-adjusted) 12-month ending count when published"
+
+      - name: is_suppressed
+        description: "True when CDC did not publish a reported data_value"
+        tests:
+          - not_null

@@ -1,0 +1,50 @@
+version: 2
+
+seeds:
+  - name: cdc_api_provisional_overdose_counts
+    description: >
+      Raw CDC VSRR SODA extract (dataset xkb8-kh2a), T40.4 indicator only.
+      Empty data_value means CDC withheld the count.
+    columns:
+      - name: state
+        description: Two-letter jurisdiction code (includes US, YC, PR)
+      - name: year
+        description: End year of the 12-month window
+      - name: month
+        description: Month name that ends the 12-month window
+      - name: period
+        description: CDC period label; pipeline keeps 12 month-ending
+      - name: indicator
+        description: Drug category
+      - name: data_value
+        description: Reported count; empty when suppressed
+      - name: predicted_value
+        description: CDC predicted count when published
+      - name: extracted_at
+        description: UTC extract timestamp
+      - name: dataset_id
+        description: SODA dataset identifier
+
+  - name: census_state_population
+    description: ACS 5-year total population by state and end year
+    columns:
+      - name: year
+        description: ACS 5-year end year
+      - name: state_name
+        description: State or equivalent name
+      - name: population
+        description: ACS 5-year total population estimate
+      - name: date_description
+        description: Always 'ACS 5-Year Estimate'
+      - name: extracted_at
+        description: Extract timestamp
+
+  - name: census_state_economic
+    description: ACS 5-year income and labor-force estimates by state
+    columns:
+      - name: year
+        description: ACS 5-year end year
+      - name: unemployment_rate
+        description: Unemployed / civilian labor force * 100; null when undefined
+      - name: extracted_at
+        description: Extract timestamp

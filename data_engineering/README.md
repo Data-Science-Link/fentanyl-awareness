@@ -1,260 +1,92 @@
 # Data Engineering
 
-This folder contains the technical infrastructure for the Fentanyl Awareness Project. While the work here is technical, its purpose is deeply serious: to provide accurate data that helps us understand and address the tragic synthetic opioid crisis claiming lives across our country.
+Technical infrastructure for the Fentanyl Awareness Project. The pipeline extracts CDC VSRR T40.4 counts and Census ACS 5-year estimates, then publishes one fact table.
 
-## 📁 Contents
+## Contents
 
-### Data Engineering
-- `data_build_tool/` - Complete dbt project for data transformations
-  - `dbt/` - dbt project files
-    - `models/staging/` - Data cleaning and staging models
-    - `models/marts/` - Final analytical models
-    - `seeds/` - Raw data files
-    - `tests/` - Data quality tests
-    - `macros/` - Reusable SQL macros
-  - `dbt_project.yml` - dbt configuration
-  - `packages.yml` - dbt package dependencies
-  - `fentanyl_awareness.duckdb` - DuckDB database
-  - `logs/` - dbt execution logs
-  - `target/` - dbt compiled artifacts
+- `data_sources/cdc_api/soda_extractor.py` — CDC SODA extract
+- `data_sources/census_acs/census_extractor.py` — Census ACS extract
+- `data_build_tool/` — dbt project (DuckDB)
+  - `dbt/models/staging/` — cleaning
+  - `dbt/models/marts/` — published fact table
+  - `dbt/seeds/` — versioned extracts
+  - `dbt/tests/` — extra data-quality tests
 
-### Raw Data Sources
-- `data_sources/cdc_wonder/` - CDC WONDER XML request files and documentation
-- `data_sources/census_acs/` - US Census Bureau data extraction scripts
-- `data_sources/customs_and_border_control/` - Border control data (placeholder)
+CDC WONDER and Google Sheets are not part of this pipeline.
 
-## 🚀 Getting Started
+## Setup
 
-### Prerequisites
-
-- Python 3.10+
-- Git
-- DuckDB CLI (optional, for direct database queries)
-- **Note**: `fentanyl_awareness.duckdb` is a generated file that will be created after running the dbt transformations.
-
-### Installation
-
-1. **Install Python dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Install DuckDB CLI (optional)**:
-   ```bash
-   # On macOS with Homebrew
-   brew install duckdb
-
-   # On Ubuntu/Debian
-   sudo apt-get install duckdb
-
-   # On Windows with Chocolatey
-   choco install duckdb
-
-   # Or download from: https://duckdb.org/docs/installation/
-   ```
-
-3. **Set up environment variables**:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration (at project root)
-   ```
-
-4. **Transform data with dbt**:
-   ```bash
-   cd data_build_tool
-   dbt deps --profiles-dir ~/.dbt
-   dbt seed --profiles-dir ~/.dbt
-   dbt run --profiles-dir ~/.dbt
-   dbt test --profiles-dir ~/.dbt
-   ```
-
-5. **Generate documentation**:
-   ```bash
-   dbt docs generate --profiles-dir ~/.dbt
-   dbt docs serve --profiles-dir ~/.dbt
-   ```
-
-## 🔍 Querying Your Data
-
-### Using DuckDB CLI
-
-Once you've run the pipeline, you can query your data directly using DuckDB CLI:
+Python 3.10+ is required.
 
 ```bash
-# Connect to your database
-duckdb data_build_tool/fentanyl_awareness.duckdb
-
-# List available tables
-.tables
-
-# Explore raw data
-SELECT * FROM main.cdc_api_provisional_overdose_counts LIMIT 5;
-
-# Query cleaned staging data (after dbt run)
-SELECT * FROM main.stg_cdc_api_provisional_overdose_counts LIMIT 5;
-
-# Top states by deaths
-SELECT state, SUM(rolling_12_month_deaths) as total_deaths
-FROM main.stg_cdc_api_provisional_overdose_counts
-GROUP BY state
-ORDER BY total_deaths DESC
-LIMIT 10;
-
-# Export results to CSV
-.output results.csv
-SELECT * FROM main.stg_cdc_api_provisional_overdose_counts;
-.output stdout
+pip install -r requirements.txt
+cp ../.env.example ../.env   # add CENSUS_API_KEY to refresh ACS seeds
 ```
 
-### Using Python Scripts
+Create a DuckDB profile at `~/.dbt/profiles.yml`:
 
-You can run individual queries using Python:
+```yaml
+fentanyl_awareness:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: 'fentanyl_awareness.duckdb'
+      threads: 4
+      schema: 'main'
+```
 
 ```bash
-python3 -c "
-import duckdb
-conn = duckdb.connect('data_build_tool/fentanyl_awareness.duckdb')
-result = conn.execute('SELECT COUNT(*) FROM main.d176_provisional_2018_current').fetchdf()
-print(result)
-conn.close()
-"
-```
-
-## 📊 Data Sources
-
-This pipeline uses data from:
-
-1. **CDC WONDER** - Mortality data (seeds in `dbt/seeds/`)
-2. **US Census** - Population and economic data (seeds in `dbt/seeds/`)
-
-The seed files are automatically loaded when you run `dbt seed`.
-
-### Available dbt Models
-
-**Staging Models**:
-- `stg_cdc_api_provisional_overdose_counts` - Provisional drug overdose death counts from CDC API
-- `stg_census_state_population` - Population estimates
-- `stg_census_state_economic` - Economic indicators
-
-**Mart Models**:
-- `fact_fentanyl_deaths_over_time` - Final fact table with all data sources
-
-### Sample Queries
-
-```sql
--- View final dataset
-SELECT * FROM main.fact_fentanyl_deaths_over_time LIMIT 10;
-
--- Deaths by state in 2023
-SELECT
-    state,
-    SUM(deaths) as total_deaths
-FROM main.fact_fentanyl_deaths_over_time
-WHERE year = 2023
-GROUP BY state
-ORDER BY total_deaths DESC;
-
--- Monthly trends
-SELECT
-    year,
-    SUM(deaths) as total_deaths
-FROM main.fact_fentanyl_deaths_over_time
-GROUP BY year
-ORDER BY year;
-```
-
-## 🤖 GitHub Actions Automation
-
-This pipeline is fully automated with three GitHub workflows:
-
-- **dbt CI/CD**: Runs tests on every push/PR, deploys docs to GitHub Pages
-- **Security Audit**: Scans code and dependencies for vulnerabilities
-- **Weekly Data Refresh**: Automated pipeline runs every Monday
-
-All workflows can be manually triggered from the Actions tab.
-
-## ⚙️ Configuration
-
-### Environment Variables
-
-Create a `.env` file at the project root with:
-
-```bash
-# CDC WONDER API Configuration
-CDC_WONDER_BASE_URL=https://wonder.cdc.gov/controller/datarequest
-CDC_WONDER_TIMEOUT=600
-
-# Data Configuration
-DATA_DIRECTORY=./data
-SEEDS_DIRECTORY=./data_build_tool/dbt/seeds
-```
-
-## 🧪 Testing
-
-Run data quality tests:
-
-```bash
+python data_sources/cdc_api/soda_extractor.py
+python data_sources/census_acs/census_extractor.py   # optional without a key
 cd data_build_tool
+dbt deps --profiles-dir ~/.dbt
+dbt seed --profiles-dir ~/.dbt
+dbt run --profiles-dir ~/.dbt
 dbt test --profiles-dir ~/.dbt
 ```
 
-Tests include:
-- Not null constraints on key fields
-- Data freshness checks
-- Referential integrity between models
-- Unique constraints
+The fact model writes `../Final_Datasets/fact_fentanyl_deaths_over_time.csv`.
 
-## 🤝 Contributing
+## Models
 
-### Development Setup
+- `stg_cdc_api_provisional_overdose_counts` — T40.4 12-month ending rows; suppressed counts stay null
+- `stg_census_state_population` — ACS 5-year population
+- `stg_census_state_economic` — ACS 5-year income and unemployment
+- `fact_fentanyl_deaths_over_time` — published table with `geo_type`, rates, and CDC footnotes
 
-1. **Fork and clone the repository**
-   ```bash
-   git clone https://github.com/your-username/fentanyl-awareness.git
-   cd fentanyl-awareness
-   ```
+## Query notes
 
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+```sql
+-- Latest national 12-month ending count
+SELECT month, rolling_12_month_deaths
+FROM main.fact_fentanyl_deaths_over_time
+WHERE geo_type = 'nation'
+ORDER BY month DESC
+LIMIT 1;
 
-3. **Make your changes and test**
-   ```bash
-   cd data_engineering/data_build_tool
-   dbt test --profiles-dir ~/.dbt
-   ```
+-- Latest state rates (do not include nation / NYC / PR)
+SELECT state, deaths_per_100k, rolling_12_month_deaths
+FROM main.fact_fentanyl_deaths_over_time
+WHERE geo_type = 'state'
+  AND month = (SELECT max(month) FROM main.fact_fentanyl_deaths_over_time)
+  AND is_suppressed = false
+ORDER BY deaths_per_100k DESC;
+```
 
-4. **Commit and push**
-   ```bash
-   git commit -m 'Add your feature'
-   git push origin feature/your-feature-name
-   ```
+Do not `SUM(rolling_12_month_deaths)` across months. That metric is already a 12-month window.
 
-5. **Open a Pull Request**
+## Automation
 
-### Contribution Guidelines
+- **dbt CI**: seeds, models, dbt tests, Python tests, Pages deploy from `main`
+- **Weekly refresh**: re-extract CDC (and Census when `CENSUS_API_KEY` is set), rebuild, deploy Pages, open a PR if `main` is protected
+- **Security audit**: Bandit and pip-audit
 
-- **Data Quality**: All changes must pass dbt tests
-- **Documentation**: Update README and code comments as needed
-- **Testing**: Add tests for new features
-- **Security**: Never commit sensitive data or credentials
+## Tests
 
-### Areas for Contribution
+```bash
+cd data_build_tool && dbt test --profiles-dir ~/.dbt
+cd ../.. && python -m pytest tests
+```
 
-- 🔍 **Data Sources**: Add new sources (CBP, healthcare, economic)
-- 📊 **dbt Models**: Improve transformations and add new metrics
-- 🧪 **Testing**: Enhance data quality tests
-- 📚 **Documentation**: Improve guides and examples
-- 🐛 **Bug Fixes**: Report and fix issues
-
-## 🔧 Technical Details
-
-This folder contains the complete data engineering pipeline that:
-- **Loads** data from CSV seed files (CDC WONDER and Census data)
-- Transforms data using dbt with DuckDB
-- Implements data quality tests and validation
-- Automates the entire process with GitHub Actions
-- Generates final CSV and documentation
-
-For detailed technical documentation, see the individual dbt model files.
+dbt tests include uniqueness, accepted `geo_type` values, core-state coverage (Louisiana is a documented source gap), a national row in the latest month, and suppressed deaths remaining null.

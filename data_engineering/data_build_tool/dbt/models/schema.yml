@@ -2,17 +2,17 @@ version: 2
 
 sources:
   - name: cdc_api_raw
-    description: "Raw CDC SODA API drug overdose data"
+    description: "CDC VSRR provisional overdose counts loaded from the SODA seed"
     schema: main
     tables:
       - name: cdc_api_provisional_overdose_counts
-        description: "Provisional drug overdose death counts from CDC API"
+        description: "Raw extract of dataset xkb8-kh2a, T40.4 indicator only"
 
   - name: census_raw
-    description: "Raw US Census Bureau data (Population Estimates Program and ACS)"
+    description: "US Census ACS 5-year estimates loaded from seeds"
     schema: main
     tables:
       - name: census_state_population
-        description: "State-level population estimates from Census PEP"
+        description: "State-level ACS 5-year population (B01001_001E)"
       - name: census_state_economic
-        description: "State-level economic data from Census ACS"
+        description: "State-level ACS 5-year income and labor-force estimates"

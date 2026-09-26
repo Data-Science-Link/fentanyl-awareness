@@ -3,18 +3,17 @@ version: 2
 models:
   - name: stg_census_state_population
     description: |
-      Staging model for US Census Population Estimates Program (PEP) data.
+      Staging model for US Census ACS 5-year state population estimates.
 
-      This model cleans and standardizes state-level population estimates from the US Census Bureau.
-      The data provides annual population counts for all US states and the District of Columbia,
-      which is essential for calculating per-capita mortality rates and other demographic analyses.
+      The year label is the ACS 5-year end year, not a PEP point-in-time count.
+      These estimates are used as denominators for deaths per 100,000.
 
       **Data Characteristics:**
-      - **Source**: US Census Bureau Population Estimates Program
-      - **Time Period**: 2010-current (annual estimates)
+      - **Source**: US Census Bureau American Community Survey 5-year estimates
+      - **Time Period**: 2009 through the latest published ACS 5-year file
       - **Geographic Level**: State-level aggregation
       - **Update Frequency**: Annual
-      - **Data Quality**: Official government estimates, highly reliable
+      - **Data Quality**: Survey estimates with multi-year averaging
 
       **Key Transformations:**
       - Standardizes state names and codes
