@@ -1,8 +1,7 @@
 
   
   create view "fentanyl_awareness"."main"."stg_census_state_population__dbt_tmp" as (
-    -- Staging model for Census Population Estimates Program (PEP) data
--- This model cleans and standardizes state-level population data from US Census
+    -- Staging model for Census ACS 5-year state population estimates.
 
 
 

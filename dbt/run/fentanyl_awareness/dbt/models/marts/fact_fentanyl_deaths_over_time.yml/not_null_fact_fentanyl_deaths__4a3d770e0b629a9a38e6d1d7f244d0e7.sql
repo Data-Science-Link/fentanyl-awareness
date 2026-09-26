@@ -13,9 +13,9 @@
 
 
 
-select rolling_12_month_deaths
+select population_is_carried_forward
 from "fentanyl_awareness"."main"."fact_fentanyl_deaths_over_time"
-where rolling_12_month_deaths is null
+where population_is_carried_forward is null
 
 
 

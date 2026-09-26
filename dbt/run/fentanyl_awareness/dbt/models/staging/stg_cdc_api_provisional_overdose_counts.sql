@@ -1,8 +1,8 @@
 
   
   create view "fentanyl_awareness"."main"."stg_cdc_api_provisional_overdose_counts__dbt_tmp" as (
-    -- Staging model for CDC API Provisional Overdose Counts
--- This model cleans and standardizes the data from the CDC SODA API
+    -- Staging model for CDC VSRR provisional T40.4 counts.
+-- Empty CDC data_value cells stay null (suppressed / not shown), never zero.
 
 
 
@@ -12,12 +12,7 @@ with source_data as (
 
 cleaned_data as (
     select
-        -- Ensure year is an integer
         cast(year as integer) as year
-
-        -- Convert month name and year to a proper date
-        -- The API provides "January", "February", etc. and a "year"
-        -- We'll assume the first day of the month
         , case
             when month = 'January' then strptime(year || '-01-01', '%Y-%m-%d')::date
             when month = 'February' then strptime(year || '-02-01', '%Y-%m-%d')::date
@@ -32,18 +27,28 @@ cleaned_data as (
             when month = 'November' then strptime(year || '-11-01', '%Y-%m-%d')::date
             when month = 'December' then strptime(year || '-12-01', '%Y-%m-%d')::date
           end as month
-
         , trim(state_name) as state
+        , case
+            when trim(state_name) = 'United States' then 'nation'
+            when trim(state_name) = 'New York City' then 'city'
+            when trim(state_name) = 'Puerto Rico' then 'territory'
+            else 'state'
+          end as geo_type
         , trim(indicator) as multiple_cause_of_death
         , 'T40.4' as multiple_cause_of_death_code
-
-        -- Handle nulls in data_value
-        -- This represents the 12-month rolling total of deaths ending in the given month
-        , coalesce(cast(data_value as integer), 0) as rolling_12_month_deaths
-
+        , try_cast(data_value as integer) as rolling_12_month_deaths
+        , try_cast(predicted_value as integer) as predicted_12_month_deaths
+        , case
+            when data_value is null or trim(cast(data_value as varchar)) = ''
+                then true
+            else false
+          end as is_suppressed
+        , nullif(trim(footnote), '') as footnote
+        , nullif(trim(footnote_symbol), '') as footnote_symbol
+        , try_cast(percent_complete as double) as percent_complete
+        , try_cast(percent_pending_investigation as double) as percent_pending_investigation
+        , try_cast(extracted_at as timestamp) as extracted_at
     from source_data
-    -- The API includes "12 month-ending" and "Monthly" periods sometimes.
-    -- Looking at the data, '12 month-ending' is the common one for these counts.
     where period = '12 month-ending'
 )
 

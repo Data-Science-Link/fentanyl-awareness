@@ -1,5 +1,4 @@
--- Staging model for Census Population Estimates Program (PEP) data
--- This model cleans and standardizes state-level population data from US Census
+-- Staging model for Census ACS 5-year state population estimates.
 
 
 

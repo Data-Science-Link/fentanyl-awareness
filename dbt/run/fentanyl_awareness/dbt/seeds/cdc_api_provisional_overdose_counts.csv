@@ -2,7 +2,7 @@
     
     
     
-    create table "fentanyl_awareness"."main"."cdc_api_provisional_overdose_counts" ("state" text,"year" integer,"month" text,"period" text,"indicator" text,"percent_complete" float8,"percent_pending_investigation" float8,"state_name" text,"footnote" text,"footnote_symbol" text,"data_value" integer,"predicted_value" integer)
+    create table "fentanyl_awareness"."main"."cdc_api_provisional_overdose_counts" ("state" text,"year" integer,"month" text,"period" text,"indicator" text,"percent_complete" float8,"percent_pending_investigation" float8,"state_name" text,"footnote" text,"footnote_symbol" text,"data_value" integer,"predicted_value" integer,"extracted_at" timestamp without time zone,"dataset_id" text)
   ;
     -- dbt seed --
     
