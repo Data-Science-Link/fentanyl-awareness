@@ -3,7 +3,10 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from data_engineering.data_sources.cdc_api.soda_extractor import CDCSodaExtractor
+from data_engineering.data_sources.cdc_api.soda_extractor import (
+    CDCSodaExtractor,
+    CORE_STATE_NAMES,
+)
 
 
 def test_save_to_csv(tmp_path: Path):
@@ -49,6 +52,19 @@ def test_validate_rejects_missing_unexpected_state():
     )
     with pytest.raises(ValueError, match="Ohio"):
         extractor.validate(df)
+
+
+def test_validate_fails_when_a_previously_present_state_disappears():
+    extractor = CDCSodaExtractor()
+    names = sorted(CORE_STATE_NAMES - {"Louisiana"})
+    df = pd.DataFrame(
+        {
+            "state_name": names * 25,
+            "indicator": [extractor.indicator] * (len(names) * 25),
+        }
+    )
+    with pytest.raises(ValueError, match="Louisiana"):
+        extractor.validate(df, previous_states={"Louisiana", "Ohio"})
 
 
 def test_validate_allows_documented_louisiana_gap():

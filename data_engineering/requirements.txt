@@ -1,5 +1,6 @@
 # Core dependencies
 requests>=2.31.0
+curl_cffi>=0.10.0
 pandas>=2.3.3
 python-dotenv>=1.0.0
 pytest>=8.0.0

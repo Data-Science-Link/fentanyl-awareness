@@ -18,10 +18,20 @@ models:
       - Complete state coverage. Louisiana is commonly absent from T40.4 VSRR
         when CDC quality thresholds are not met.
 
-      Census ACS 5-year population and economic fields are joined on geography
-      name using the latest ACS end-year on or before the death-year label.
-      When the death year is newer than the latest ACS year, `population_is_carried_forward`
-      is true.
+      Death rates use Census PEP July 1 population (`population_source` =
+      `Census PEP`). Income and unemployment stay on ACS 5-year estimates.
+      When `population_year` is not the death-year label,
+      `population_is_carried_forward` is true.
+
+      `headline_deaths` is the CDC predicted count when that value exists and
+      the month is within six months of the latest month in the file, or
+      `percent_complete` is below 100, or the footnote flags underreporting
+      or incomplete data. Otherwise it is the reported count. If the rule
+      calls for a predicted count and CDC did not publish one, the headline
+      falls back to the reported count.
+
+      States with no VSRR row, including Louisiana, are present with
+      `reporting_status = not_reportable` and null death counts.
 
     tests:
       - dbt_utils.unique_combination_of_columns:
@@ -61,6 +71,12 @@ models:
       - name: predicted_12_month_deaths
         description: "CDC predicted 12-month ending count when published"
 
+      - name: headline_deaths
+        description: "Predicted count for recent or flagged months; otherwise the reported count"
+
+      - name: headline_basis
+        description: "predicted or reported, naming which column headline_deaths used"
+
       - name: is_suppressed
         description: "True when CDC withheld the reported count"
         tests:
@@ -78,16 +94,27 @@ models:
       - name: percent_pending_investigation
         description: "CDC percent of records pending investigation"
 
+      - name: reporting_status
+        description: "reported, suppressed, or not_reportable"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['reported', 'suppressed', 'not_reportable']
+
       - name: data_source
-        description: "Always 'CDC SODA API'"
+        description: "Always 'CDC SODA API' on this provisional file"
         tests:
           - not_null
 
       - name: population
-        description: "ACS 5-year total population for the matched population_year"
+        description: "Census PEP July 1 population for the matched population_year. Null for New York City."
 
       - name: population_year
-        description: "ACS 5-year end year used for population"
+        description: "Year of the population estimate used for the rate"
+
+      - name: population_source
+        description: "Census PEP for nation, state, and territory rows that have a denominator"
 
       - name: median_household_income
         description: "ACS 5-year median household income for demographics_year"
@@ -105,7 +132,7 @@ models:
         description: "predicted_12_month_deaths per 100,000 population when both are present"
 
       - name: population_is_carried_forward
-        description: "True when population_year is earlier than the death-year label"
+        description: "True when population_year is not the death-year label"
         tests:
           - not_null
 

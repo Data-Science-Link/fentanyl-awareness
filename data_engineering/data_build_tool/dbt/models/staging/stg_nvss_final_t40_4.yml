@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: stg_nvss_final_t40_4
+    description: |
+      Incident deaths from the CDC WONDER multiple-cause request form.
+      A death is counted when the underlying cause is drug poisoning and a
+      record-axis condition is T40.4. Counts below 10 are null.
+    columns:
+      - name: year
+        tests:
+          - not_null
+      - name: state
+        tests:
+          - not_null
+      - name: period_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['year', 'month']
+      - name: data_source
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['NVSS final']
+      - name: source_dataset
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['D77', 'D157']

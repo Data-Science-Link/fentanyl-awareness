@@ -51,6 +51,10 @@
         </div>
     </div>
 
+    <div class="container d-none" id="staleness-banner">
+        <div class="alert alert-warning" role="alert" id="staleness-banner-text"></div>
+    </div>
+
     <div class="container">
         <div class="card">
             <div class="card-header bg-white pt-3 px-4">
@@ -94,14 +98,15 @@
                                     <li><strong>Source:</strong> CDC Vital Statistics Rapid Release, SODA dataset <code>xkb8-kh2a</code>.</li>
                                     <li><strong>Indicator:</strong> Synthetic opioids, excl. methadone (ICD-10 T40.4). This includes fentanyl and other synthetics such as tramadol. It is not a fentanyl-only series.</li>
                                     <li><strong>Metric:</strong> Provisional 12-month ending counts. The month is the end of that window.</li>
-                                    <li><strong>Time span:</strong> 2015 through the latest month CDC has published.</li>
-                                    <li><strong>Rates:</strong> Deaths per 100,000 use ACS 5-year population. If the death year is newer than the latest ACS year, the last available population is carried forward and flagged.</li>
+                                    <li><strong>Time span:</strong> Provisional counts run from 2015 through the latest month CDC has published. Final incident deaths, in a separate file, run from 1999 through the latest final year.</li>
+                                    <li><strong>Rates:</strong> Deaths per 100,000 use Census PEP July 1 population. If that year is not the death-year label, the population year is carried from another year and flagged. Income and unemployment remain ACS 5-year estimates.</li>
+                                    <li><strong>Recent months:</strong> <code>headline_deaths</code> uses CDC’s predicted count when that value exists and the month is within six months of the latest month, or completeness is below 100, or the footnote says the count is underreported or incomplete. Otherwise the headline is the reported count. Both series are on the chart.</li>
                                 </ul>
                                 <h5>How to read missing values</h5>
                                 <ul>
                                     <li>A blank death count means CDC withheld the number (suppression or low data quality). It is not a zero.</li>
-                                    <li>Use <code>predicted_12_month_deaths</code> when CDC published a delay-adjusted estimate.</li>
-                                    <li>Louisiana is often absent from T40.4 VSRR when quality thresholds are not met.</li>
+                                    <li><code>reporting_status = not_reportable</code> means CDC did not publish T40.4 VSRR for that state. Louisiana is the current case. Those rows are not zeros, and they are not filled with all-drug deaths.</li>
+                                    <li>Final year and month counts for the same ICD-10 code, including Louisiana, are in <code>fact_nvss_final_t40_4.csv</code>. That file is labeled <code>NVSS final</code>. Do not add it to the rolling column.</li>
                                     <li><code>United States</code>, <code>New York City</code>, and <code>Puerto Rico</code> sit in the same file as states. Filter on <code>geo_type</code> before ranking or summing.</li>
                                     <li>New York and New York City are separate CDC reporting areas. Do not add them to a national total that already includes the United States row.</li>
                                 </ul>
@@ -116,8 +121,9 @@
                             <p class="mt-2">Building dashboard…</p>
                         </div>
                         <div id="dashboard-content" class="d-none">
+                            <div id="missing-states-alert" class="alert alert-warning d-none" role="alert"></div>
                             <div class="row g-3 mb-4">
-                                <div class="col-md-3"><div class="stat-card"><div class="stat-label">Latest U.S. 12-month ending</div><div class="stat-value" id="stat-us-count">—</div><div class="text-muted small" id="stat-us-month"></div></div></div>
+                                <div class="col-md-3"><div class="stat-card"><div class="stat-label" id="stat-us-label">Latest U.S. 12-month ending</div><div class="stat-value" id="stat-us-count">—</div><div class="text-muted small" id="stat-us-month"></div></div></div>
                                 <div class="col-md-3"><div class="stat-card"><div class="stat-label">Change from one year earlier</div><div class="stat-value" id="stat-us-change">—</div><div class="text-muted small">Same ending month, prior year</div></div></div>
                                 <div class="col-md-3"><div class="stat-card"><div class="stat-label">Highest state rate</div><div class="stat-value" id="stat-top-rate">—</div><div class="text-muted small" id="stat-top-rate-geo"></div></div></div>
                                 <div class="col-md-3"><div class="stat-card"><div class="stat-label">Suppressed state-months</div><div class="stat-value" id="stat-suppressed">—</div><div class="text-muted small">Blank CDC counts, not zeros</div></div></div>
@@ -125,13 +131,25 @@
                             <div class="row g-4">
                                 <div class="col-lg-7">
                                     <h5>United States 12-month ending deaths</h5>
-                                    <p class="text-muted small">Each point is the total for the 12 months ending that month. The series is provisional T40.4, not fentanyl-only.</p>
+                                    <p class="text-muted small">Each point is the total for the 12 months ending that month. Reported and CDC predicted counts are both shown. The series is provisional T40.4, not fentanyl-only.</p>
                                     <div class="chart-wrap"><canvas id="us-trend-chart"></canvas></div>
                                 </div>
                                 <div class="col-lg-5">
                                     <h5>Latest state rates per 100,000</h5>
                                     <p class="text-muted small" id="rate-chart-note">States only. Blank counts are omitted.</p>
                                     <div class="chart-wrap"><canvas id="state-rate-chart"></canvas></div>
+                                </div>
+                            </div>
+                            <div class="row g-4 mt-2">
+                                <div class="col-lg-7">
+                                    <h5>United States final incident deaths</h5>
+                                    <p class="text-muted small">Calendar-year totals from CDC WONDER final multiple-cause data, 1999 through the latest final year. These are not 12-month ending counts.</p>
+                                    <div class="chart-wrap"><canvas id="final-annual-chart"></canvas></div>
+                                </div>
+                                <div class="col-lg-5">
+                                    <h5>United States final deaths by month</h5>
+                                    <p class="text-muted small" id="final-month-note">Months where NVSS suppressed the count (1–9 deaths) are omitted.</p>
+                                    <div class="chart-wrap"><canvas id="final-month-chart"></canvas></div>
                                 </div>
                             </div>
                         </div>
@@ -143,14 +161,29 @@
                                 <h3 class="mb-1">Interactive Data Explorer</h3>
                                 <p class="text-muted mb-0">Blank death counts are suppressed by CDC. Filter <code>geo_type</code> to <code>state</code> before ranking.</p>
                             </div>
-                            <a href="fact_fentanyl_deaths_over_time.csv" class="btn btn-outline-primary">
-                                <i class="fas fa-download me-2"></i>Download CSV
-                            </a>
+                            <div>
+                                <a href="fact_fentanyl_deaths_over_time.csv" class="btn btn-outline-primary me-2">
+                                    <i class="fas fa-download me-2"></i>Provisional CSV
+                                </a>
+                                <a href="fact_nvss_final_t40_4.csv" class="btn btn-outline-secondary">
+                                    <i class="fas fa-download me-2"></i>Final NVSS CSV
+                                </a>
+                            </div>
                         </div>
                         <div class="table-responsive">
                             <table id="data-table" class="table table-striped table-hover w-100">
                                 <thead class="table-light">
                                     <tr id="table-header"></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <h4 class="mt-5 mb-3">Final NVSS incident deaths</h4>
+                        <p class="text-muted">Separate from the table above. <code>period_type = year</code> is a calendar year. <code>period_type = month</code> is deaths in that month. Do not add either column to <code>rolling_12_month_deaths</code>.</p>
+                        <div class="table-responsive">
+                            <table id="final-data-table" class="table table-striped table-hover w-100">
+                                <thead class="table-light">
+                                    <tr id="final-table-header"></tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
@@ -172,7 +205,7 @@
     <footer class="footer mt-5">
         <div class="container text-center">
             <p class="mb-3 text-muted">Each count is a life. These figures are for awareness and research; confirm them with CDC before policy use.</p>
-            <p class="text-muted mb-0">Data from CDC VSRR (SODA xkb8-kh2a) and U.S. Census ACS 5-year estimates.</p>
+            <p class="text-muted mb-0">Provisional counts from CDC VSRR (SODA xkb8-kh2a). Final incident counts from CDC WONDER multiple-cause datasets D77 and D157. Rates use Census PEP July 1 population. Income and unemployment use ACS 5-year estimates.</p>
             <p class="text-muted small">Weekly extract via GitHub Actions. Portal CSV updates even when a protected-branch commit must go through a pull request.</p>
         </div>
     </footer>
@@ -204,7 +237,18 @@
             return String(value).slice(0, 7);
         }
 
+        let provisionalRows = [];
+        let finalRows = [];
+
+        function rateFor(row) {
+            if (row.headline_basis === 'predicted' && toNumber(row.predicted_deaths_per_100k) !== null) {
+                return toNumber(row.predicted_deaths_per_100k);
+            }
+            return toNumber(row.deaths_per_100k);
+        }
+
         function renderDashboard(rows) {
+            provisionalRows = rows;
             const us = rows
                 .filter(r => r.geo_type === 'nation' || r.state === 'United States')
                 .sort((a, b) => a.month.localeCompare(b.month));
@@ -212,12 +256,19 @@
             const prior = latestUs
                 ? us.find(r => r.month === latestUs.month.replace(String(latestUs.year), String(Number(latestUs.year) - 1)))
                 : null;
-            const latestUsCount = latestUs ? toNumber(latestUs.rolling_12_month_deaths) : null;
-            const priorCount = prior ? toNumber(prior.rolling_12_month_deaths) : null;
+            const basis = latestUs && latestUs.headline_basis === 'predicted' ? 'predicted' : 'reported';
+            const countField = basis === 'predicted' ? 'predicted_12_month_deaths' : 'rolling_12_month_deaths';
+            const otherField = basis === 'predicted' ? 'rolling_12_month_deaths' : 'predicted_12_month_deaths';
+            const latestUsCount = latestUs ? toNumber(latestUs[countField]) : null;
+            const priorCount = prior ? toNumber(prior[countField]) : null;
+            const otherCount = latestUs ? toNumber(latestUs[otherField]) : null;
 
+            document.getElementById('stat-us-label').textContent = basis === 'predicted'
+                ? 'Latest U.S. predicted count'
+                : 'Latest U.S. reported count';
             document.getElementById('stat-us-count').textContent = formatCount(latestUsCount);
             document.getElementById('stat-us-month').textContent = latestUs
-                ? `12 months ending ${monthLabel(latestUs.month)}`
+                ? `12 months ending ${monthLabel(latestUs.month)} · ${basis === 'predicted' ? 'CDC predicted' : 'CDC reported'}${otherCount !== null ? ` · ${basis === 'predicted' ? 'Reported' : 'Predicted'} ${formatCount(otherCount)}` : ''}`
                 : '';
             if (latestUsCount !== null && priorCount !== null) {
                 const delta = latestUsCount - priorCount;
@@ -229,14 +280,19 @@
             const latestStates = rows.filter(r =>
                 r.month === latestMonth &&
                 r.geo_type === 'state' &&
+                r.reporting_status !== 'not_reportable' &&
                 !isTrue(r.is_suppressed) &&
-                toNumber(r.deaths_per_100k) !== null
-            ).sort((a, b) => toNumber(b.deaths_per_100k) - toNumber(a.deaths_per_100k));
+                rateFor(r) !== null
+            ).sort((a, b) => rateFor(b) - rateFor(a));
             if (latestStates.length) {
-                document.getElementById('stat-top-rate').textContent = `${latestStates[0].deaths_per_100k}`;
-                document.getElementById('stat-top-rate-geo').textContent = `${latestStates[0].state} • ${monthLabel(latestMonth)}`;
+                const sample = latestStates[0];
+                document.getElementById('stat-top-rate').textContent = `${rateFor(sample)}`;
+                document.getElementById('stat-top-rate-geo').textContent = `${sample.state} • ${monthLabel(latestMonth)}`;
+                const carried = latestStates.some(r => isTrue(r.population_is_carried_forward));
+                const source = sample.population_source || 'population';
+                const popYear = sample.population_year || 'an earlier year';
                 document.getElementById('rate-chart-note').textContent =
-                    `States only, ${monthLabel(latestMonth)}. Blank/suppressed counts omitted. Population may be carried forward from an earlier ACS year.`;
+                    `States only, ${monthLabel(latestMonth)}. ${sample.headline_basis === 'predicted' ? 'Rates use CDC predicted counts. ' : ''}Denominator is ${source} for ${popYear}${carried ? ', carried forward because that is not the death year' : ''}. Not-reportable states are omitted.`;
             }
 
             const suppressed = rows.filter(r => isTrue(r.is_suppressed) && r.geo_type === 'state').length;
@@ -246,17 +302,111 @@
             document.getElementById('as-of-label').textContent = extracted
                 ? `CDC extract as of ${extracted}`
                 : `Latest month in file: ${monthLabel(latestMonth)}`;
+            if (extracted) {
+                const extractedAt = new Date(extracted);
+                const ageDays = (Date.now() - extractedAt.getTime()) / 86400000;
+                if (!Number.isNaN(extractedAt.getTime()) && ageDays > 10) {
+                    const banner = document.getElementById('staleness-banner');
+                    banner.classList.remove('d-none');
+                    document.getElementById('staleness-banner-text').textContent =
+                        `This CDC extract is ${Math.floor(ageDays)} days old (${extracted}). Counts on this page have not been refreshed in the last 10 days.`;
+                }
+            }
 
-            const usCounts = us.map(r => toNumber(r.rolling_12_month_deaths));
             new Chart(document.getElementById('us-trend-chart'), {
                 type: 'line',
                 data: {
                     labels: us.map(r => monthLabel(r.month)),
+                    datasets: [
+                        {
+                            label: 'Reported',
+                            data: us.map(r => toNumber(r.rolling_12_month_deaths)),
+                            borderColor: '#2c3e50',
+                            backgroundColor: 'rgba(44, 62, 80, 0.08)',
+                            fill: false,
+                            tension: 0.15,
+                            pointRadius: 0,
+                            spanGaps: false
+                        },
+                        {
+                            label: 'CDC predicted',
+                            data: us.map(r => toNumber(r.predicted_12_month_deaths)),
+                            borderColor: '#0d6efd',
+                            borderDash: [6, 4],
+                            fill: false,
+                            tension: 0.15,
+                            pointRadius: 0,
+                            spanGaps: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true } },
+                    scales: { y: { beginAtZero: false } }
+                }
+            });
+
+            const top = latestStates.slice(0, 12).reverse();
+            new Chart(document.getElementById('state-rate-chart'), {
+                type: 'bar',
+                data: {
+                    labels: top.map(r => r.state),
                     datasets: [{
-                        label: 'U.S. 12-month ending T40.4 deaths',
-                        data: usCounts,
-                        borderColor: '#2c3e50',
-                        backgroundColor: 'rgba(44, 62, 80, 0.12)',
+                        label: 'Deaths per 100,000',
+                        data: top.map(r => rateFor(r)),
+                        backgroundColor: '#0d6efd'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            renderMissingStates();
+            document.getElementById('dashboard-loading').classList.add('d-none');
+            document.getElementById('dashboard-content').classList.remove('d-none');
+        }
+
+        function renderMissingStates() {
+            const latestMonth = provisionalRows.reduce((max, r) => r.month > max ? r.month : max, '');
+            const missing = provisionalRows.filter(r =>
+                r.month === latestMonth && r.reporting_status === 'not_reportable'
+            );
+            const alert = document.getElementById('missing-states-alert');
+            if (!missing.length) {
+                alert.classList.add('d-none');
+                return;
+            }
+            const names = missing.map(r => r.state).sort();
+            const finalYears = finalRows
+                .filter(r => names.includes(r.state) && r.period_type === 'year' && toNumber(r.incident_deaths) !== null)
+                .map(r => Number(r.year));
+            const through = finalYears.length ? Math.max(...finalYears) : null;
+            alert.classList.remove('d-none');
+            alert.textContent = through
+                ? `${names.join(', ')} ${names.length === 1 ? 'is' : 'are'} not in the provisional T40.4 file for ${monthLabel(latestMonth)}. Final NVSS incident counts for ${names.length === 1 ? 'that state are' : 'those states are'} in the final series through ${through}.`
+                : `${names.join(', ')} ${names.length === 1 ? 'is' : 'are'} not in the provisional T40.4 file for ${monthLabel(latestMonth)}.`;
+        }
+
+        function renderFinalCharts(rows) {
+            finalRows = rows;
+            const annual = rows
+                .filter(r => (r.geo_type === 'nation' || r.state === 'United States') && r.period_type === 'year')
+                .sort((a, b) => String(a.year).localeCompare(String(b.year)));
+            new Chart(document.getElementById('final-annual-chart'), {
+                type: 'line',
+                data: {
+                    labels: annual.map(r => String(r.year)),
+                    datasets: [{
+                        label: 'NVSS final annual T40.4 deaths',
+                        data: annual.map(r => toNumber(r.incident_deaths)),
+                        borderColor: '#6c3d1a',
+                        backgroundColor: 'rgba(108, 61, 26, 0.12)',
                         fill: true,
                         tension: 0.15,
                         pointRadius: 0,
@@ -271,27 +421,60 @@
                 }
             });
 
-            const top = latestStates.slice(0, 12).reverse();
-            new Chart(document.getElementById('state-rate-chart'), {
-                type: 'bar',
+            const monthly = rows
+                .filter(r =>
+                    (r.geo_type === 'nation' || r.state === 'United States') &&
+                    r.period_type === 'month' &&
+                    toNumber(r.incident_deaths) !== null
+                )
+                .sort((a, b) => String(a.month).localeCompare(String(b.month)));
+            new Chart(document.getElementById('final-month-chart'), {
+                type: 'line',
                 data: {
-                    labels: top.map(r => r.state),
+                    labels: monthly.map(r => monthLabel(r.month)),
                     datasets: [{
-                        label: 'Deaths per 100,000',
-                        data: top.map(r => toNumber(r.deaths_per_100k)),
-                        backgroundColor: '#0d6efd'
+                        label: 'NVSS final monthly T40.4 deaths',
+                        data: monthly.map(r => toNumber(r.incident_deaths)),
+                        borderColor: '#8d6e63',
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 0,
+                        spanGaps: false
                     }]
                 },
                 options: {
-                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } }
                 }
             });
+            renderMissingStates();
+        }
 
-            document.getElementById('dashboard-loading').classList.add('d-none');
-            document.getElementById('dashboard-content').classList.remove('d-none');
+        function renderTable(tableId, headerId, rows, headers) {
+            headers.forEach(header => {
+                $(headerId).append(`<th>${header.replace(/_/g, ' ').toUpperCase()}</th>`);
+            });
+            $(tableId).DataTable({
+                data: rows,
+                columns: headers.map(h => ({
+                    data: h,
+                    defaultContent: '',
+                    render: function(value) {
+                        if (value === null || value === undefined || value === '') return '—';
+                        return value;
+                    }
+                })),
+                pageLength: 15,
+                scrollX: true,
+                order: [[0, 'desc']],
+                dom: 'Bfrtip',
+                buttons: ['copy', 'csv', 'excel', 'print'],
+                language: {
+                    zeroRecords: "No matching records found.",
+                    emptyTable: "No data available in this table."
+                }
+            });
         }
 
         $(document).ready(function() {
@@ -302,38 +485,23 @@
                     const headers = results.meta.fields || [];
                     const cleanData = results.data.filter(row => row[headers[0]]);
                     renderDashboard(cleanData);
-
-                    headers.forEach(header => {
-                        $('#table-header').append(`<th>${header.replace(/_/g, ' ').toUpperCase()}</th>`);
-                    });
-
-                    $('#data-table').DataTable({
-                        data: cleanData,
-                        columns: headers.map(h => ({
-                            data: h,
-                            defaultContent: '',
-                            render: function(value) {
-                                if (value === null || value === undefined || value === '') return '—';
-                                return value;
-                            }
-                        })),
-                        pageLength: 15,
-                        scrollX: true,
-                        order: [[0, 'desc'], [1, 'asc']],
-                        dom: 'Bfrtip',
-                        buttons: ['copy', 'csv', 'excel', 'print'],
-                        language: {
-                            zeroRecords: "No matching records found.",
-                            emptyTable: "No data available in this table."
-                        },
-                        initComplete: function() {
-                            $('#loading-spinner').hide();
-                        }
-                    });
+                    renderTable('#data-table', '#table-header', cleanData, headers);
+                    $('#loading-spinner').hide();
                 },
                 error: function() {
                     $('#loading-spinner').html('<div class="alert alert-danger">Error loading data. Please try again later.</div>');
                     $('#dashboard-loading').html('<div class="alert alert-danger">Error loading data.</div>');
+                }
+            });
+
+            Papa.parse('fact_nvss_final_t40_4.csv', {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    const headers = results.meta.fields || [];
+                    const cleanData = results.data.filter(row => row[headers[0]]);
+                    renderFinalCharts(cleanData);
+                    renderTable('#final-data-table', '#final-table-header', cleanData, headers);
                 }
             });
         });

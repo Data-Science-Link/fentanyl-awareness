@@ -40,17 +40,23 @@ jobs:
     - name: Extract CDC SODA data
       run: python data_engineering/data_sources/cdc_api/soda_extractor.py
 
+    - name: Extract Census PEP population
+      run: python data_engineering/data_sources/census_pep/pep_extractor.py
+
+    - name: Extract final NVSS T40.4 deaths
+      run: python data_engineering/data_sources/nvss_wonder/wonder_extractor.py
+
     - name: Check for Census API key
       id: check_key
       run: |
         if [ -z "${{ secrets.CENSUS_API_KEY }}" ]; then
-          echo "WARNING: CENSUS_API_KEY is missing. Census extraction will be skipped and existing ACS seeds will be reused."
+          echo "::warning::CENSUS_API_KEY is not set. ACS income and unemployment stay on the last committed seed until the secret is added. Death rates use Census PEP and do not need this key."
           echo "has_key=false" >> $GITHUB_OUTPUT
         else
           echo "has_key=true" >> $GITHUB_OUTPUT
         fi
 
-    - name: Extract US Census data
+    - name: Extract US Census ACS income and unemployment
       if: steps.check_key.outputs.has_key == 'true'
       env:
         CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
@@ -104,6 +110,7 @@ jobs:
         cp -r data_engineering/data_build_tool/target/* docs/dbt/
         cp website/index.html docs/
         cp Final_Datasets/fact_fentanyl_deaths_over_time.csv docs/
+        cp Final_Datasets/fact_nvss_final_t40_4.csv docs/
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
@@ -120,6 +127,7 @@ jobs:
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
         git add Final_Datasets/fact_fentanyl_deaths_over_time.csv
+        git add Final_Datasets/fact_nvss_final_t40_4.csv
         git add data_engineering/data_build_tool/dbt/seeds/*.csv
 
         if git diff --staged --quiet; then
@@ -128,7 +136,7 @@ jobs:
         fi
 
         git checkout -B automated/weekly-data-refresh
-        git commit -m "chore: refresh CDC and census datasets"
+        git commit -m "chore: refresh CDC, NVSS, and census datasets"
         git push origin automated/weekly-data-refresh --force
 
         if gh pr list --head automated/weekly-data-refresh --state open --json number --jq 'length' | grep -qx '0'; then
@@ -136,9 +144,19 @@ jobs:
             --base main \
             --head automated/weekly-data-refresh \
             --title "chore: weekly data refresh" \
-            --body "Automated refresh of CDC VSRR T40.4 seeds and the published fact table. Pages was updated from this workflow; merge this PR to keep main in sync. Branch protection on main blocks a direct bot push."
+            --body "Automated refresh of CDC VSRR T40.4 seeds, final NVSS incident deaths, Census PEP population, and the published fact tables. Pages was updated from this workflow. Auto-merge keeps main in sync after dbt-test and security-audit. This job does not push main directly."
         else
           echo "Updated existing weekly data refresh PR."
+        fi
+
+        # Auto-merge waits for the required status checks. It does not wait for
+        # a human review only after an admin splits the review rule onto its
+        # own ruleset and adds a GitHub Actions bypass. See the repository
+        # ruleset notes in the README. Do not git push origin main.
+        pr_number=$(gh pr list --head automated/weekly-data-refresh --state open --json number --jq '.[0].number')
+        if [ -n "$pr_number" ]; then
+          gh pr merge "$pr_number" --merge --auto \
+            || echo "::warning::Could not enable auto-merge on PR #$pr_number. An admin must allow auto-merge and let GitHub Actions bypass the pull-request review ruleset."
         fi
 
     - name: Upload artifacts
