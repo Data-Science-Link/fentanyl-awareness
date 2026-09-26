@@ -1,4 +1,4 @@
--- Every US state and DC must appear at least once, except documented CDC gaps.
+-- Every US state and DC must appear, including jurisdictions VSRR does not publish.
 with expected(state) as (
     values
         ('Alabama'), ('Alaska'), ('Arizona'), ('Arkansas'), ('California'),
@@ -14,10 +14,6 @@ with expected(state) as (
         ('Virginia'), ('Washington'), ('West Virginia'), ('Wisconsin'),
         ('Wyoming')
 ),
-excluded(state) as (
-    values
-        ('Louisiana')
-),
 actual as (
     select distinct state
     from "fentanyl_awareness"."main"."fact_fentanyl_deaths_over_time"
@@ -26,9 +22,6 @@ actual as (
 
 select expected.state as missing_state
 from expected
-left join excluded
-    on expected.state = excluded.state
 left join actual
     on expected.state = actual.state
-where excluded.state is null
-  and actual.state is null
+where actual.state is null

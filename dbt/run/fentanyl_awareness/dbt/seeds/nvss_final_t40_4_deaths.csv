@@ -1,0 +1,13 @@
+
+    
+    
+    
+    create table "fentanyl_awareness"."main"."nvss_final_t40_4_deaths" ("year" integer,"month" date,"state" text,"geo_type" text,"period_type" text,"incident_deaths" integer,"is_suppressed" boolean,"data_source" text,"source_dataset" text,"extracted_at" timestamp without time zone)
+  ;
+    -- dbt seed --
+    
+          COPY "fentanyl_awareness"."main"."nvss_final_t40_4_deaths" FROM '/home/runner/work/fentanyl-awareness/fentanyl-awareness/data_engineering/data_build_tool/dbt/seeds/nvss_final_t40_4_deaths.csv' (FORMAT CSV, HEADER TRUE, DELIMITER ',')
+        
+
+;
+  
