@@ -1,12 +1,13 @@
 # Fentanyl Awareness Data Pipeline
 
-The fentanyl crisis in the United States is a profound tragedy. This project republishes one official CDC series so it is easier to see whether synthetic-opioid deaths are rising or falling, and how states compare per capita.
+The fentanyl crisis in the United States is a profound tragedy. This project republishes official CDC series so it is easier to see whether synthetic-opioid deaths are rising or falling, and how states compare per capita.
 
 **A note on the data**: Every count is a life lost too soon. The files here are for awareness and research. Confirm figures with CDC before using them for policy.
 
 ## What this project provides
 
 - A cleaned CSV of **provisional CDC 12-month ending T40.4 counts** (2015–current)
+- A separate CSV of **final NVSS incident deaths** for the same ICD-10 code (1999 through the latest final year)
 - An [interactive portal](https://data-science-link.github.io/fentanyl-awareness/) with methodology, charts, and a downloadable table
 - Weekly extracts via GitHub Actions
 - dbt tests and lineage docs
@@ -15,13 +16,16 @@ The fentanyl crisis in the United States is a profound tragedy. This project rep
 
 | Topic | Fact |
 |--------|------|
-| Source | CDC VSRR SODA dataset `xkb8-kh2a` |
+| Provisional source | CDC VSRR SODA dataset `xkb8-kh2a` |
+| Final source | CDC WONDER multiple-cause request form, labeled `NVSS final` (`D77` for 1999–2017, `D157` for 2018–latest final year) |
 | Indicator | Synthetic opioids, excl. methadone (**T40.4**). Includes fentanyl and other synthetics such as tramadol |
-| Metric | **12-month ending** provisional counts. Do not sum monthly rows |
+| Provisional metric | **12-month ending** counts. Do not sum monthly rows. Recent months use CDC predicted counts in `headline_deaths` |
+| Final metric | Incident deaths in a calendar year or month. Not derived from the rolling column |
 | Geography | States, DC, New York City, Puerto Rico, and a United States total. Filter on `geo_type` |
-| Known gap | Louisiana is often missing from T40.4 VSRR when CDC quality thresholds are not met |
+| Known gap | Louisiana is not in T40.4 VSRR. The provisional file has an explicit `not_reportable` row. Final NVSS counts for Louisiana are in the final file |
 | Blank deaths | CDC withheld the number. That is not a zero |
-| Demographics | Census ACS 5-year population and economics; last available year is carried forward when needed |
+| Rates | Census PEP July 1 population. `population_year` is shown when a different year is carried forward |
+| Income and unemployment | Census ACS 5-year estimates. Those refresh only when `CENSUS_API_KEY` is set |
 
 The published file is [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Final_Datasets/fact_fentanyl_deaths_over_time.csv). See [`Final_Datasets/README.md`](Final_Datasets/README.md) for the data dictionary.
 
@@ -33,10 +37,21 @@ The published file is [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Fina
 
 ## How it works
 
-1. `soda_extractor.py` pulls T40.4 rows from the CDC SODA API
-2. `census_extractor.py` pulls ACS 5-year population and economic estimates when a Census API key is present
-3. dbt + DuckDB stages the seeds, joins the latest ACS year on or before each death year, and writes the fact CSV
-4. GitHub Actions deploys the portal every Monday. If `main` is protected, the refreshed seeds are opened as a pull request instead of a direct push
+1. `soda_extractor.py` pulls T40.4 rows from the CDC SODA API and fails if a state that was in the previous extract disappears
+2. `wonder_extractor.py` requests final T40.4 incident deaths from the CDC WONDER request form. The XML API does not return state tabulations, so the job uses the form that does
+3. `pep_extractor.py` loads Census PEP July 1 population. `census_extractor.py` loads ACS income and unemployment when `CENSUS_API_KEY` is present
+4. dbt writes two fact CSVs. Final incident deaths are never copied into `rolling_12_month_deaths`
+5. GitHub Actions deploys the portal every Monday and opens `automated/weekly-data-refresh` with auto-merge. The job does not push `main` directly
+
+### Unattended merge
+
+`main` requires a pull request, a review, and the checks `dbt-test` and `security-audit`. This token cannot edit those rules. An admin needs to:
+
+1. Allow auto-merge on the repository (`allow_auto_merge`).
+2. Remove the pull-request review rule from ruleset `18204346` (Main Branch Protections). Leave deletion, non-fast-forward, and the required status checks, with no bypass actors.
+3. Add a second ruleset, "Main pull request reviews", with the same review settings (one approval, code owners, dismiss stale reviews, extra approval for unattributed changes, merge commits only) and a bypass for GitHub Actions (integration id `15368`, bypass mode `pull_request`).
+
+Auto-merge then waits for the checks and does not wait for a person.
 
 ## Reliability
 
@@ -51,6 +66,6 @@ MIT. See [LICENSE](LICENSE).
 
 ## Acknowledgments
 
-- CDC National Center for Health Statistics (VSRR)
-- U.S. Census Bureau (ACS)
+- CDC National Center for Health Statistics (VSRR and WONDER multiple-cause datasets D77 and D157)
+- U.S. Census Bureau (Population Estimates Program and ACS)
 - GitHub (hosting and automation)

@@ -96,8 +96,11 @@ class CensusExtractor:
                 response = self.session.get(url, params=params, timeout=30)
 
                 if response.status_code == 404:
-                    logger.warning(f"Data for year {year} not available yet (404). Skipping.")
-                    continue
+                    logger.warning(
+                        f"Data for year {year} is not available (404). "
+                        "Stopping. Later ACS 5-year vintages are not published yet."
+                    )
+                    break
 
                 response.raise_for_status()
 
@@ -175,8 +178,11 @@ class CensusExtractor:
                 response = self.session.get(url, params=params, timeout=30)
 
                 if response.status_code == 404:
-                    logger.warning(f"Economic data for year {year} not available yet (404). Skipping.")
-                    continue
+                    logger.warning(
+                        f"Economic data for year {year} is not available (404). "
+                        "Stopping. Later ACS 5-year vintages are not published yet."
+                    )
+                    break
 
                 response.raise_for_status()
 

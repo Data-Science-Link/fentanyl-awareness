@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: stg_census_pep_state_population
+    description: |
+      Census PEP July 1 resident population for the United States, states,
+      the District of Columbia, and Puerto Rico. This is the denominator for
+      death rates. It is not an ACS 5-year estimate.
+    columns:
+      - name: year
+        tests:
+          - not_null
+      - name: state_name
+        tests:
+          - not_null
+      - name: population
+        tests:
+          - not_null
+      - name: population_source
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Census PEP']

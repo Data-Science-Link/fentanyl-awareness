@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: fact_nvss_final_t40_4
+    description: |
+      Final incident deaths involving synthetic opioids other than methadone
+      (ICD-10 T40.4), from the CDC WONDER multiple-cause request form.
+
+      A row is a calendar year or a calendar month. It is not a 12-month
+      ending total. `source_dataset` is D77 for 1999-2017 and D157 for 2018
+      through the latest final year. The XML API does not return state
+      tabulations, so the extract uses the request form, which does.
+
+      Counts of 1-9 are null and `is_suppressed` is true. Annual totals come
+      from the year query, not from summing published months.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - year
+              - month
+              - state
+              - period_type
+    columns:
+      - name: year
+        tests:
+          - not_null
+      - name: state
+        tests:
+          - not_null
+      - name: geo_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['nation', 'state', 'territory']
+      - name: period_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['year', 'month']
+      - name: data_source
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['NVSS final']
+      - name: source_dataset
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['D77', 'D157']
+      - name: is_suppressed
+        tests:
+          - not_null

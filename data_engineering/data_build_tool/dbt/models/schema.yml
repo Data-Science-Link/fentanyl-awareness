@@ -16,3 +16,12 @@ sources:
         description: "State-level ACS 5-year population (B01001_001E)"
       - name: census_state_economic
         description: "State-level ACS 5-year income and labor-force estimates"
+      - name: census_pep_state_population
+        description: "Census PEP July 1 resident population by state and year"
+
+  - name: nvss_raw
+    description: "Final NVSS T40.4 incident deaths from the CDC WONDER request form"
+    schema: main
+    tables:
+      - name: nvss_final_t40_4_deaths
+        description: "Annual and monthly final T40.4 drug-overdose deaths, 1999 through the latest final year"

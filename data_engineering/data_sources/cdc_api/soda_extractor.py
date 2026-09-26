@@ -82,8 +82,8 @@ class CDCSodaExtractor:
         logger.info("Successfully fetched %s records.", len(df))
         return df
 
-    def validate(self, df: pd.DataFrame) -> None:
-        """Fail fast on empty or truncated extracts; warn on known geography gaps."""
+    def validate(self, df: pd.DataFrame, previous_states: set[str] | None = None) -> None:
+        """Fail fast on empty extracts, unexpected gaps, or a state that disappears."""
         if len(df) < MIN_EXPECTED_ROWS:
             raise ValueError(
                 f"CDC extract has only {len(df)} rows; expected at least {MIN_EXPECTED_ROWS}"
@@ -110,6 +110,15 @@ class CDCSodaExtractor:
         if unexpected_extra:
             logger.info("CDC extract includes additional geographies: %s", ", ".join(unexpected_extra))
 
+        if previous_states:
+            tracked = CORE_STATE_NAMES | {"United States", "New York City", "Puerto Rico"}
+            disappeared = sorted((previous_states & tracked) - names)
+            if disappeared:
+                raise ValueError(
+                    "CDC extract dropped previously present jurisdictions: "
+                    + ", ".join(disappeared)
+                )
+
     def save_to_csv(self, df: pd.DataFrame, output_path: Path) -> None:
         """Save the DataFrame to a CSV file."""
         logger.info("Saving data to %s", output_path)
@@ -126,7 +135,11 @@ def main() -> int:
     extractor = CDCSodaExtractor()
     try:
         df = extractor.fetch_data()
-        extractor.validate(df)
+        previous_states = set()
+        if output_path.exists():
+            previous = pd.read_csv(output_path, usecols=["state_name"], dtype=str)
+            previous_states = set(previous["state_name"].dropna().str.strip().unique())
+        extractor.validate(df, previous_states)
         extractor.save_to_csv(df, output_path)
         return 0
     except Exception as exc:

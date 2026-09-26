@@ -48,3 +48,39 @@ seeds:
         description: Unemployed / civilian labor force * 100; null when undefined
       - name: extracted_at
         description: Extract timestamp
+
+  - name: census_pep_state_population
+    description: Census PEP July 1 resident population used as the rate denominator
+    columns:
+      - name: year
+        description: Estimate year
+      - name: state_name
+        description: United States, state, District of Columbia, or Puerto Rico
+      - name: population
+        description: July 1 resident population
+      - name: vintage
+        description: PEP vintage or intercensal file the row came from
+      - name: population_source
+        description: Always Census PEP
+      - name: extracted_at
+        description: UTC extract timestamp
+
+  - name: nvss_final_t40_4_deaths
+    description: >
+      Final incident T40.4 drug-overdose deaths from the CDC WONDER
+      request form (D77 and D157). Not a 12-month ending series.
+    columns:
+      - name: year
+        description: Calendar year of death
+      - name: month
+        description: First of the month for monthly rows; empty for annual rows
+      - name: period_type
+        description: year or month
+      - name: incident_deaths
+        description: Deaths that month or year; empty when suppressed (1-9)
+      - name: is_suppressed
+        description: True when the count is 1-9
+      - name: data_source
+        description: Always NVSS final
+      - name: source_dataset
+        description: D77 for 1999-2017, D157 for 2018 through the latest final year
