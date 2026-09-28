@@ -27,12 +27,13 @@ The fentanyl crisis in the United States is a profound tragedy. This project rep
 | Rates | Census PEP July 1 population. `population_year` is shown when a different year is carried forward |
 | Income and unemployment | Census ACS 5-year estimates. Those refresh only when `CENSUS_API_KEY` is set |
 
-The published file is [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Final_Datasets/fact_fentanyl_deaths_over_time.csv). See [`Final_Datasets/README.md`](Final_Datasets/README.md) for the data dictionary.
+The published files are on the [portal](https://data-science-link.github.io/fentanyl-awareness/): [provisional CSV](https://data-science-link.github.io/fentanyl-awareness/fact_fentanyl_deaths_over_time.csv) and [final CSV](https://data-science-link.github.io/fentanyl-awareness/fact_nvss_final_t40_4.csv). See [`Final_Datasets/README.md`](Final_Datasets/README.md) for the data dictionary. Copies under `Final_Datasets/` are for local dbt and can lag the portal.
 
 ## Quick access
 
 - **Portal**: https://data-science-link.github.io/fentanyl-awareness/
-- **CSV**: [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Final_Datasets/fact_fentanyl_deaths_over_time.csv)
+- **Provisional CSV**: https://data-science-link.github.io/fentanyl-awareness/fact_fentanyl_deaths_over_time.csv
+- **Final CSV**: https://data-science-link.github.io/fentanyl-awareness/fact_nvss_final_t40_4.csv
 - **Pipeline docs**: [`data_engineering/`](data_engineering/README.md)
 
 ## How it works
@@ -41,26 +42,27 @@ The published file is [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Fina
 2. `wonder_extractor.py` requests final T40.4 incident deaths from the CDC WONDER request form. The XML API does not return state tabulations, so the job uses the form that does
 3. `pep_extractor.py` loads Census PEP July 1 population. `census_extractor.py` loads ACS income and unemployment when `CENSUS_API_KEY` is present
 4. dbt writes two fact CSVs. Final incident deaths are never copied into `rolling_12_month_deaths`
-5. GitHub Actions deploys the portal every Monday and force-pushes `automated/weekly-data-refresh`. It opens that pull request when Actions is allowed to, then requests auto-merge. The job does not push `main` directly.
+5. The Monday GitHub Actions job (also runnable by hand) extracts, tests, and deploys GitHub Pages. That run is the publish. It does not open a pull request or push `main`.
 
-### Unattended merge
+### Publishing
 
-`main` requires a pull request, a review, and the checks `dbt-test` and `security-audit`. This token cannot edit those rules. An admin needs to:
+The portal reads CSVs from GitHub Pages. `main` is for code, models, tests, and a local snapshot of seeds.
 
-1. Settings → Actions → General → enable **Allow GitHub Actions to create and approve pull requests**. Without this, the weekly job extracts, tests, and deploys Pages, then fails at `gh pr create`.
-2. Optionally add repository secret `WEEKLY_REFRESH_TOKEN` (a PAT with `repo` scope). Use this when the Actions checkbox must stay off. A PAT-created PR also starts other workflows; `GITHUB_TOKEN` PRs do not. `dbt-test` and `security-audit` still run on pushes to `automated/weekly-data-refresh`.
-3. Allow auto-merge on the repository (`allow_auto_merge`).
-4. Remove the pull-request review rule from ruleset `18204346` (Main Branch Protections). Leave deletion, non-fast-forward, and the required status checks, with no bypass actors.
-5. Add a second ruleset, "Main pull request reviews", with the same review settings (one approval, code owners, dismiss stale reviews, extra approval for unattributed changes, merge commits only) and a bypass for GitHub Actions (integration id `15368`, bypass mode `pull_request`).
+| Event | What goes live |
+|--------|----------------|
+| Weekly refresh (Monday or **Run workflow**) | Fresh extracts, fact CSVs, dbt docs, and `website/index.html` |
+| Push of `website/` to `main` | HTML only. Live CSVs and dbt docs are left in place |
 
-Without (1) or (2), the weekly job still publishes Pages and updates the data branch. Open a PR from `automated/weekly-data-refresh` (the compare URL is in the Actions log). After (3)–(5), auto-merge waits for the checks and does not wait for a person.
+A merge to `main` does not republish death counts. That avoids rolling the portal back to whatever CSVs last landed in git. `gh-pages` commit history is the audit trail for each published extract. Workflow artifacts are kept for 30 days.
+
+`main` still requires a reviewed pull request for code. Publishing the data does not.
 
 ## Reliability
 
 - dbt tests cover keys, geography coverage, and suppression handling
 - Python unit tests run in CI
 - Security scanning runs on pushes and pull requests
-- Git history is the audit trail for each published extract
+- `gh-pages` history is the audit trail for each published extract
 
 ## License
 

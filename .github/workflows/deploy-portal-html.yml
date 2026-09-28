@@ -1,0 +1,35 @@
+name: Deploy portal HTML
+
+# Publishes website/index.html to GitHub Pages without replacing the
+# CSVs and dbt docs from the last successful weekly data refresh.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'website/**'
+      - '.github/workflows/deploy-portal-html.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  deploy-html:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare HTML
+        run: |
+          mkdir -p docs
+          cp website/index.html docs/
+
+      - name: Deploy HTML to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          keep_files: true

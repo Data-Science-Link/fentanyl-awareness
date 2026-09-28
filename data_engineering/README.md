@@ -78,8 +78,9 @@ Do not `SUM(rolling_12_month_deaths)` across months. That metric is already a 12
 
 ## Automation
 
-- **dbt CI**: seeds, models, dbt tests, Python tests, Pages deploy from `main`
-- **Weekly refresh**: re-extract CDC (and Census when `CENSUS_API_KEY` is set), rebuild, deploy Pages, force-push `automated/weekly-data-refresh`. Opening the PR needs Settings → Actions → "Allow GitHub Actions to create and approve pull requests" or secret `WEEKLY_REFRESH_TOKEN`
+- **dbt CI**: seeds, models, dbt tests, and Python tests. Does not deploy Pages
+- **Weekly refresh**: re-extract CDC (and Census when `CENSUS_API_KEY` is set), rebuild, and deploy Pages. That is the publish. No pull request
+- **Portal HTML**: a push of `website/` to `main` updates the portal page and leaves live CSVs in place
 - **Security audit**: Bandit and pip-audit
 
 ## Tests

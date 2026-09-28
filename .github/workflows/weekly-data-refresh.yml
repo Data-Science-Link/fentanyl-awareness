@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
   pages: write
   id-token: write
 
@@ -119,64 +118,6 @@ jobs:
         publish_dir: ./docs
         keep_files: false
 
-    # GITHUB_TOKEN cannot open PRs unless the repo enables
-    # Settings → Actions → General → "Allow GitHub Actions to create and
-    # approve pull requests". A PAT in WEEKLY_REFRESH_TOKEN bypasses that
-    # and also starts dbt-test / security-audit on the new PR. Pages and
-    # the data branch are already published before this step.
-    - name: Open or update data refresh pull request
-      env:
-        GH_TOKEN: ${{ secrets.WEEKLY_REFRESH_TOKEN || secrets.GITHUB_TOKEN }}
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-
-        git add Final_Datasets/fact_fentanyl_deaths_over_time.csv
-        git add Final_Datasets/fact_nvss_final_t40_4.csv
-        git add data_engineering/data_build_tool/dbt/seeds/*.csv
-
-        if git diff --staged --quiet; then
-          echo "No seed or published CSV changes."
-          exit 0
-        fi
-
-        git checkout -B automated/weekly-data-refresh
-        git commit -m "chore: refresh CDC, NVSS, and census datasets"
-        git push origin automated/weekly-data-refresh --force
-
-        compare_url="https://github.com/${GITHUB_REPOSITORY}/compare/main...automated/weekly-data-refresh?expand=1"
-        pr_body="Automated refresh of CDC VSRR T40.4 seeds, final NVSS incident deaths, Census PEP population, and the published fact tables. Pages was updated from this workflow. Auto-merge keeps main in sync after dbt-test and security-audit. This job does not push main directly."
-
-        if gh pr list --head automated/weekly-data-refresh --state open --json number --jq 'length' | grep -qx '0'; then
-          if pr_out=$(gh pr create \
-            --base main \
-            --head automated/weekly-data-refresh \
-            --title "chore: weekly data refresh" \
-            --body "$pr_body" 2>&1); then
-            echo "$pr_out"
-          else
-            echo "$pr_out"
-            if echo "$pr_out" | grep -qi 'not permitted to create or approve pull requests'; then
-              echo "::warning::GITHUB_TOKEN cannot open pull requests. Enable Settings → Actions → General → Allow GitHub Actions to create and approve pull requests, or add secret WEEKLY_REFRESH_TOKEN (a PAT with repo scope). Branch was pushed; open $compare_url"
-            else
-              echo "::error::gh pr create failed unexpectedly."
-              exit 1
-            fi
-          fi
-        else
-          echo "Updated existing weekly data refresh PR."
-        fi
-
-        # Auto-merge waits for the required status checks. It does not wait for
-        # a human review only after an admin splits the review rule onto its
-        # own ruleset and adds a GitHub Actions bypass. See the repository
-        # ruleset notes in the README. Do not git push origin main.
-        pr_number=$(gh pr list --head automated/weekly-data-refresh --state open --json number --jq '.[0].number')
-        if [ -n "$pr_number" ]; then
-          gh pr merge "$pr_number" --merge --auto \
-            || echo "::warning::Could not enable auto-merge on PR #$pr_number. An admin must allow auto-merge and let GitHub Actions bypass the pull-request review ruleset."
-        fi
-
     - name: Upload artifacts
       if: always()
       uses: actions/upload-artifact@v4
@@ -190,5 +131,7 @@ jobs:
     - name: Summary
       if: success()
       run: |
-        echo "Weekly data refresh succeeded."
+        echo "Weekly data refresh succeeded. The portal is the published copy."
         echo "Portal: https://data-science-link.github.io/fentanyl-awareness/"
+        echo "Provisional CSV: https://data-science-link.github.io/fentanyl-awareness/fact_fentanyl_deaths_over_time.csv"
+        echo "Final CSV: https://data-science-link.github.io/fentanyl-awareness/fact_nvss_final_t40_4.csv"
