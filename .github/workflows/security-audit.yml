@@ -2,7 +2,7 @@ name: Security Audit Pipeline
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master, develop, automated/weekly-data-refresh ]
   pull_request:
     branches: [ main, master, develop ]
 

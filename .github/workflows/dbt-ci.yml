@@ -2,7 +2,7 @@ name: dbt CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master, develop, automated/weekly-data-refresh ]
     paths:
       - 'data_engineering/data_build_tool/**'
       - 'data_engineering/data_sources/**'

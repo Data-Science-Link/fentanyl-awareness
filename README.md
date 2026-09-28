@@ -41,17 +41,19 @@ The published file is [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Fina
 2. `wonder_extractor.py` requests final T40.4 incident deaths from the CDC WONDER request form. The XML API does not return state tabulations, so the job uses the form that does
 3. `pep_extractor.py` loads Census PEP July 1 population. `census_extractor.py` loads ACS income and unemployment when `CENSUS_API_KEY` is present
 4. dbt writes two fact CSVs. Final incident deaths are never copied into `rolling_12_month_deaths`
-5. GitHub Actions deploys the portal every Monday and opens `automated/weekly-data-refresh` with auto-merge. The job does not push `main` directly
+5. GitHub Actions deploys the portal every Monday and force-pushes `automated/weekly-data-refresh`. It opens that pull request when Actions is allowed to, then requests auto-merge. The job does not push `main` directly.
 
 ### Unattended merge
 
 `main` requires a pull request, a review, and the checks `dbt-test` and `security-audit`. This token cannot edit those rules. An admin needs to:
 
-1. Allow auto-merge on the repository (`allow_auto_merge`).
-2. Remove the pull-request review rule from ruleset `18204346` (Main Branch Protections). Leave deletion, non-fast-forward, and the required status checks, with no bypass actors.
-3. Add a second ruleset, "Main pull request reviews", with the same review settings (one approval, code owners, dismiss stale reviews, extra approval for unattributed changes, merge commits only) and a bypass for GitHub Actions (integration id `15368`, bypass mode `pull_request`).
+1. Settings → Actions → General → enable **Allow GitHub Actions to create and approve pull requests**. Without this, the weekly job extracts, tests, and deploys Pages, then fails at `gh pr create`.
+2. Optionally add repository secret `WEEKLY_REFRESH_TOKEN` (a PAT with `repo` scope). Use this when the Actions checkbox must stay off. A PAT-created PR also starts other workflows; `GITHUB_TOKEN` PRs do not. `dbt-test` and `security-audit` still run on pushes to `automated/weekly-data-refresh`.
+3. Allow auto-merge on the repository (`allow_auto_merge`).
+4. Remove the pull-request review rule from ruleset `18204346` (Main Branch Protections). Leave deletion, non-fast-forward, and the required status checks, with no bypass actors.
+5. Add a second ruleset, "Main pull request reviews", with the same review settings (one approval, code owners, dismiss stale reviews, extra approval for unattributed changes, merge commits only) and a bypass for GitHub Actions (integration id `15368`, bypass mode `pull_request`).
 
-Auto-merge then waits for the checks and does not wait for a person.
+Without (1) or (2), the weekly job still publishes Pages and updates the data branch. Open a PR from `automated/weekly-data-refresh` (the compare URL is in the Actions log). After (3)–(5), auto-merge waits for the checks and does not wait for a person.
 
 ## Reliability
 

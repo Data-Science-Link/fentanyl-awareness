@@ -119,9 +119,14 @@ jobs:
         publish_dir: ./docs
         keep_files: false
 
+    # GITHUB_TOKEN cannot open PRs unless the repo enables
+    # Settings → Actions → General → "Allow GitHub Actions to create and
+    # approve pull requests". A PAT in WEEKLY_REFRESH_TOKEN bypasses that
+    # and also starts dbt-test / security-audit on the new PR. Pages and
+    # the data branch are already published before this step.
     - name: Open or update data refresh pull request
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.WEEKLY_REFRESH_TOKEN || secrets.GITHUB_TOKEN }}
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -139,12 +144,25 @@ jobs:
         git commit -m "chore: refresh CDC, NVSS, and census datasets"
         git push origin automated/weekly-data-refresh --force
 
+        compare_url="https://github.com/${GITHUB_REPOSITORY}/compare/main...automated/weekly-data-refresh?expand=1"
+        pr_body="Automated refresh of CDC VSRR T40.4 seeds, final NVSS incident deaths, Census PEP population, and the published fact tables. Pages was updated from this workflow. Auto-merge keeps main in sync after dbt-test and security-audit. This job does not push main directly."
+
         if gh pr list --head automated/weekly-data-refresh --state open --json number --jq 'length' | grep -qx '0'; then
-          gh pr create \
+          if pr_out=$(gh pr create \
             --base main \
             --head automated/weekly-data-refresh \
             --title "chore: weekly data refresh" \
-            --body "Automated refresh of CDC VSRR T40.4 seeds, final NVSS incident deaths, Census PEP population, and the published fact tables. Pages was updated from this workflow. Auto-merge keeps main in sync after dbt-test and security-audit. This job does not push main directly."
+            --body "$pr_body" 2>&1); then
+            echo "$pr_out"
+          else
+            echo "$pr_out"
+            if echo "$pr_out" | grep -qi 'not permitted to create or approve pull requests'; then
+              echo "::warning::GITHUB_TOKEN cannot open pull requests. Enable Settings → Actions → General → Allow GitHub Actions to create and approve pull requests, or add secret WEEKLY_REFRESH_TOKEN (a PAT with repo scope). Branch was pushed; open $compare_url"
+            else
+              echo "::error::gh pr create failed unexpectedly."
+              exit 1
+            fi
+          fi
         else
           echo "Updated existing weekly data refresh PR."
         fi
