@@ -42,27 +42,27 @@ The published files are on the [portal](https://data-science-link.github.io/fent
 2. `wonder_extractor.py` requests final T40.4 incident deaths from the CDC WONDER request form. The XML API does not return state tabulations, so the job uses the form that does
 3. `pep_extractor.py` loads Census PEP July 1 population. `census_extractor.py` loads ACS income and unemployment when `CENSUS_API_KEY` is present
 4. dbt writes two fact CSVs. Final incident deaths are never copied into `rolling_12_month_deaths`
-5. The Monday GitHub Actions job (also runnable by hand) extracts, tests, and deploys GitHub Pages. That run is the publish. It does not open a pull request or push `main`.
+5. The publish job extracts, tests, and deploys GitHub Pages. It runs every Monday, on **Run workflow**, and when website or pipeline changes merge to `main`. HTML and data in that run are one snapshot. It does not open a pull request.
 
 ### Publishing
 
-The portal reads CSVs from GitHub Pages. `main` is for code, models, tests, and a local snapshot of seeds.
+The portal is whatever the last successful **Publish portal** run deployed. `main` holds code, models, tests, and a local seed snapshot.
 
 | Event | What goes live |
 |--------|----------------|
-| Weekly refresh (Monday or **Run workflow**) | Fresh extracts, fact CSVs, dbt docs, and `website/index.html` |
-| Push of `website/` to `main` | HTML only. Live CSVs and dbt docs are left in place |
+| Monday schedule, **Run workflow**, or a merge to `main` that touches `website/`, `data_engineering/`, or `Final_Datasets/` | Fresh extracts, fact CSVs, dbt docs, and `website/index.html` from that commit |
+| Merge of README or test-only changes | Nothing on the portal |
 
-A merge to `main` does not republish death counts. That avoids rolling the portal back to whatever CSVs last landed in git. `gh-pages` commit history is the audit trail for each published extract. Workflow artifacts are kept for 30 days.
+Pages source must be **GitHub Actions** (Settings → Pages → Build and deployment → Source). This token cannot flip that. Until it is set, `actions/deploy-pages` will fail and the last `gh-pages` copy stays live.
 
-`main` still requires a reviewed pull request for code. Publishing the data does not.
+`main` still requires a reviewed pull request for code. Publishing does not.
 
 ## Reliability
 
 - dbt tests cover keys, geography coverage, and suppression handling
 - Python unit tests run in CI
 - Security scanning runs on pushes and pull requests
-- `gh-pages` history is the audit trail for each published extract
+- GitHub Actions Pages deployments are the audit trail for each published extract
 
 ## License
 
