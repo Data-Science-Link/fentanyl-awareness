@@ -1,6 +1,6 @@
 # Final Datasets
 
-This folder holds the published extracts of the Fentanyl Awareness Project. The numbers are people. Use them carefully.
+This folder holds snapshot extracts for local dbt. The live published files are on the [portal](https://data-science-link.github.io/fentanyl-awareness/). The numbers are people. Use them carefully.
 
 ## Provisional series
 

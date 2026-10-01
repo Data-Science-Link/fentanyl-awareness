@@ -27,12 +27,13 @@ The fentanyl crisis in the United States is a profound tragedy. This project rep
 | Rates | Census PEP July 1 population. `population_year` is shown when a different year is carried forward |
 | Income and unemployment | Census ACS 5-year estimates. Those refresh only when `CENSUS_API_KEY` is set |
 
-The published file is [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Final_Datasets/fact_fentanyl_deaths_over_time.csv). See [`Final_Datasets/README.md`](Final_Datasets/README.md) for the data dictionary.
+The published files are on the [portal](https://data-science-link.github.io/fentanyl-awareness/): [provisional CSV](https://data-science-link.github.io/fentanyl-awareness/fact_fentanyl_deaths_over_time.csv) and [final CSV](https://data-science-link.github.io/fentanyl-awareness/fact_nvss_final_t40_4.csv). See [`Final_Datasets/README.md`](Final_Datasets/README.md) for the data dictionary. Copies under `Final_Datasets/` are for local dbt and can lag the portal.
 
 ## Quick access
 
 - **Portal**: https://data-science-link.github.io/fentanyl-awareness/
-- **CSV**: [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Final_Datasets/fact_fentanyl_deaths_over_time.csv)
+- **Provisional CSV**: https://data-science-link.github.io/fentanyl-awareness/fact_fentanyl_deaths_over_time.csv
+- **Final CSV**: https://data-science-link.github.io/fentanyl-awareness/fact_nvss_final_t40_4.csv
 - **Pipeline docs**: [`data_engineering/`](data_engineering/README.md)
 
 ## How it works
@@ -41,24 +42,27 @@ The published file is [`Final_Datasets/fact_fentanyl_deaths_over_time.csv`](Fina
 2. `wonder_extractor.py` requests final T40.4 incident deaths from the CDC WONDER request form. The XML API does not return state tabulations, so the job uses the form that does
 3. `pep_extractor.py` loads Census PEP July 1 population. `census_extractor.py` loads ACS income and unemployment when `CENSUS_API_KEY` is present
 4. dbt writes two fact CSVs. Final incident deaths are never copied into `rolling_12_month_deaths`
-5. GitHub Actions deploys the portal every Monday and opens `automated/weekly-data-refresh` with auto-merge. The job does not push `main` directly
+5. The publish job extracts, tests, and deploys GitHub Pages. It runs every Monday, on **Run workflow**, and when website or pipeline changes merge to `main`. HTML and data in that run are one snapshot. It does not open a pull request.
 
-### Unattended merge
+### Publishing
 
-`main` requires a pull request, a review, and the checks `dbt-test` and `security-audit`. This token cannot edit those rules. An admin needs to:
+The portal is whatever the last successful **Publish portal** run deployed. `main` holds code, models, tests, and a local seed snapshot.
 
-1. Allow auto-merge on the repository (`allow_auto_merge`).
-2. Remove the pull-request review rule from ruleset `18204346` (Main Branch Protections). Leave deletion, non-fast-forward, and the required status checks, with no bypass actors.
-3. Add a second ruleset, "Main pull request reviews", with the same review settings (one approval, code owners, dismiss stale reviews, extra approval for unattributed changes, merge commits only) and a bypass for GitHub Actions (integration id `15368`, bypass mode `pull_request`).
+| Event | What goes live |
+|--------|----------------|
+| Monday schedule, **Run workflow**, or a merge to `main` that touches `website/`, `data_engineering/`, or `Final_Datasets/` | Fresh extracts, fact CSVs, dbt docs, and `website/index.html` from that commit |
+| Merge of README or test-only changes | Nothing on the portal |
 
-Auto-merge then waits for the checks and does not wait for a person.
+Pages source must be **GitHub Actions** (Settings → Pages → Build and deployment → Source). This token cannot flip that. Until it is set, `actions/deploy-pages` will fail and the last `gh-pages` copy stays live.
+
+`main` still requires a reviewed pull request for code. Publishing does not.
 
 ## Reliability
 
 - dbt tests cover keys, geography coverage, and suppression handling
 - Python unit tests run in CI
 - Security scanning runs on pushes and pull requests
-- Git history is the audit trail for each published extract
+- GitHub Actions Pages deployments are the audit trail for each published extract
 
 ## License
 

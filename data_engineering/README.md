@@ -78,8 +78,8 @@ Do not `SUM(rolling_12_month_deaths)` across months. That metric is already a 12
 
 ## Automation
 
-- **dbt CI**: seeds, models, dbt tests, Python tests, Pages deploy from `main`
-- **Weekly refresh**: re-extract CDC (and Census when `CENSUS_API_KEY` is set), rebuild, deploy Pages, open a PR if `main` is protected
+- **dbt CI**: seeds, models, dbt tests, and Python tests. Does not deploy Pages
+- **Publish portal**: re-extract CDC (and Census when `CENSUS_API_KEY` is set), rebuild, and deploy Pages. Runs Monday, on demand, and when website or pipeline changes merge to `main`. No pull request
 - **Security audit**: Bandit and pip-audit
 
 ## Tests
