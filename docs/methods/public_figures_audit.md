@@ -1,6 +1,6 @@
 # Audit of the public figures
 
-Checked on October 2, 2026, against the sources named on the page. Each item is either confirmed or changed. The front page keeps ordinary words. The code for the death category stays in the method notes.
+Checked on October 2, 2026, against the sources named on the site. Each item is either confirmed or changed. The site is six pages. The caveat for a chart sits on the page that shows that chart. The code for the death category stays in the method notes.
 
 ## Monthly deaths
 
@@ -20,15 +20,15 @@ Later months follow the rule in [monthly_deaths.md](monthly_deaths.md): the chan
 
 The reported-only change would be 39,519 − 40,022 = −503, and the estimate would be 2,627. The chart uses the predicted series on both sides, which is the same kind of total the headline already uses for October. Months after October were already predicted on both sides, so their estimates did not change. November's change from the previous month changed because October's estimate changed.
 
-**Revisions.** No month in this file estimates below zero. If one does, the spreadsheet keeps the number and explains it, and the chart leaves a gap. That gap is a revision, not a month with no deaths. The sentence is next to the chart.
+**Revisions.** No month in this file estimates below zero. If one does, the spreadsheet keeps the number and explains it, and the chart leaves a gap. That gap is a revision, not a month with no deaths. The sentence is on the rising-or-falling page, next to the monthly chart.
 
-**Residence and place of death.** Finished counts are deaths of residents of the 50 states and DC. CDC's provisional file counts deaths by where they occurred, and it can include people who were not residents. A recent estimate can sit a little above or below the count CDC prints when the certificates are finished. The decline on the chart is much larger than that gap. The method note says so. The page says a recent month can move when CDC revises a provisional total.
+**Residence and place of death.** Finished counts are deaths of residents of the 50 states and DC. CDC's provisional file counts deaths by where they occurred, and it can include people who were not residents. A recent estimate can sit a little above or below the count CDC prints when the certificates are finished. The decline on the chart is much larger than that gap. The method note says so. The rising-or-falling page says a recent month can move when CDC revises a provisional total, and that the estimate stays inside one kind of CDC total.
 
-**Population.** The chart is a count, not a rate. In the spreadsheet, deaths per 100,000 use a July 1 Census population. The note on a row names the Census year when it is not the death year. In this file, 1999 uses July 1 2000, the first year in the Census file, and 2026 uses July 1 2025. The download section says that.
+**Population.** The chart is a count, not a rate. In the spreadsheet, deaths per 100,000 use a July 1 Census population. The note on a row names the Census year when it is not the death year. In this file, 1999 uses July 1 2000, the first year in the Census file, and 2026 uses July 1 2025. The download page says that.
 
 ## The drug category
 
-Confirmed. The opening paragraph says the death records include fentanyl and other synthetic opioids, do not include methadone, and are not a fentanyl-only count. That matches CDC's category. The code stays in the method note, not on the front page.
+Confirmed. The opening paragraph on the first page says the death records include fentanyl and other synthetic opioids, do not include methadone, and are not a fentanyl-only count. That matches CDC's category. The code stays in the method note.
 
 ## State map
 
@@ -103,7 +103,7 @@ Confirmed against the September 2026 file `nationwide-drugs-fy23-fy26-aug.csv`, 
 | 2025 | 12,027.28 |
 | 2026, year so far | 10,368.75 |
 
-**Changed: the sentences next to the charts.** The year chart already labels the last year as the year so far. The note now says that in ordinary words, and says a seizure total is not a measure of how much got through. The region chart adds every year in the file, including the unfinished year. That was not said on the page. The Southwest border is still where almost all of the pounds were counted. The chart does not show that total as a share of drugs that got through.
+**Changed: the sentences next to the charts.** The year chart already labels the last year as the year so far. The note says that in ordinary words, and says a seizure total is not a measure of how much got through. The region chart uses the latest fiscal year that is not marked year-to-date, so the unfinished year is not added into that total. The Southwest border is still where almost all of those pounds were counted. The chart does not show that total as a share of drugs that got through.
 
 ## Official actions
 
@@ -126,7 +126,7 @@ The list is agency releases that mention fentanyl, not a ranking of news outlets
 
 ## Memorial cards
 
-Confirmed. The cards are people whose families sent a photo to DEA's Faces of Fentanyl exhibit. The file has 7,039 names with a photo. The page does not copy the image files. It links to the image on DEA's site. The note now says the number of cards is the number of photos families sent, not the number of deaths.
+Confirmed. These are people whose families sent a photo to DEA's Faces of Fentanyl exhibit. The file has 7,039 names with a photo. The page does not copy the image files. It links to the image on DEA's site. The note says the number of names is the number of photos families sent, not the number of deaths.
 
 ## DEA kilograms and Customs and Border Protection pounds
 

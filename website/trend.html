@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Are deaths rising or falling? — Fentanyl deaths</title>
+    <meta name="description" content="Estimated synthetic-opioid deaths in each month, and the change in the 12-month total by state.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="trend">
+    <a class="skip" href="#content">Skip to content</a>
+    <nav class="nav" aria-label="Pages">
+        <div class="nav-bar">
+            <a class="brand" href="index.html">Fentanyl deaths</a>
+            <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+        </div>
+        <div class="nav-links" id="site-nav">
+            <a href="index.html">What this is</a>
+            <a href="trend.html" aria-current="page">Rising or falling</a>
+            <a href="who.html">Who is affected</a>
+            <a href="actions.html">Official actions</a>
+            <a href="news.html">Announcements</a>
+            <a href="download.html">Download</a>
+        </div>
+    </nav>
+    <main id="content" tabindex="-1">
+        <header class="hero">
+            <p class="eyebrow">Rising or falling</p>
+            <h1>Are deaths rising or falling?</h1>
+            <p class="answer" id="trend-answer">Loading the monthly counts…</p>
+            <p>Each point is the estimated number of people who died that month. Where CDC has finished the death certificates, the point is that official count, drawn as a solid line. After the last finished year, the point is estimated from the change in CDC's 12-month total, drawn as a dashed line. The estimate stays inside one kind of CDC total, so a switch from the reported total to the predicted total is not counted as deaths in a single month. Vertical lines are dates of official actions. A line is a date, not proof the action caused a change. The <a href="actions.html">official actions</a> page reads those dates one by one.</p>
+        </header>
+        <nav class="on-page" aria-label="On this page">
+            <a href="#monthly">Monthly deaths</a>
+            <a href="#states">Change by state</a>
+        </nav>
+        <div class="stats" id="stats"></div>
+        <p class="source">Source for the first two figures: <a href="deaths_by_month.csv">deaths_by_month.csv</a>. The 12-month total is the provisional CDC series, linked under the map.</p>
+        <section id="monthly">
+            <h2>Deaths in each month</h2>
+            <div class="toolbar" role="group" aria-label="Years shown on the chart">
+                <button type="button" id="range-recent" aria-pressed="true">From 2015</button>
+                <button type="button" id="range-all" aria-pressed="false">Back to 1999</button>
+            </div>
+            <div class="panel">
+                <div class="chart-box">
+                    <canvas id="monthly-chart" role="img" aria-label="Line chart of deaths in each month. A solid line is an official final count. A dashed line is an estimate. Vertical lines are official actions."></canvas>
+                </div>
+                <ul class="legend">
+                    <li><span class="legend-swatch line"></span> Official final count, solid line</li>
+                    <li><span class="legend-swatch line dashed"></span> Estimated month, dashed line</li>
+                    <li><span class="legend-swatch tick"></span> Official action</li>
+                </ul>
+                <p class="note" id="monthly-summary"></p>
+                <details>
+                    <summary>View these months as a table</summary>
+                    <div id="monthly-chart-data" class="table-scroll"></div>
+                </details>
+                <p class="source">Source: <a href="deaths_by_month.csv">deaths_by_month.csv</a>. <a href="methods/monthly_deaths.md">How the estimate is made</a>. A month after the last finished year can move when CDC revises a provisional total. A number below zero is not plotted. It is a revision, not a count of deaths.</p>
+            </div>
+        </section>
+        <section id="states">
+            <h2>Change over the past year, by state</h2>
+            <p>This map is the percent change in the 12-month total, not the number of deaths in that month. It compares the latest month with the same month a year earlier, using the same kind of CDC total for both. States CDC did not publish are gray. A blank count is left out. It is not treated as zero. Louisiana is gray because CDC does not include it in this series. New York is the state outside New York City. CDC counts the city on its own, and this map does not add the city into the state. The list and the table use the same numbers as the map.</p>
+            <div class="panel">
+                <div class="map-layout">
+                    <div>
+                        <svg id="state-map" viewBox="0 0 975 610" role="img" aria-label="Map of the change in the 12-month death total by state"></svg>
+                        <div class="map-legend">
+                            <span class="swatch" style="background:#1f6b4a"></span> down
+                            <span class="swatch" style="background:#f4f1ea; border:1px solid #e2d9cc"></span> little change
+                            <span class="swatch" style="background:#8c2f2f"></span> up
+                            <span class="swatch" style="background:#d9d4cc"></span> not published
+                        </div>
+                        <p class="note">Darker means a larger change, up to 40 percent. The words in the list do not depend on the colors.</p>
+                    </div>
+                    <div id="state-list"></div>
+                </div>
+                <details>
+                    <summary>View every state as a table</summary>
+                    <div id="state-table" class="table-scroll"></div>
+                </details>
+                <p class="source">Source: <a href="fact_fentanyl_deaths_over_time.csv">provisional 12-month file</a>. Louisiana is not in this CDC series. Final counts for Louisiana are in the <a href="fact_nvss_final_t40_4.csv">final death-certificate file</a>.</p>
+            </div>
+        </section>
+        <p class="next"><a href="who.html">Next: Who is affected, and who is responding?</a></p>
+        <p class="meta" id="status" role="status"></p>
+        <noscript><p class="note">The chart and the map need JavaScript. The spreadsheet linked above can still be opened.</p></noscript>
+    </main>
+    <footer class="footer">
+        <p>Each count is a person. Confirm figures with the agency that published them before using them for a decision.</p>
+        <p><a href="design.html">How this site is laid out</a></p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

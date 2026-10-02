@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official announcements — Fentanyl deaths</title>
+    <meta name="description" content="Agency releases that mention fentanyl, each with a link to the publisher.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="news">
+    <a class="skip" href="#content">Skip to content</a>
+    <nav class="nav" aria-label="Pages">
+        <div class="nav-bar">
+            <a class="brand" href="index.html">Fentanyl deaths</a>
+            <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+        </div>
+        <div class="nav-links" id="site-nav">
+            <a href="index.html">What this is</a>
+            <a href="trend.html">Rising or falling</a>
+            <a href="who.html">Who is affected</a>
+            <a href="actions.html">Official actions</a>
+            <a href="news.html" aria-current="page">Announcements</a>
+            <a href="download.html">Download</a>
+        </div>
+    </nav>
+    <main id="content" tabindex="-1">
+        <header class="hero">
+            <p class="eyebrow">Announcements</p>
+            <h1>Official announcements</h1>
+            <p class="lede">These are agency releases that mention fentanyl. Each one links to the page it came from. This is not a ranking of news outlets, and it is not everything that has been written.</p>
+        </header>
+        <section>
+            <h2>Releases in this extract</h2>
+            <div class="panel" id="news-list">
+                <p class="note">Loading announcements…</p>
+            </div>
+            <p class="source">Source: <a href="official_announcements.csv">official_announcements.csv</a>.</p>
+        </section>
+        <p class="next"><a href="download.html">Next: Download the spreadsheet</a></p>
+        <p class="meta" id="status" role="status"></p>
+        <noscript><p class="note">The list needs JavaScript. The CSV linked above can still be opened.</p></noscript>
+    </main>
+    <footer class="footer">
+        <p>Each count is a person. Confirm figures with the agency that published them before using them for a decision.</p>
+        <p><a href="design.html">How this site is laid out</a></p>
+    </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
