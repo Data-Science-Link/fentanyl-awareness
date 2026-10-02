@@ -36,7 +36,7 @@ The deaths-per-1,000 comparison with wars is no longer the front page. The input
 
 ## How a chart is built
 
-Every visual has the same parts: a title, a sentence that says how to read it, the chart, a table of the same numbers, and a source line. The table is there for someone who cannot see the chart, and for someone who wants the figures on a phone.
+Every visual has the same parts: a title, a sentence that says how to read it, the chart, a table of the same numbers, and a source line. The table is there for someone who cannot see the chart, and for someone who wants the figures on a phone. Hovering a month, a policy line, a state, or a bar shows that figure beside the pointer. The table still holds the same numbers.
 
 Type is a serif for the question and the prose, and a sans-serif for navigation, numbers, tables, and charts. They are system fonts, so the page does not wait on a font service.
 

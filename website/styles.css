@@ -167,6 +167,30 @@ caption { text-align: left; font-weight: 600; padding: 0.2rem 0 0.45rem; color: 
 .table-scroll { overflow-x: auto; }
 .map-layout { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 1rem; align-items: start; }
 #state-map { width: 100%; height: auto; aspect-ratio: 975 / 610; display: block; background: var(--card); }
+#state-map path { cursor: pointer; }
+#state-map path.is-hot,
+#state-map path:focus-visible { stroke: var(--ink); stroke-width: 2px; }
+#state-map path.is-selected { stroke: var(--accent); stroke-width: 2.5px; }
+.viz-tip {
+    position: fixed;
+    z-index: 30;
+    max-width: 18rem;
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 10px 28px rgba(28, 25, 21, 0.14);
+    padding: 0.55rem 0.75rem 0.65rem;
+    pointer-events: none;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    line-height: 1.35;
+}
+.viz-tip[hidden] { display: none; }
+.viz-tip p { margin: 0.12rem 0; }
+.viz-tip-title { font-weight: 650; }
+.viz-tip-line { color: var(--muted); }
+.meter { cursor: crosshair; }
 .map-legend, .legend {
     display: flex;
     flex-wrap: wrap;

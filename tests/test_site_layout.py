@@ -154,3 +154,10 @@ def test_motion_and_photos_stay_restrained():
     assert "Hide photos" in (SITE / "who.html").read_text()
     assert "menu-button" in style
     assert ":focus-visible" in style
+    assert "showVizTip" in script
+    assert "viz-tip" in style
+    for name in ("index.html", "trend.html", "actions.html"):
+        assert "Hover a month or a policy line." in (SITE / name).read_text()
+    assert "Hover a state for both 12-month totals." in (SITE / "trend.html").read_text()
+    assert "Hover a bar for the figure." in (SITE / "who.html").read_text()
+    assert "map-readout" in (SITE / "trend.html").read_text()
