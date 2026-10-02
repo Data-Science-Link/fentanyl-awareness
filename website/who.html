@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Who is affected, and who is responding? — Fentanyl deaths</title>
+    <meta name="description" content="Age, race, a family memorial, and the public seizure and budget figures tied to fentanyl.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="who">
+    <a class="skip" href="#content">Skip to content</a>
+    <nav class="nav" aria-label="Pages">
+        <div class="nav-bar">
+            <a class="brand" href="index.html">Fentanyl deaths</a>
+            <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+        </div>
+        <div class="nav-links" id="site-nav">
+            <a href="index.html">What this is</a>
+            <a href="trend.html">Rising or falling</a>
+            <a href="who.html" aria-current="page">Who is affected</a>
+            <a href="actions.html">Official actions</a>
+            <a href="news.html">Announcements</a>
+            <a href="download.html">Download</a>
+        </div>
+    </nav>
+    <main id="content" tabindex="-1">
+        <header class="hero">
+            <p class="eyebrow">Who is affected</p>
+            <h1>Who is affected, and who is responding?</h1>
+            <p class="lede">The first half of this page is about people who died. The second half is about the agencies that seize fentanyl or publish a budget line. None of these charts is a full account of who is responsible.</p>
+        </header>
+        <nav class="on-page" aria-label="On this page">
+            <a href="#memorial">Memorial</a>
+            <a href="#age">Age</a>
+            <a href="#race">Race</a>
+            <a href="#share">Share of deaths</a>
+            <a href="#supply">Supply</a>
+            <a href="#seizures">Seizures</a>
+            <a href="#budget">Budgets</a>
+        </nav>
+
+        <section id="memorial">
+            <h2>People whose families shared a photo with DEA</h2>
+            <p>These first names, ages, states, and photos were submitted to <a href="https://fof.dea.gov/exhibit">DEA's Faces of Fentanyl exhibit</a>. Families acknowledge DEA's privacy policy, and they can ask DEA to remove a photo. This site does not copy the image files. If a photo leaves the exhibit, it leaves this page on the next update. This is not a full count of everyone who died. The public listing does not include a video address, so this page links to the exhibit rather than to a video.</p>
+            <div class="toolbar">
+                <label class="field" for="people-search">First name
+                    <input id="people-search" type="search" autocomplete="off">
+                </label>
+                <label class="field" for="people-state">State
+                    <select id="people-state"><option value="">All states</option></select>
+                </label>
+                <button type="button" id="photos-toggle" aria-pressed="true">Hide photos</button>
+            </div>
+            <div class="people" id="people"></div>
+            <div class="toolbar">
+                <button type="button" id="people-prev">Previous</button>
+                <button type="button" id="people-next">Next</button>
+                <span class="note" id="people-count" aria-live="polite"></span>
+            </div>
+            <p class="source">Source: <a href="faces_of_fentanyl.csv">the exhibit listing</a> (names and DEA image links, not image files). Photos stay on DEA's site.</p>
+        </section>
+
+        <section id="age">
+            <h2>Age in the latest finished year</h2>
+            <p class="note">Final death certificates. Ten-year age groups from CDC WONDER. The category is synthetic opioids other than methadone.</p>
+            <div class="panel">
+                <div class="chart-box short">
+                    <canvas id="age-chart" role="img" aria-label="Bar chart of synthetic-opioid deaths by age group in the latest finished year"></canvas>
+                </div>
+                <p class="note" id="age-summary">Loading ages…</p>
+                <details>
+                    <summary>View these numbers as a table</summary>
+                    <div id="age-table" class="table-scroll"></div>
+                </details>
+                <p class="source">Source: <a href="wonder_age.csv">wonder_age.csv</a>. <a href="methods/who_is_affected.md">How age and race are counted</a>.</p>
+            </div>
+        </section>
+
+        <section id="race">
+            <h2>Race on the death certificate and race in the Census</h2>
+            <p>Both sides are race alone for 2024. Hispanic origin is not separated, so Hispanic and non-Hispanic people are inside each race. Read the two bars in a group together. One is the share of these deaths. The other is the share of the population. The chart does not say why they differ.</p>
+            <div class="panel">
+                <div class="chart-box tall">
+                    <canvas id="race-chart" role="img" aria-label="Horizontal bar chart comparing each group's share of deaths with its share of the population. Dark red is deaths. Stone is population."></canvas>
+                </div>
+                <details>
+                    <summary>View these shares as a table</summary>
+                    <div id="race-table" class="table-scroll"></div>
+                </details>
+                <p class="source">Source: <a href="wonder_race.csv">wonder_race.csv</a> and <a href="census_race_2024.csv">census_race_2024.csv</a>. <a href="methods/who_is_affected.md">How the groups are matched</a>.</p>
+            </div>
+        </section>
+
+        <section id="share">
+            <h2>Share of drug-poisoning deaths</h2>
+            <p>This is the share of drug-poisoning deaths that also listed a synthetic opioid other than methadone. One death can list more than one drug, so this is not a pie and the remainder is not one other drug.</p>
+            <div class="panel">
+                <div class="meter" id="share-meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="share-text">
+                    <div class="meter-fill" id="share-fill"></div>
+                </div>
+                <p id="share-text">Loading the share…</p>
+                <p class="source">Source: <a href="wonder_drug_share.csv">wonder_drug_share.csv</a>. <a href="methods/who_is_affected.md">Why this is not a pie</a>.</p>
+            </div>
+        </section>
+
+        <section id="supply">
+            <h2>What DEA's threat assessment says</h2>
+            <div class="panel quotes">
+                <p class="note">Quoted from the 2025 National Drug Threat Assessment. A territory map is not drawn here, because DEA did not publish one as a dataset. A drawn map of cartel territory, supply routes, or border crossings would be a guess.</p>
+                <blockquote><p>The Sinaloa Cartel and Jalisco New Generation Cartel … are the primary groups producing the illicit synthetic drugs driving U.S. drug poisoning deaths and trafficking these drugs into the United States.</p></blockquote>
+                <blockquote><p>Mexican TCOs dominate fentanyl transportation into and through the United States, with the Southwest Border (SWB) as the main entry point for fentanyl entering the United States.</p></blockquote>
+                <p class="source">Source: <a href="sources/supply_context.md">the quotations, with page context</a>. The seizure charts below are Customs and Border Protection's pounds. They are a separate series from the kilogram figure in the DEA report. Do not add them together.</p>
+            </div>
+        </section>
+
+        <section id="seizures">
+            <h2>Fentanyl seized by Customs and Border Protection</h2>
+            <p>Pounds CBP reports seizing, by the two components in its public file. The last year label that says FYTD is a partial year.</p>
+            <div class="panel">
+                <div class="chart-box short">
+                    <canvas id="seizure-chart" role="img" aria-label="Grouped bar chart of fentanyl pounds seized by CBP component and fiscal year"></canvas>
+                </div>
+                <details>
+                    <summary>View the pounds as a table</summary>
+                    <div id="seizure-table" class="table-scroll"></div>
+                </details>
+                <p class="source">Source: <a href="https://www.cbp.gov/document/stats/nationwide-drug-seizures">CBP Nationwide Drug Seizures</a>, copied into <a href="cbp_fentanyl_seizures.csv">cbp_fentanyl_seizures.csv</a>.</p>
+            </div>
+            <div class="split">
+                <div class="panel">
+                    <h3>Where those seizures were counted</h3>
+                    <p class="note" id="region-note">Loading regions…</p>
+                    <div class="chart-box short">
+                        <canvas id="region-chart" role="img" aria-label="Horizontal bar chart of fentanyl pounds by CBP region for the latest complete fiscal year"></canvas>
+                    </div>
+                    <details>
+                        <summary>View the regions as a table</summary>
+                        <div id="region-table" class="table-scroll"></div>
+                    </details>
+                </div>
+                <div class="panel">
+                    <h3>Share of those pounds, by CBP component</h3>
+                    <p class="note" id="component-note">Loading the share…</p>
+                    <div id="component-table" class="table-scroll"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="budget">
+            <h2>Budget lines, as printed</h2>
+            <p>These are different kinds of lines from different years. They are not pieces of one fentanyl budget, and they should not be added together. The table is the readable version. The bars use one scale, so a smaller line looks short.</p>
+            <div class="panel">
+                <div class="chart-box short">
+                    <canvas id="budget-chart" role="img" aria-label="Horizontal bar chart of published budget lines. The lines are not comparable and should not be added."></canvas>
+                </div>
+                <details>
+                    <summary>View the dollars as a table</summary>
+                    <div id="budget-table" class="table-scroll"></div>
+                </details>
+                <p class="source">Source: <a href="agency_budgets.csv">agency_budgets.csv</a>. Each row names the document it was taken from.</p>
+            </div>
+        </section>
+
+        <p class="next"><a href="actions.html">Next: Did an official action line up with a change?</a></p>
+        <p class="meta" id="status" role="status"></p>
+        <noscript><p class="note">The charts need JavaScript. Each source file linked on this page can still be opened.</p></noscript>
+    </main>
+    <footer class="footer">
+        <p>Each count is a person. Confirm figures with the agency that published them before using them for a decision.</p>
+        <p><a href="design.html">How this site is laid out</a></p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

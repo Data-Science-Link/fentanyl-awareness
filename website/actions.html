@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Did an official action line up with a change? — Fentanyl deaths</title>
+    <meta name="description" content="Official action dates beside the monthly death counts, including the count a year later.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="actions">
+    <a class="skip" href="#content">Skip to content</a>
+    <nav class="nav" aria-label="Pages">
+        <div class="nav-bar">
+            <a class="brand" href="index.html">Fentanyl deaths</a>
+            <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+        </div>
+        <div class="nav-links" id="site-nav">
+            <a href="index.html">What this is</a>
+            <a href="trend.html">Rising or falling</a>
+            <a href="who.html">Who is affected</a>
+            <a href="actions.html" aria-current="page">Official actions</a>
+            <a href="news.html">Announcements</a>
+            <a href="download.html">Download</a>
+        </div>
+    </nav>
+    <main id="content" tabindex="-1">
+        <header class="hero">
+            <p class="eyebrow">Official actions</p>
+            <h1>Did an official action line up with a change?</h1>
+            <p class="lede">The lines on the chart are the dates in the table. Read a row across: deaths in that month, and deaths twelve months later. A difference is what the count did. It is not a measure of whether the action worked. This page does not decide that.</p>
+        </header>
+        <section id="policy">
+            <h2>The dates on the death chart</h2>
+            <div class="toolbar" role="group" aria-label="Years shown on the chart">
+                <button type="button" id="range-recent" aria-pressed="true">From 2015</button>
+                <button type="button" id="range-all" aria-pressed="false">Back to 1999</button>
+            </div>
+            <div class="panel">
+                <div class="chart-box">
+                    <canvas id="policy-chart" role="img" aria-label="Line chart of deaths in each month with vertical lines on official action dates. A solid line is an official count. A dashed line is an estimate."></canvas>
+                </div>
+                <ul class="legend">
+                    <li><span class="legend-swatch line"></span> Official final count, solid line</li>
+                    <li><span class="legend-swatch line dashed"></span> Estimated month, dashed line</li>
+                    <li><span class="legend-swatch tick"></span> Official action</li>
+                </ul>
+                <p class="note" id="policy-summary"></p>
+                <details>
+                    <summary>View these months as a table</summary>
+                    <div id="policy-chart-data" class="table-scroll"></div>
+                </details>
+                <p class="source">Source: <a href="deaths_by_month.csv">deaths_by_month.csv</a> and <a href="policy_actions.csv">policy_actions.csv</a>. <a href="methods/monthly_deaths.md">How a month is counted</a>.</p>
+            </div>
+            <div class="panel table-scroll">
+                <table id="action-table">
+                    <caption>Each official action, with the monthly count and the count twelve months later</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Action</th>
+                            <th scope="col">Who</th>
+                            <th scope="col">Deaths that month</th>
+                            <th scope="col">Deaths 12 months later</th>
+                            <th scope="col">Source</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+        <p class="next"><a href="news.html">Next: Official announcements</a></p>
+        <p class="meta" id="status" role="status"></p>
+        <noscript><p class="note">The chart needs JavaScript. The action file linked above can still be opened.</p></noscript>
+    </main>
+    <footer class="footer">
+        <p>Each count is a person. Confirm figures with the agency that published them before using them for a decision.</p>
+        <p><a href="design.html">How this site is laid out</a></p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
