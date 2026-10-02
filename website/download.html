@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download the monthly spreadsheet — Fentanyl deaths</title>
+    <meta name="description" content="A plain CSV of estimated deaths in each month, with a column dictionary and the file behind every chart.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="download">
+    <a class="skip" href="#content">Skip to content</a>
+    <nav class="nav" aria-label="Pages">
+        <div class="nav-bar">
+            <a class="brand" href="index.html">Fentanyl deaths</a>
+            <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+        </div>
+        <div class="nav-links" id="site-nav">
+            <a href="index.html">What this is</a>
+            <a href="trend.html">Rising or falling</a>
+            <a href="who.html">Who is affected</a>
+            <a href="actions.html">Official actions</a>
+            <a href="news.html">Announcements</a>
+            <a href="download.html" aria-current="page">Download</a>
+        </div>
+    </nav>
+    <main id="content" tabindex="-1">
+        <header class="hero">
+            <p class="eyebrow">Download</p>
+            <h1>Download the monthly spreadsheet</h1>
+            <p class="lede">One row is one month for the United States. Column names are ordinary words. You can open the file in a spreadsheet and do your own analysis.</p>
+        </header>
+        <nav class="on-page" aria-label="On this page">
+            <a href="#spreadsheet">Spreadsheet</a>
+            <a href="#dictionary">Column dictionary</a>
+            <a href="#sources">Sources</a>
+            <a href="#research">For researchers</a>
+        </nav>
+        <section id="spreadsheet">
+            <h2>The plain file</h2>
+            <p><a class="button primary" href="deaths_by_month.csv" download>Download deaths_by_month.csv</a></p>
+            <p class="note">A number below zero is not a count of deaths. It means a provisional total was revised. The method is written out in <a href="methods/monthly_deaths.md">monthly_deaths.md</a>.</p>
+        </section>
+        <section id="dictionary">
+            <h2>What the columns mean</h2>
+            <div class="panel table-scroll">
+                <table>
+                    <caption>Column dictionary for deaths_by_month.csv</caption>
+                    <thead><tr><th scope="col">Column</th><th scope="col">What it means</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">Month</th><td>The calendar month, written as year-month.</td></tr>
+                        <tr><th scope="row">Estimated deaths</th><td>Deaths that month. See the next column for whether it is an official count or an estimate.</td></tr>
+                        <tr><th scope="row">How this number was produced</th><td>Either "Official final count" or "Estimated from the change in the 12-month total."</td></tr>
+                        <tr><th scope="row">Deaths per 100,000</th><td>Deaths that month for every 100,000 people. This is not a yearly rate.</td></tr>
+                        <tr><th scope="row">Change from the previous month</th><td>This month's deaths minus the month before.</td></tr>
+                        <tr><th scope="row">Change from the same month a year earlier</th><td>This month's deaths minus that month one year earlier.</td></tr>
+                        <tr><th scope="row">Change in the 12-month total</th><td>The arithmetic CDC's rolling total implies. It equals this month minus the same month a year earlier when both totals are complete. Kept so the estimate can be checked.</td></tr>
+                        <tr><th scope="row">Official actions that month</th><td>Actions whose source date falls in the month. Blank means none in the list.</td></tr>
+                        <tr><th scope="row">Source</th><td>Where the death number came from.</td></tr>
+                        <tr><th scope="row">Note</th><td>What the category includes, and a warning if an estimate fell below zero.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section id="sources">
+            <h2>Source for every visual</h2>
+            <ul>
+                <li>Questions and their order: <a href="Fentanyl_Project_Overview_and_Initial_Design.md">the project brief</a>. Layout: <a href="design.html">how this site is laid out</a>.</li>
+                <li>Monthly deaths: <a href="methods/monthly_deaths.md">how the estimate is made</a> and <a href="deaths_by_month.csv">deaths_by_month.csv</a>.</li>
+                <li>Comparison chart: <a href="methods/comparison_per_1000.md">deaths per 1,000</a> and <a href="comparison_per_1000.csv">the inputs</a>.</li>
+                <li>State map: <a href="fact_fentanyl_deaths_over_time.csv">provisional 12-month file</a>.</li>
+                <li>Age, race, and the overdose share: <a href="methods/who_is_affected.md">who is affected</a>, <a href="wonder_age.csv">age</a>, <a href="wonder_race.csv">race</a>, <a href="census_race_2024.csv">Census race</a>, and <a href="wonder_drug_share.csv">the share</a>.</li>
+                <li>Memorial: <a href="faces_of_fentanyl.csv">exhibit listing</a> and <a href="https://fof.dea.gov/exhibit">DEA Faces of Fentanyl</a>.</li>
+                <li>Seizures: <a href="cbp_fentanyl_seizures.csv">CBP pounds</a> and <a href="https://www.cbp.gov/document/stats/nationwide-drug-seizures">CBP Nationwide Drug Seizures</a>.</li>
+                <li>Supply sentences: <a href="sources/supply_context.md">DEA National Drug Threat Assessment quotations</a>.</li>
+                <li>Budgets: <a href="agency_budgets.csv">agency_budgets.csv</a>.</li>
+                <li>Official actions: <a href="policy_actions.csv">policy_actions.csv</a>.</li>
+                <li>Announcements: <a href="official_announcements.csv">official_announcements.csv</a>.</li>
+            </ul>
+        </section>
+        <section id="research">
+            <h2>For researchers</h2>
+            <p>The files above are the plain versions. The technical extracts keep CDC's own columns, including months the agency left blank. A blank is not a zero. Do not add 12-month totals across months. Do not add final monthly deaths into the 12-month column.</p>
+            <ul>
+                <li><a href="fact_fentanyl_deaths_over_time.csv">Provisional 12-month file</a></li>
+                <li><a href="fact_nvss_final_t40_4.csv">Final death-certificate file</a></li>
+                <li><a href="cbp_fentanyl_seizures.csv">CBP fentanyl seizures by year, component, and region</a></li>
+                <li><a href="faces_of_fentanyl.csv">Exhibit listing (names and DEA image links, not image files)</a></li>
+                <li><a href="dbt/index.html">Pipeline documentation</a></li>
+            </ul>
+        </section>
+        <p class="next"><a href="index.html">Back to the start: What is fentanyl?</a></p>
+    </main>
+    <footer class="footer">
+        <p>Each count is a person. Confirm figures with the agency that published them before using them for a decision.</p>
+        <p><a href="design.html">How this site is laid out</a></p>
+    </footer>
+    <script src="app.js"></script>
+</body>
+</html>

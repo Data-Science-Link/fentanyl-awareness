@@ -1,6 +1,8 @@
 # Fentanyl Project Overview and Initial Design
 
-This is the layout brief for the public site. Counts, rates, and dates on the site cite the agency or report that published them. This brief decides which questions the pages answer. It is not a source for a number.
+This is the layout brief for the public site. Counts, rates, and dates on the site cite the agency or report that published them. This brief decides which questions the pages answer, and in which order. It is not a source for a number.
+
+How those questions are split into pages, and how the pages look, is decided in [How this site is laid out](design/public-site-layout.md).
 
 ## Introduction / Purpose
 

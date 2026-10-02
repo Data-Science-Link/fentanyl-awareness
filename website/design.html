@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How this site is laid out — Fentanyl deaths</title>
+    <meta name="description" content="Why the fentanyl site is six pages, and how the charts, memorial, and download are meant to be read.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="design">
+    <a class="skip" href="#content">Skip to content</a>
+    <nav class="nav" aria-label="Pages">
+        <div class="nav-bar">
+            <a class="brand" href="index.html">Fentanyl deaths</a>
+            <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+        </div>
+        <div class="nav-links" id="site-nav">
+            <a href="index.html">What this is</a>
+            <a href="trend.html">Rising or falling</a>
+            <a href="who.html">Who is affected</a>
+            <a href="actions.html">Official actions</a>
+            <a href="news.html">Announcements</a>
+            <a href="download.html">Download</a>
+        </div>
+    </nav>
+    <main id="content" tabindex="-1">
+        <header class="hero">
+            <p class="eyebrow">Layout</p>
+            <h1>How this site is laid out</h1>
+            <p class="lede">This page is the layout note. The questions, and their order, come from the <a href="Fentanyl_Project_Overview_and_Initial_Design.md">project brief</a>. The same note is in the repository as <a href="design/public-site-layout.md">public-site-layout.md</a>.</p>
+        </header>
+        <section>
+            <h2>What we used as a guide</h2>
+            <p>Strong public-data sites separate a question, a chart, and a source. They treat a death count as people.</p>
+            <ul>
+                <li><strong>Our World in Data</strong> puts one question at the top, the chart under it, and the source on the line under the chart. The download sits with the article.</li>
+                <li><strong>Office for National Statistics bulletins</strong> open with the question, then the latest figure, then a contents list. A chart has a written equivalent.</li>
+                <li><strong>The COVID Tracking Project</strong> and the early New York Times coronavirus pages used a useful order: what is happening, then where, then who. They also showed the failure mode. One page becomes a wall of charts.</li>
+                <li><strong>The Marshall Project</strong>, <strong>The Trace</strong>, and the Washington Post <strong>Fatal Force</strong> database show names, dates, and a way to look someone up. They do not animate a death.</li>
+                <li><strong>Periscopic’s “U.S. Gun Deaths”</strong> is the counterexample. The falling arcs made the deaths a spectacle. This site does not do that.</li>
+                <li><strong>Financial Times and Datawrapper</strong> charts use few colors, and a dashed line stays different from a solid line in black and white.</li>
+                <li><strong>CDC data portals</strong> are where the numbers come from. They are a poor first page for a new reader.</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Six pages, in the brief’s order</h2>
+            <p>A single page gave every question the same weight. On a phone, the download sat under the memorial and the charts. A screen reader had one title for six questions. Each page has its own title, one question, and a next link.</p>
+            <div class="panel table-scroll">
+                <table>
+                    <caption>The six pages</caption>
+                    <thead>
+                        <tr><th scope="col">Page</th><th scope="col">Question</th><th scope="col">What the reader does there</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><th scope="row"><a href="index.html">What this is</a></th><td>What is fentanyl and why is it important?</td><td>Reads a plain description and the deaths-per-1,000 comparison.</td></tr>
+                        <tr><th scope="row"><a href="trend.html">Rising or falling</a></th><td>Is it going up or down?</td><td>Reads estimated deaths in each month, and the state change.</td></tr>
+                        <tr><th scope="row"><a href="who.html">Who is affected</a></th><td>Who is impacted, and who is responding?</td><td>Reads the memorial, age, race, and the death share, then seizures and budget lines.</td></tr>
+                        <tr><th scope="row"><a href="actions.html">Official actions</a></th><td>Have recent policies lined up with a change?</td><td>Reads the count in an action’s month and the count a year later.</td></tr>
+                        <tr><th scope="row"><a href="news.html">Announcements</a></th><td>What has been published, and where did it come from?</td><td>Reads agency releases that mention fentanyl, each with its source.</td></tr>
+                        <tr><th scope="row"><a href="download.html">Download</a></th><td>The spreadsheet</td><td>Takes <code>deaths_by_month.csv</code>, the column dictionary, and the file behind every chart.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>“Use” in the brief is answered with deaths. CDC does not publish a public series of fentanyl use. The pages say the death category includes fentanyl and is not fentanyl alone.</p>
+        </section>
+        <section>
+            <h2>How a chart is built</h2>
+            <p>Every visual has the same parts: a title, a sentence that says how to read it, the chart, a table of the same numbers, and a source line.</p>
+            <p>Type is a serif for the question and the prose, and a sans-serif for navigation, numbers, tables, and charts. They are system fonts.</p>
+            <p>Color is a paper background and ink text. One dark red marks the subject. Stone marks a comparison series. On the map only, green means the 12-month total fell and dark red means it rose. Gray means CDC did not publish a number. Official months are a solid line. Estimated months are a dashed line. Action dates are vertical lines. The legend says this in words.</p>
+            <p>Three pictures from the brief are not drawn. DEA’s threat assessment does not publish a territory file, so a cartel map, a supply-chain map, or a crossings map would be a guess. The site quotes DEA and shows Customs and Border Protection’s pounds by region and by component. The share of drug-poisoning deaths is a number and a single bar, not a pie, because one death can list more than one drug.</p>
+            <p>The public memorial listing has a first name, an age, a state, and a DEA photo address. It does not include a video address. The site links to the exhibit.</p>
+        </section>
+        <section>
+            <h2>Engagement without a spectacle</h2>
+            <p>The engaging part is a question and a sentence that answers it. There is no counting animation and no autoplay. The memorial is a directory. Photos are shown in small groups, uncropped, and a control above them hides the photos without hiding the names. A change after an official action is two counts, not a verdict.</p>
+        </section>
+        <section>
+            <h2>Phone, keyboard, and screen reader</h2>
+            <p>The header collapses to a Menu button. Targets are at least 44 pixels tall. Charts stack in one column. The map is followed by a written list and a full table. Each page starts with a skip link. The current page is marked. Charts are labeled, and the table next to them is the text equivalent. If the reader asks for less motion, the charts do not animate.</p>
+        </section>
+        <p class="next"><a href="index.html">Start at what this is</a></p>
+    </main>
+    <footer class="footer">
+        <p>Each count is a person. Confirm figures with the agency that published them before using them for a decision.</p>
+        <p><a href="design/public-site-layout.md">The same note as a text file</a></p>
+    </footer>
+    <script src="app.js"></script>
+</body>
+</html>

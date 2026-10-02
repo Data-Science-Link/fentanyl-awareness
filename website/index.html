@@ -3,203 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fentanyl deaths in the United States</title>
+    <title>What fentanyl is, and why it matters — Fentanyl deaths</title>
+    <meta name="description" content="A plain-language introduction to illicit fentanyl and a comparison of deaths per 1,000 people per year.">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body data-page="home">
     <a class="skip" href="#content">Skip to content</a>
-    <nav class="nav">
-        <a class="brand" href="#content">Fentanyl deaths</a>
-        <div class="nav-links">
-            <a href="#why">Why it matters</a>
-            <a href="#trend">Rising or falling</a>
-            <a href="#who">Who is affected</a>
-            <a href="#actions">Official actions</a>
-            <a href="#announcements">Announcements</a>
-            <a href="#download" class="download-link">Download the spreadsheet</a>
-            <a href="#sources">Sources</a>
+    <nav class="nav" aria-label="Pages">
+        <div class="nav-bar">
+            <a class="brand" href="index.html">Fentanyl deaths</a>
+            <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+        </div>
+        <div class="nav-links" id="site-nav">
+            <a href="index.html" aria-current="page">What this is</a>
+            <a href="trend.html">Rising or falling</a>
+            <a href="who.html">Who is affected</a>
+            <a href="actions.html">Official actions</a>
+            <a href="news.html">Announcements</a>
+            <a href="download.html">Download</a>
         </div>
     </nav>
-    <main id="content">
+    <main id="content" tabindex="-1">
         <header class="hero">
-            <h1>How many people are dying, and did that change after official actions?</h1>
-            <p class="lede">These pages use public death records, seizure totals, and family photos that were submitted to a DEA memorial. The drug category in the death records includes fentanyl and other synthetic opioids. It does not include methadone, and it is not a fentanyl-only count.</p>
-            <p class="meta" id="as-of">Loading the latest extract…</p>
+            <p class="eyebrow">What this is</p>
+            <h1>What is fentanyl, and why does it matter?</h1>
+            <p class="lede">Fentanyl is a synthetic opioid. Pharmaceutical fentanyl is used in medicine for severe pain. The increase in deaths over the last decade is tied to illicit fentanyl, which is often pressed into pills or mixed into other drugs. <a href="https://www.dea.gov/factsheets/fentanyl">DEA's fentanyl fact sheet</a> describes that difference.</p>
+            <p class="lede">The death counts on this site are not a fentanyl-only number. CDC publishes them as synthetic opioids, excluding methadone. That group includes fentanyl and other synthetics such as tramadol. <a href="https://www.cdc.gov/nchs/nvss/vsrr/drug-overdose-data.htm">CDC's overdose page</a> explains why recent months are still provisional.</p>
         </header>
-
-        <div class="stats" id="stats"></div>
-
+        <ol class="path">
+            <li><div class="path-item" aria-current="page"><span class="step">1</span><span>What this is</span></div></li>
+            <li><a class="path-item" href="trend.html"><span class="step">2</span><span>Are deaths rising or falling?</span></a></li>
+            <li><a class="path-item" href="who.html"><span class="step">3</span><span>Who is affected, and who is responding?</span></a></li>
+            <li><a class="path-item" href="actions.html"><span class="step">4</span><span>Did an official action line up with a change?</span></a></li>
+            <li><a class="path-item" href="news.html"><span class="step">5</span><span>Official announcements</span></a></li>
+            <li><a class="path-item" href="download.html"><span class="step">6</span><span>Download the spreadsheet</span></a></li>
+        </ol>
         <section id="why">
-            <h2>Why this matters</h2>
-            <p>Fentanyl is a synthetic opioid. Pharmaceutical fentanyl is used in medicine for severe pain. The increase in deaths over the last decade is tied to illicit fentanyl, which is often pressed into pills or mixed into other drugs. <a href="https://www.dea.gov/factsheets/fentanyl">DEA's fentanyl fact sheet</a> describes that difference. CDC publishes the death counts used here as "synthetic opioids, excluding methadone." <a href="https://www.cdc.gov/nchs/nvss/vsrr/drug-overdose-data.htm">CDC's overdose page</a> explains why recent months are still provisional.</p>
+            <h2>Deaths per 1,000 people per year</h2>
+            <p>The same formula is used for every bar: deaths ÷ years ÷ population × 1,000. War rows are U.S. military deaths. COVID-19 is death certificates that mention COVID-19. The 2024 bar is the synthetic-opioid category, for one year. These are different kinds of death. The chart only lines up the rate.</p>
             <div class="panel">
-                <h3>Deaths per 1,000 people per year</h3>
-                <p class="note">Same formula for every bar: deaths ÷ years ÷ population × 1,000. War rows are U.S. military deaths. COVID-19 is death certificates that mention COVID-19. The 2024 bar is the synthetic-opioid category above, for one year. The inputs are in the sources.</p>
-                <div class="chart-box short"><canvas id="comparison-chart"></canvas></div>
-                <p class="note" id="comparison-summary"></p>
-            </div>
-        </section>
-
-        <section id="trend">
-            <h2>Are deaths rising or falling?</h2>
-            <p>Each point is the estimated number of people who died that month. Where CDC has finished the death certificates, the point is that official count. After the last finished year, the point is estimated from the change in CDC's 12-month total. The vertical lines are dates of official actions. A line is a date, not proof the action caused a change.</p>
-            <div class="toolbar">
-                <button type="button" id="range-recent" aria-pressed="true">From 2015</button>
-                <button type="button" id="range-all" aria-pressed="false">Back to 1999</button>
-            </div>
-            <div class="panel">
-                <div class="chart-box"><canvas id="monthly-chart"></canvas></div>
-                <p class="note" id="monthly-summary"></p>
-            </div>
-            <div class="panel">
-                <h3>Change over the past year, by state</h3>
-                <p class="note">This map uses the 12-month total, not the monthly estimate. It compares the latest month with the same month a year earlier. States CDC did not publish are gray. A blank count is left out. It is not treated as zero.</p>
-                <div class="map-layout">
-                    <div>
-                        <svg id="state-map" viewBox="0 0 975 610" role="img" aria-label="Map of the change in deaths by state"></svg>
-                        <div class="map-legend">
-                            <span class="swatch" style="background:#1f6b4a"></span> down
-                            <span class="swatch" style="background:#f4f1ea; border:1px solid #e2d9cc"></span> little change
-                            <span class="swatch" style="background:#8c2f2f"></span> up
-                            <span class="swatch" style="background:#d9d4cc"></span> not published
-                        </div>
-                    </div>
-                    <div>
-                        <h3>Largest changes</h3>
-                        <div id="state-list"></div>
-                    </div>
+                <div class="chart-box short">
+                    <canvas id="comparison-chart" role="img" aria-label="Horizontal bar chart of deaths per 1,000 people per year. The synthetic-opioid bar is dark red. The other events are stone colored."></canvas>
                 </div>
+                <p class="note" id="comparison-summary">Loading the comparison…</p>
+                <details>
+                    <summary>View these numbers as a table</summary>
+                    <div id="comparison-table" class="table-scroll"></div>
+                </details>
+                <p class="source">Source: <a href="methods/comparison_per_1000.md">how the rates are calculated</a> and <a href="comparison_per_1000.csv">the inputs</a>.</p>
             </div>
         </section>
-
-        <section id="who">
-            <h2>Who is affected, and who is responding</h2>
-            <div class="split">
-                <div class="panel">
-                    <h3>Age in the latest finished year</h3>
-                    <p class="note">Final death certificates, 2024. Ten-year age groups from CDC WONDER.</p>
-                    <div class="chart-box short"><canvas id="age-chart"></canvas></div>
-                </div>
-                <div class="panel">
-                    <h3>Share of 2024 drug-poisoning deaths</h3>
-                    <p class="note" id="share-text">Loading…</p>
-                </div>
-            </div>
-            <div class="panel">
-                <h3>Race on the death certificate and race in the Census</h3>
-                <p class="note">Both sides are race alone for 2024. Hispanic origin is not separated, so Hispanic and non-Hispanic people are inside each race. The bars are shares, not a claim about why they differ.</p>
-                <div class="chart-box"><canvas id="race-chart"></canvas></div>
-            </div>
-            <div class="panel">
-                <h3>People whose families shared a photo with DEA</h3>
-                <p class="note">These first names, ages, states, and photos were submitted to <a href="https://fof.dea.gov/exhibit">DEA's Faces of Fentanyl exhibit</a>. Families acknowledge DEA's privacy policy, and they can ask DEA to remove a photo. This site does not copy the image files. If a photo leaves the exhibit, it leaves this page on the next update. This is not a full count of everyone who died.</p>
-                <div class="people" id="people"></div>
-                <div class="toolbar">
-                    <button type="button" id="people-prev">Previous</button>
-                    <button type="button" id="people-next">Next</button>
-                    <span class="note" id="people-count"></span>
-                </div>
-            </div>
-            <div class="split">
-                <div class="panel">
-                    <h3>Fentanyl seized by Customs and Border Protection</h3>
-                    <p class="note">Pounds CBP reports seizing. This is not a measure of how much got through. Field offices are added up to a region.</p>
-                    <div class="chart-box short"><canvas id="seizure-chart"></canvas></div>
-                </div>
-                <div class="panel">
-                    <h3>Where those seizures were counted</h3>
-                    <div class="chart-box short"><canvas id="region-chart"></canvas></div>
-                </div>
-            </div>
-            <div class="panel">
-                <h3>Budget lines, as printed</h3>
-                <p class="note">These are different kinds of lines from different years. They are not pieces of one fentanyl budget, and they should not be added together.</p>
-                <div class="chart-box short"><canvas id="budget-chart"></canvas></div>
-            </div>
-            <div class="panel quotes" id="supply"></div>
-        </section>
-
-        <section id="actions">
-            <h2>Did an official action line up with a change?</h2>
-            <p>The lines on the death chart are the dates below. Read them next to the monthly counts. This page does not decide whether an action worked.</p>
-            <div class="panel">
-                <div class="chart-box"><canvas id="policy-chart"></canvas></div>
-            </div>
-            <div class="panel" style="overflow-x:auto">
-                <table id="action-table">
-                    <thead>
-                        <tr><th>Date</th><th>Action</th><th>Who</th><th>Source</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </section>
-
-        <section id="announcements">
-            <h2>Official announcements</h2>
-            <p class="note">Agency releases that mention fentanyl. This is not a ranking of news outlets.</p>
-            <div class="panel" id="news-list"></div>
-        </section>
-
-        <section id="download">
-            <h2>Download the monthly spreadsheet</h2>
-            <p>One row is one month for the United States. Column names are ordinary words. You can open it in a spreadsheet and do your own analysis.</p>
-            <p><a class="button primary" href="deaths_by_month.csv">Download deaths_by_month.csv</a></p>
-            <div class="panel" style="overflow-x:auto">
-                <table>
-                    <thead><tr><th>Column</th><th>What it means</th></tr></thead>
-                    <tbody>
-                        <tr><td>Month</td><td>The calendar month, written as year-month.</td></tr>
-                        <tr><td>Estimated deaths</td><td>Deaths that month. See the next column for whether it is an official count or an estimate.</td></tr>
-                        <tr><td>How this number was produced</td><td>Either "Official final count" or "Estimated from the change in the 12-month total."</td></tr>
-                        <tr><td>Deaths per 100,000</td><td>Deaths that month for every 100,000 people. This is not a yearly rate.</td></tr>
-                        <tr><td>Change from the previous month</td><td>This month's deaths minus the month before.</td></tr>
-                        <tr><td>Change from the same month a year earlier</td><td>This month's deaths minus that month one year earlier.</td></tr>
-                        <tr><td>Change in the 12-month total</td><td>The arithmetic CDC's rolling total implies. It equals this month minus the same month a year earlier when both totals are complete. Kept so the estimate can be checked.</td></tr>
-                        <tr><td>Official actions that month</td><td>Actions whose source date falls in the month. Blank means none in the list.</td></tr>
-                        <tr><td>Source</td><td>Where the death number came from.</td></tr>
-                        <tr><td>Note</td><td>What the category includes, and a warning if an estimate fell below zero.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <p class="note">A number below zero is not a count of deaths. It means a provisional total was revised. The method is written out in <a href="methods/monthly_deaths.md">monthly_deaths.md</a>.</p>
-        </section>
-
-        <section id="sources">
-            <h2>Sources</h2>
-            <ul>
-                <li>Layout of these pages: <a href="Fentanyl_Project_Overview_and_Initial_Design.md">Fentanyl Project Overview and Initial Design</a>.</li>
-                <li>Monthly deaths: <a href="methods/monthly_deaths.md">how the estimate is made</a>.</li>
-                <li>Comparison chart: <a href="methods/comparison_per_1000.md">deaths per 1,000</a> and <a href="comparison_per_1000.csv">the inputs</a>.</li>
-                <li>Age, race, and the overdose share: <a href="methods/who_is_affected.md">who is affected</a>.</li>
-                <li>Official actions: <a href="policy_actions.csv">policy_actions.csv</a>.</li>
-                <li>Budgets: <a href="agency_budgets.csv">agency_budgets.csv</a>.</li>
-                <li>Supply sentences: <a href="sources/supply_context.md">DEA National Drug Threat Assessment quotations</a>.</li>
-                <li>Seizures: <a href="https://www.cbp.gov/document/stats/nationwide-drug-seizures">CBP Nationwide Drug Seizures</a>.</li>
-                <li>Photos: <a href="https://fof.dea.gov/exhibit">DEA Faces of Fentanyl</a>.</li>
-            </ul>
-        </section>
-
-        <section id="research">
-            <h2>For researchers</h2>
-            <p>The files above are the plain versions. The technical extracts keep CDC's own columns, including months the agency left blank. A blank is not a zero. Do not add 12-month totals across months. Do not add final monthly deaths into the 12-month column.</p>
-            <ul>
-                <li><a href="fact_fentanyl_deaths_over_time.csv">Provisional 12-month file</a></li>
-                <li><a href="fact_nvss_final_t40_4.csv">Final death-certificate file</a></li>
-                <li><a href="cbp_fentanyl_seizures.csv">CBP fentanyl seizures by year, component, and region</a></li>
-                <li><a href="faces_of_fentanyl.csv">Exhibit listing (names and DEA image links, not image files)</a></li>
-                <li><a href="dbt/index.html">Pipeline documentation</a></li>
-            </ul>
-        </section>
+        <p class="next"><a href="trend.html">Next: Are deaths rising or falling?</a></p>
+        <p class="meta" id="status" role="status"></p>
+        <noscript><p class="note">The chart needs JavaScript. The source file linked above can still be opened.</p></noscript>
     </main>
     <footer class="footer">
         <p>Each count is a person. Confirm figures with the agency that published them before using them for a decision.</p>
+        <p><a href="design.html">How this site is laid out</a></p>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-    <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="app.js"></script>
 </body>
