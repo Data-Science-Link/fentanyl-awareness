@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download deaths by month, state, and year — Fentanyl deaths</title>
+    <title>Download deaths by month, state, and year — Fentanyl Awareness</title>
     <meta name="description" content="A plain CSV of synthetic-opioid deaths by month, state, and year, refreshed every Monday when CDC posts a new month.">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
@@ -12,14 +12,16 @@
     <a class="skip" href="#content">Skip to content</a>
     <nav class="nav" aria-label="Pages">
         <div class="nav-bar">
-            <a class="brand" href="index.html">Fentanyl deaths</a>
+            <a class="brand" href="index.html">Fentanyl Awareness</a>
             <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
         </div>
         <div class="nav-links" id="site-nav">
-            <a href="index.html">Why this exists</a>
+            <a href="index.html">Start</a>
+            <span class="nav-label">Learn</span>
+            <a href="who.html">About fentanyl</a>
             <a href="trend.html">Better or worse</a>
-            <a href="who.html">Lives lost</a>
             <a href="actions.html">Public policy</a>
+            <span class="nav-label">Data</span>
             <a href="download.html" aria-current="page">Download</a>
         </div>
     </nav>
@@ -28,7 +30,13 @@
             <p class="eyebrow">For analysts</p>
             <h1>A dataset by month, state, and year</h1>
             <p class="lede">The file is meant to be used. One row is one geography and one month. Finished months are the death certificate. Later months keep CDC's preliminary 12-month total, labeled as preliminary, so the series does not stop at the last final year. Column names are ordinary words.</p>
+            <p>This is the path for analysts and developers. Download the file if you want the numbers. Open the repository if you want the code that builds them. Either way, you can skip assembling CDC's SODA API and the WONDER request form yourself.</p>
+            <div class="toolbar">
+                <a class="button primary" href="deaths_by_state_month.csv" download>Download the dataset</a>
+                <a class="button" href="https://github.com/Data-Science-Link/fentanyl-awareness">Open the repository</a>
+            </div>
             <p class="note" data-freshness>Checking how current the CDC files are…</p>
+            <p>If you want the explanation instead, start with <a href="who.html">what fentanyl is</a>.</p>
         </header>
         <nav class="on-page" aria-label="On this page">
             <a href="#state-file">Month, state, and year</a>

@@ -16,7 +16,7 @@ Strong public-data sites separate a question, a chart, and a source. They treat 
 
 ## Five pages, in the order of the story
 
-The site starts with why it exists. The question — is the fentanyl crisis getting better or worse? — was hard to piece together. The deaths sit in more than one CDC file, recent months are preliminary, and there was no plain dashboard. The site also explains what fentanyl is, sets public policy actions next to the counts, and publishes a dataset by month, state, and year that the Monday job refreshes when CDC posts a new month. The counts are people. That is the reason to keep them visible.
+The site is called Fentanyl Awareness. It starts with the question — is the fentanyl crisis getting better or worse? — because that was hard to piece together. The deaths sit in more than one CDC file, recent months are preliminary, and there was no plain dashboard. The first page answers that question, says why the site was built, and then offers two paths. One path explains what fentanyl is, who died, and which public actions people look at. The other is for analysts and developers: a dataset by month, state, and year, or the open source repository that builds it, so they do not have to start from CDC's interfaces. The Monday job refreshes the file when CDC posts a new month. The counts are people. That is the reason to keep them visible.
 
 A single page gave every part the same weight. On a phone, the download sat under the memorial and the charts. A screen reader had one title for several questions.
 
@@ -24,11 +24,11 @@ Each story page has its own title and a next link. The header is the same list o
 
 | Page | File | What the page is for | What the reader does there |
 | --- | --- | --- | --- |
-| Why this exists | `website/index.html` | The question, and why the site was built | Reads whether deaths are lower or higher than a year earlier, what fentanyl is, and the four reasons for the site |
+| Start | `website/index.html` | The question, why the site was built, and the two paths | Reads whether deaths are lower or higher than a year earlier, then chooses to learn about fentanyl or take the data |
 | Better or worse | `website/trend.html` | Is it going up or down? | Reads finished months and later preliminary estimates, and the state change |
-| Lives lost | `website/who.html` | Who died? | Reads the memorial, age, race, and the death share, then seizures and budget lines |
+| About fentanyl | `website/who.html` | What is fentanyl, and who died? | Reads what fentanyl is, the memorial, age, race, and the death share, then seizures and budget lines |
 | Public policy | `website/actions.html` | Did a border, enforcement, supply-chain, or China action line up with a change? | Reads the monthly series with those dates, and the count that month and a year later. The page does not decide whether the action worked |
-| Download | `website/download.html` | A file other analysts can use | Takes `deaths_by_state_month.csv`, by month, state, and year, and `deaths_by_month.csv` |
+| Download | `website/download.html` | A file, or the code that builds it | Takes `deaths_by_state_month.csv`, by month, state, and year, and `deaths_by_month.csv`, or opens the repository |
 
 The deaths-per-1,000 comparison with wars is no longer the front page. The inputs remain in `comparison_per_1000.csv`. The events on the chart are public policy actions.
 

@@ -74,8 +74,16 @@ def test_visuals_name_a_source_and_charts_are_labeled():
     assert "policy_actions.csv" in home.hrefs
     assert "comparison-chart" not in home.ids
     assert "getting better or worse" in home_text
+    assert "Fentanyl Awareness" in home_text
+    assert "Choose a path" in home_text
+    assert "Learn about fentanyl" in home_text
     assert "What fentanyl is" in home_text
+    assert "github.com/Data-Science-Link/fentanyl-awareness" in home_text
     assert "month, state, and year" in home_text
+    for name in PAGES:
+        page_text = (SITE / name).read_text()
+        assert "Fentanyl Awareness" in page_text
+        assert ">Fentanyl deaths<" not in page_text
     assert all(home.canvas_labels)
 
     trend = read_page("trend.html")
@@ -123,6 +131,8 @@ def test_download_keeps_the_plain_language_dictionary():
     assert "deaths_by_month.csv" in text
     assert "deaths_by_state_month.csv" in text
     assert "methods/monthly_deaths.md" in text
+    assert "github.com/Data-Science-Link/fentanyl-awareness" in text
+    assert "what fentanyl is" in text
 
 
 def test_layout_note_names_the_practice_and_the_five_pages():

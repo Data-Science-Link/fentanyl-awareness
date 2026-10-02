@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How this site is laid out — Fentanyl deaths</title>
+    <title>How this site is laid out — Fentanyl Awareness</title>
     <meta name="description" content="Why the fentanyl site is six pages, and how the charts, memorial, and download are meant to be read.">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
@@ -12,14 +12,16 @@
     <a class="skip" href="#content">Skip to content</a>
     <nav class="nav" aria-label="Pages">
         <div class="nav-bar">
-            <a class="brand" href="index.html">Fentanyl deaths</a>
+            <a class="brand" href="index.html">Fentanyl Awareness</a>
             <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
         </div>
         <div class="nav-links" id="site-nav">
-            <a href="index.html">Why this exists</a>
+            <a href="index.html">Start</a>
+            <span class="nav-label">Learn</span>
+            <a href="who.html">About fentanyl</a>
             <a href="trend.html">Better or worse</a>
-            <a href="who.html">Lives lost</a>
             <a href="actions.html">Public policy</a>
+            <span class="nav-label">Data</span>
             <a href="download.html">Download</a>
         </div>
     </nav>
@@ -44,7 +46,7 @@
         </section>
         <section>
             <h2>Five pages, in the order of the story</h2>
-            <p>The site starts with why it exists: the crisis was hard to measure, and the deaths are people. A single page gave every question the same weight. On a phone, the download sat under the memorial and the charts. Each page has its own title and a next link. Agency announcements stay available, linked from the policy page and the download, and are not one of the five story pages.</p>
+            <p>The site is called Fentanyl Awareness. The first page answers whether the crisis is getting better or worse, says why the site was built, and then offers two paths: learn about fentanyl, or take the data and the repository. A single page gave every question the same weight. On a phone, the download sat under the memorial and the charts. Each page has its own title. Agency announcements stay available, linked from the policy page and the download, and are not one of the five story pages.</p>
             <div class="panel table-scroll">
                 <table>
                     <caption>The five pages</caption>
@@ -52,11 +54,11 @@
                         <tr><th scope="col">Page</th><th scope="col">Question</th><th scope="col">What the reader does there</th></tr>
                     </thead>
                     <tbody>
-                        <tr><th scope="row"><a href="index.html">Why this exists</a></th><td>Is the crisis getting better or worse, and why is this site here?</td><td>Reads the answer, what fentanyl is, and the four reasons for the site.</td></tr>
+                        <tr><th scope="row"><a href="index.html">Start</a></th><td>Is the crisis getting better or worse, and why is this site here?</td><td>Reads the answer, then chooses a path: learn about fentanyl, or take the data.</td></tr>
                         <tr><th scope="row"><a href="trend.html">Better or worse</a></th><td>Are deaths rising or falling?</td><td>Reads finished months and later preliminary estimates, then the state change.</td></tr>
-                        <tr><th scope="row"><a href="who.html">Lives lost</a></th><td>Who died?</td><td>Reads the memorial, age, race, and the death share, then seizures and budget lines.</td></tr>
+                        <tr><th scope="row"><a href="who.html">About fentanyl</a></th><td>What is fentanyl, and who died?</td><td>Reads what fentanyl is, the memorial, age, race, and the death share, then seizures and budget lines.</td></tr>
                         <tr><th scope="row"><a href="actions.html">Public policy</a></th><td>Did a border, enforcement, supply-chain, or China action line up with a change?</td><td>Reads the count in an action’s month and the count a year later. The page does not decide whether the action worked.</td></tr>
-                        <tr><th scope="row"><a href="download.html">Download</a></th><td>Can someone else use the data?</td><td>Takes <code>deaths_by_state_month.csv</code>, by month, state, and year, plus <code>deaths_by_month.csv</code>.</td></tr>
+                        <tr><th scope="row"><a href="download.html">Download</a></th><td>Can someone else use the data?</td><td>Takes <code>deaths_by_state_month.csv</code> and <code>deaths_by_month.csv</code>, by month, state, and year, plus the repository that builds them.</td></tr>
                     </tbody>
                 </table>
             </div>
