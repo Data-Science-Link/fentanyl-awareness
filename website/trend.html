@@ -29,7 +29,7 @@
             <p class="eyebrow">Rising or falling</p>
             <h1>Are deaths rising or falling?</h1>
             <p class="answer" id="trend-answer">Loading the monthly counts…</p>
-            <p>Each point is the estimated number of people who died that month. Where CDC has finished the death certificates, the point is that official count, drawn as a solid line. After the last finished year, the point is estimated from the change in CDC's 12-month total, drawn as a dashed line. Vertical lines are dates of official actions. A line is a date, not proof the action caused a change. The <a href="actions.html">official actions</a> page reads those dates one by one.</p>
+            <p>Each point is the estimated number of people who died that month. Where CDC has finished the death certificates, the point is that official count, drawn as a solid line. After the last finished year, the point is estimated from the change in CDC's 12-month total, drawn as a dashed line. The estimate stays inside one kind of CDC total, so a switch from the reported total to the predicted total is not counted as deaths in a single month. Vertical lines are dates of official actions. A line is a date, not proof the action caused a change. The <a href="actions.html">official actions</a> page reads those dates one by one.</p>
         </header>
         <nav class="on-page" aria-label="On this page">
             <a href="#monthly">Monthly deaths</a>
@@ -57,12 +57,12 @@
                     <summary>View these months as a table</summary>
                     <div id="monthly-chart-data" class="table-scroll"></div>
                 </details>
-                <p class="source">Source: <a href="deaths_by_month.csv">deaths_by_month.csv</a>. <a href="methods/monthly_deaths.md">How the estimate is made</a>. A number below zero is not plotted. It is a revision, not a count of deaths.</p>
+                <p class="source">Source: <a href="deaths_by_month.csv">deaths_by_month.csv</a>. <a href="methods/monthly_deaths.md">How the estimate is made</a>. A month after the last finished year can move when CDC revises a provisional total. A number below zero is not plotted. It is a revision, not a count of deaths.</p>
             </div>
         </section>
         <section id="states">
             <h2>Change over the past year, by state</h2>
-            <p>This map uses the 12-month total, not the monthly estimate. It compares the latest month with the same month a year earlier. States CDC did not publish are gray. A blank count is left out. It is not treated as zero. The list and the table use the same numbers as the map.</p>
+            <p>This map is the percent change in the 12-month total, not the number of deaths in that month. It compares the latest month with the same month a year earlier, using the same kind of CDC total for both. States CDC did not publish are gray. A blank count is left out. It is not treated as zero. Louisiana is gray because CDC does not include it in this series. New York is the state outside New York City. CDC counts the city on its own, and this map does not add the city into the state. The list and the table use the same numbers as the map.</p>
             <div class="panel">
                 <div class="map-layout">
                     <div>

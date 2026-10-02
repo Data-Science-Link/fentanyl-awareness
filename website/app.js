@@ -294,7 +294,7 @@ function renderStats(monthly, provisional) {
     const cards = [
         ["Deaths in the latest month", latest ? comma(num(latest["Estimated deaths"])) : "—", latest ? latest.Month + " · " + latest["How this number was produced"] : ""],
         ["Compared with a year earlier", changeText, prior ? "Against " + prior.Month : "Same month, previous year"],
-        ["Deaths in the last 12 months", latestNation ? comma(num(latestNation.headline_deaths)) : "—", latestNation ? "CDC 12-month total ending " + monthLabel(latestNation.month) + ". Not a sum of the monthly chart." : ""]
+        ["Deaths in the last 12 months", latestNation ? comma(num(latestNation.headline_deaths)) : "—", latestNation ? twelveMonthDetail(latestNation) : ""]
     ];
     const stats = document.getElementById("stats");
     if (stats) {
@@ -306,6 +306,14 @@ function renderStats(monthly, provisional) {
     setStatus(extracted
         ? "Provisional CDC extract " + extracted + ". Final months use CDC WONDER."
         : "Latest month in the spreadsheet: " + (latest ? latest.Month : ""));
+}
+
+function twelveMonthDetail(row) {
+    const ending = monthLabel(row.month);
+    if (row.headline_basis === "predicted") {
+        return "CDC's predicted total for the 12 months ending " + ending + ". Recent death certificates are still coming in. Not a sum of the monthly chart.";
+    }
+    return "CDC's reported total for the 12 months ending " + ending + ". Not a sum of the monthly chart.";
 }
 
 function deathsInMonth(monthly, month) {
@@ -328,7 +336,7 @@ function renderComparison(rows) {
     const fentanyl = rows.find((row) => String(row.event || "").startsWith("Synthetic"));
     if (summary) {
         summary.textContent = fentanyl
-            ? "In " + String(fentanyl.start_date).slice(0, 4) + ", the synthetic-opioid category was " + fentanyl.deaths_per_1000_per_year + " deaths per 1,000 people. The dark red bar is that category. The other bars use the same formula for the years in the source file."
+            ? "In " + String(fentanyl.start_date).slice(0, 4) + ", the synthetic-opioid category was " + fentanyl.deaths_per_1000_per_year + " deaths per 1,000 people. The dark red bar is that category. War bars are service members, spread across the years in the source file. The Vietnam bar covers 1955 to 1975."
             : "The comparison file had no synthetic-opioid row.";
     }
     const canvas = document.getElementById("comparison-chart");
@@ -357,7 +365,7 @@ function renderComparison(rows) {
     });
 }
 
-function renderAge(rows) {
+function renderAge(rows, fullYearDeaths) {
     const summary = document.getElementById("age-summary");
     fillTable(
         "age-table",
@@ -370,7 +378,12 @@ function renderAge(rows) {
         rows.forEach((row) => {
             if ((num(row.deaths) || 0) > (num(peak.deaths) || 0)) peak = row;
         });
-        summary.textContent = "The largest ten-year group in " + rows[0].year + " was " + peak.group + " (" + comma(num(peak.deaths)) + " deaths).";
+        const total = rows.reduce((sum, row) => sum + (num(row.deaths) || 0), 0);
+        let text = "The largest group in " + rows[0].year + " was " + peak.group + " (" + comma(num(peak.deaths)) + " deaths). The youngest groups are shorter than ten years.";
+        if (fullYearDeaths && total !== fullYearDeaths) {
+            text += " These groups add up to " + comma(total) + ". The full year is " + comma(fullYearDeaths) + ". The chart does not fill in the difference.";
+        }
+        summary.textContent = text;
     }
     const canvas = document.getElementById("age-chart");
     if (!canvas || !window.Chart) return;
@@ -601,11 +614,25 @@ function renderBudgets(rows) {
     });
 }
 
+function seriesValue(row, basis) {
+    if (!row) return null;
+    if (basis === "predicted") {
+        const predicted = num(row.predicted_12_month_deaths);
+        if (predicted !== null) return predicted;
+    }
+    if (basis === "reported") {
+        const reported = num(row.rolling_12_month_deaths);
+        if (reported !== null) return reported;
+    }
+    return num(row.headline_deaths);
+}
+
 function stateChanges(provisional) {
     const states = provisional.filter((row) => row.geo_type === "state");
     const latest = states.reduce((max, row) => (row.month > max ? row.month : max), "");
     const priorMonth = monthShift(monthLabel(latest), -12) + "-01";
     const changes = [];
+    const bases = new Set();
     [...new Set(states.map((row) => row.state))].forEach((name) => {
         const current = states.find((row) => row.state === name && row.month === latest);
         const prior = states.find((row) => row.state === name && row.month === priorMonth);
@@ -613,15 +640,20 @@ function stateChanges(provisional) {
             changes.push({ state: name, pct: null });
             return;
         }
-        const now = num(current.headline_deaths);
-        const then = prior ? num(prior.headline_deaths) : null;
+        const basis = current.headline_basis || "reported";
+        const now = seriesValue(current, basis);
+        const then = seriesValue(prior, basis);
         if (now === null || then === null || then === 0) {
             changes.push({ state: name, pct: null });
             return;
         }
+        bases.add(basis);
         changes.push({ state: name, pct: ((now - then) / then) * 100 });
     });
-    return { latest: monthLabel(latest), changes };
+    const comparison = bases.has("predicted")
+        ? "Both months use CDC's predicted total, so a reporting adjustment is not counted as a change."
+        : "Both months use CDC's reported total.";
+    return { latest: monthLabel(latest), changes, comparison };
 }
 
 function colorFor(pct) {
@@ -641,7 +673,7 @@ function formatPercent(pct) {
 }
 
 async function renderMap(provisional) {
-    const { latest, changes } = stateChanges(provisional);
+    const { latest, changes, comparison } = stateChanges(provisional);
     const byName = Object.fromEntries(changes.map((row) => [row.state, row.pct]));
     const ranked = changes.filter((row) => row.pct !== null).sort((a, b) => a.pct - b.pct);
     const down = ranked.filter((row) => row.pct < 0).slice(0, 5);
@@ -649,7 +681,7 @@ async function renderMap(provisional) {
     const list = document.getElementById("state-list");
     const item = (row) => `<li>${escapeHtml(row.state)}: ${escapeHtml(formatPercent(row.pct))}</li>`;
     if (list) {
-        list.innerHTML = `<p class="note">12 months ending ${escapeHtml(latest)}, compared with a year earlier.</p>
+        list.innerHTML = `<p class="note">Percent change in the 12-month total ending ${escapeHtml(latest)}, compared with a year earlier. ${escapeHtml(comparison)}</p>
             <p><strong>Largest decreases</strong></p><ul>${down.map(item).join("")}</ul>
             <p><strong>Largest increases</strong></p><ul>${up.map(item).join("")}</ul>`;
     }
@@ -862,7 +894,8 @@ async function renderWho() {
         .sort((a, b) => String(a.first_name).localeCompare(String(b.first_name)) || String(a.state).localeCompare(String(b.state)));
     setupPeople();
     renderPeople();
-    renderAge(age);
+    const fullYear = share[0] ? num(share[0].t40_4_deaths) : null;
+    renderAge(age, fullYear);
     renderRace(raceDeaths, racePop);
     renderShare(share);
     renderSeizures(seizures);

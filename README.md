@@ -22,7 +22,7 @@ The fentanyl crisis in the United States is a profound tragedy. This project rep
 | Final source | CDC WONDER multiple-cause request form, labeled `NVSS final` (`D77` for 1999–2017, `D157` for 2018–latest final year) |
 | Indicator | Synthetic opioids, excl. methadone (**T40.4**). Includes fentanyl and other synthetics such as tramadol |
 | Provisional metric | **12-month ending** counts. Do not sum monthly rows. Recent months use CDC predicted counts in `headline_deaths` |
-| Monthly series | If a final NVSS month exists, that count is used. Later months use `deaths in month t = (12-month total at t − 12-month total at t−1) + deaths in month t−12`. See [`docs/methods/monthly_deaths.md`](docs/methods/monthly_deaths.md) |
+| Monthly series | If a final NVSS month exists, that count is used. Later months use `deaths in month t = (12-month total at t − 12-month total at t−1) + deaths in month t−12`. The change stays inside one CDC series, predicted or reported. See [`docs/methods/monthly_deaths.md`](docs/methods/monthly_deaths.md) |
 | Final metric | Incident deaths in a calendar year or month. Not derived from the rolling column |
 | Geography | States, DC, New York City, Puerto Rico, and a United States total. Filter on `geo_type` |
 | Known gap | Louisiana is not in T40.4 VSRR. The provisional file has an explicit `not_reportable` row. Final NVSS counts for Louisiana are in the final file |

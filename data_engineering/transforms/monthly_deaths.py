@@ -12,7 +12,10 @@ last final month, deaths in month t are estimated as:
     deaths_t = (H_t - H_{t-1}) + deaths_{t-12}
 
 H is the provisional headline count (CDC's predicted count when CDC already
-flags the month as incomplete).
+flags the month as incomplete, or when the month is inside the latest six
+months). The change from one month to the next stays inside one CDC series.
+A predicted total is not subtracted from a reported total. That gap is a
+reporting adjustment, not deaths in a single month.
 """
 
 from __future__ import annotations
@@ -39,12 +42,23 @@ def add_months(value: date, count: int) -> date:
     return date(start.year + index // 12, index % 12 + 1, 1)
 
 
+def _series_value(row, basis):
+    """Value to difference. Predicted months use predicted on both sides."""
+    if basis == "predicted" and row.get("predicted_deaths") is not None:
+        return int(row["predicted_deaths"])
+    if basis == "reported" and row.get("reported_deaths") is not None:
+        return int(row["reported_deaths"])
+    return int(row["headline_deaths"])
+
+
 def estimate_monthly_deaths(final_months, headline_months):
     """Build one national monthly series.
 
     final_months: mappings with month and deaths (official incident counts).
-    headline_months: mappings with month and headline_deaths. A lag is used
-    only when the previous headline row is the previous calendar month.
+    headline_months: mappings with month and headline_deaths. Optional
+    headline_basis, reported_deaths, and predicted_deaths keep the monthly
+    change inside one CDC series. A lag is used only when the previous
+    headline row is the previous calendar month.
 
     Final months are never replaced by an estimate. A negative estimate is
     kept and marked; it is a revision artifact, not a death count.
@@ -59,16 +73,18 @@ def estimate_monthly_deaths(final_months, headline_months):
     for row in headline_months:
         if row.get("headline_deaths") is None:
             continue
-        headline.append((month_start(row["month"]), int(row["headline_deaths"])))
-    headline.sort()
+        headline.append(row)
+    headline.sort(key=lambda row: month_start(row["month"]))
 
     lag = {}
-    for index, (month, value) in enumerate(headline):
+    for index, row in enumerate(headline):
         if index == 0:
             continue
-        previous_month, previous_value = headline[index - 1]
-        if previous_month == add_months(month, -1):
-            lag[month] = value - previous_value
+        month = month_start(row["month"])
+        previous = headline[index - 1]
+        if month_start(previous["month"]) == add_months(month, -1):
+            basis = row.get("headline_basis")
+            lag[month] = _series_value(row, basis) - _series_value(previous, basis)
 
     series = {
         month: {

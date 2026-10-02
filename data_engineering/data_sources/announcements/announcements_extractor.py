@@ -42,7 +42,7 @@ BASELINE = (
         "published": "2023-04-12",
         "title": "Fentanyl combined with xylazine designated an emerging threat",
         "publisher": "White House Office of National Drug Control Policy",
-        "url": "https://www.whitehouse.gov/ondcp/briefing-room/2023/04/12/biden-harris-administration-designates-fentanyl-combined-with-xylazine-as-an-emerging-threat-to-the-united-states/",
+        "url": "https://bidenwhitehouse.archives.gov/ondcp/briefing-room/2023/04/12/biden-harris-administration-designates-fentanyl-combined-with-xylazine-as-an-emerging-threat-to-the-united-states/",
     },
     {
         "published": "2023-03-13",
@@ -57,6 +57,29 @@ BASELINE = (
         "url": "https://www.cbp.gov/newsroom/national-media-release/statement-acting-commissioner-troy-miller-cbp-s-successful-fentanyl",
     },
 )
+
+
+def archived_cdc_release(url: str) -> str | None:
+    """CDC's old newsroom host now answers 404. The same page is on the archive host."""
+    text = (url or "").split("?")[0]
+    marker = "://www.cdc.gov/media/"
+    if marker not in text:
+        return None
+    return "https://archive.cdc.gov/www_cdc_gov/media/" + text.split(marker, 1)[1]
+
+
+def resolve_announcement_url(session, url: str) -> str:
+    """Keep a working link. A dead CDC newsroom page is replaced with the archive copy."""
+    try:
+        response = session.get(url, timeout=30, allow_redirects=True)
+    except Exception:
+        return url
+    final = str(getattr(response, "url", "") or "")
+    if getattr(response, "status_code", 200) >= 400:
+        archived = archived_cdc_release(final)
+        if archived:
+            return archived
+    return url
 
 
 def mentions_fentanyl(title: str, summary: str = "") -> bool:
@@ -170,7 +193,10 @@ def fetch_all(session, extracted_at: str) -> list[dict]:
             response = session.get(feed["url"], timeout=60)
             if response.status_code >= 400:
                 raise RuntimeError(f"HTTP {response.status_code}")
-            rows.extend(parse_rss(response.text, feed["publisher"], extracted_at))
+            parsed = parse_rss(response.text, feed["publisher"], extracted_at)
+            for row in parsed:
+                row["url"] = resolve_announcement_url(session, row["url"])
+            rows.extend(parsed)
             logger.info("%s: %s fentanyl items in this response", feed["publisher"], len(rows))
         except Exception as exc:
             logger.warning("%s feed failed (%s). Prior rows for that publisher are kept.", feed["publisher"], exc)

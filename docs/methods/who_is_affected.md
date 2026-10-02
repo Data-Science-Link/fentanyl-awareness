@@ -2,9 +2,9 @@
 
 ## Age
 
-The age chart is the 2024 final count of U.S. drug-poisoning deaths that also list ICD-10 T40.4, by ten-year age group, from CDC WONDER dataset D157. T40.4 is synthetic opioids other than methadone. It includes fentanyl and is not fentanyl alone.
+The age chart is the 2024 final count of U.S. drug-poisoning deaths that also list ICD-10 T40.4, from CDC WONDER dataset D157. WONDER labels the grouping ten-year age groups. The youngest bands are shorter than ten years: under 1, 1–4, and 5–14. T40.4 is synthetic opioids other than methadone. It includes fentanyl and is not fentanyl alone.
 
-The age groups in `wonder_age.csv` sum to 47,732. The annual United States total in the final death file for 2024 is 47,735. The three-death difference is left as WONDER published it. The chart does not adjust it.
+The age groups in `wonder_age.csv` sum to 47,732. The annual United States total in the final death file for 2024 is 47,735. The three-death difference is left as WONDER published it. The chart does not fill in the difference.
 
 ## Race
 
@@ -20,7 +20,7 @@ The July 1, 2024 total in the race table is 340,110,988. The population used for
 
 ## Share of drug-poisoning deaths
 
-`wonder_drug_share.csv` is drug-poisoning deaths in 2024 (underlying cause X40–X44, X60–X64, X85, Y10–Y14) and, beside that, the count of those deaths that also list T40.4. One death can list more than one drug. The share is not a slice of a pie, and the other drugs are not shown as the remainder.
+`wonder_drug_share.csv` is drug-poisoning deaths in 2024 (underlying cause X40–X44, X60–X64, X85, Y10–Y14) and, beside that, the count of those deaths that also list T40.4. The numerator is the full-year total, 47,735, the same total as the race table and the annual row in the final death file. It is not the age-group sum of 47,732. One death can list more than one drug. The share is not a slice of a pie, and the other drugs are not shown as the remainder.
 
 Source for the death tabulations: CDC WONDER, https://wonder.cdc.gov/mcd-icd10-expanded.html
 
