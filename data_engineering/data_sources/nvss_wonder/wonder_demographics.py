@@ -177,6 +177,23 @@ def _write(frame: pd.DataFrame, filename: str) -> None:
         logger.info("Wrote %s (%s rows)", path, len(frame))
 
 
+def _complete_sum(frame: pd.DataFrame) -> int | None:
+    """Sum of deaths when every group is present. None if any group was withheld."""
+    if frame is None or frame.empty or bool(frame["is_suppressed"].any()):
+        return None
+    if frame["deaths"].isna().any():
+        return None
+    return int(frame["deaths"].sum())
+
+
+def national_t40_deaths(age: pd.DataFrame, race: pd.DataFrame) -> int | None:
+    """Full-year total. Race groups include deaths an age group can omit."""
+    race_total = _complete_sum(race)
+    if race_total is not None:
+        return race_total
+    return _complete_sum(age)
+
+
 def extract(session, sleep=time.sleep) -> dict[str, pd.DataFrame]:
     extracted_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     action, fields, html = open_request_form(session, D157["page"])
@@ -198,16 +215,11 @@ def extract(session, sleep=time.sleep) -> dict[str, pd.DataFrame]:
     age = parse_grouped_export(age_csv, year, extracted_at)
     race = parse_grouped_export(race_csv, year, extracted_at)
     total = parse_grouped_export(total_csv, year, extracted_at)
-    t40 = int(age["deaths"].fillna(0).sum()) if not age["is_suppressed"].all() else None
-    # Prefer the unsuppressed T40.4 total from the age table only if every age is present.
-    # The national T40.4 total is the sum of age rows when none are suppressed.
     drug_total = None
     if not total.empty and not bool(total.iloc[0]["is_suppressed"]):
         drug_total = int(total.iloc[0]["deaths"])
-    if t40 is None or bool(age["is_suppressed"].any()):
-        t40_deaths = None
-    else:
-        t40_deaths = int(age["deaths"].sum())
+    # Age groups can omit a few deaths. The race total matches the annual file.
+    t40_deaths = national_t40_deaths(age, race)
     share = pd.DataFrame(
         [
             {

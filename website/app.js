@@ -131,7 +131,7 @@ function renderStats(monthly, provisional) {
     const cards = [
         ["Deaths in the latest month", latest ? comma(num(latest["Estimated deaths"])) : "—", latest ? latest.Month + " · " + latest["How this number was produced"] : ""],
         ["Change from a year earlier", yearChange === null ? "—" : (yearChange > 0 ? "+" : "") + comma(yearChange), "Same month, previous year"],
-        ["Deaths in the last 12 months", latestNation ? comma(num(latestNation.headline_deaths)) : "—", latestNation ? "12 months ending " + monthLabel(latestNation.month) : ""]
+        ["Deaths in the last 12 months", latestNation ? comma(num(latestNation.headline_deaths)) : "—", latestNation ? twelveMonthDetail(latestNation) : ""]
     ];
     document.getElementById("stats").innerHTML = cards.map(([label, value, detail]) =>
         `<div class="stat"><span>${label}</span><b>${value}</b><span>${detail}</span></div>`
@@ -140,6 +140,14 @@ function renderStats(monthly, provisional) {
     document.getElementById("as-of").textContent = extracted
         ? "Provisional CDC extract " + extracted + ". Final months use CDC WONDER."
         : "Latest month in the spreadsheet: " + (latest ? latest.Month : "");
+}
+
+function twelveMonthDetail(row) {
+    const ending = monthLabel(row.month);
+    if (row.headline_basis === "predicted") {
+        return "CDC's predicted total for the 12 months ending " + ending + ". Recent death certificates are still coming in.";
+    }
+    return "CDC's reported total for the 12 months ending " + ending;
 }
 
 function monthShift(label, delta) {
@@ -169,11 +177,21 @@ function renderComparison(rows) {
     });
     const fentanyl = rows.find((row) => row.event.startsWith("Synthetic"));
     document.getElementById("comparison-summary").textContent = fentanyl
-        ? "In " + fentanyl.start_date.slice(0, 4) + ", the synthetic-opioid category was " + fentanyl.deaths_per_1000_per_year + " deaths per 1,000 people. The other bars use the years and populations in the source file."
+        ? "In " + fentanyl.start_date.slice(0, 4) + ", the synthetic-opioid category was " + fentanyl.deaths_per_1000_per_year + " deaths per 1,000 people. War bars are service members, spread across the years in the source file. The Vietnam bar covers 1955 to 1975."
         : "";
 }
 
-function renderAge(rows) {
+function renderAge(rows, fullYearDeaths) {
+    const total = rows.reduce((sum, row) => sum + (num(row.deaths) || 0), 0);
+    const note = document.getElementById("age-note");
+    if (note) {
+        const year = rows[0] ? rows[0].year : "";
+        let text = "Final death certificates" + (year ? ", " + year : "") + ". The youngest groups are shorter than ten years.";
+        if (fullYearDeaths && total !== fullYearDeaths) {
+            text += " These groups add up to " + comma(total) + ". The full year is " + comma(fullYearDeaths) + ". The chart does not fill in the difference.";
+        }
+        note.textContent = text;
+    }
     destroyChart("age");
     charts.age = new Chart(document.getElementById("age-chart"), {
         type: "bar",
@@ -317,11 +335,25 @@ function renderBudgets(rows) {
     });
 }
 
+function seriesValue(row, basis) {
+    if (!row) return null;
+    if (basis === "predicted") {
+        const predicted = num(row.predicted_12_month_deaths);
+        if (predicted !== null) return predicted;
+    }
+    if (basis === "reported") {
+        const reported = num(row.rolling_12_month_deaths);
+        if (reported !== null) return reported;
+    }
+    return num(row.headline_deaths);
+}
+
 function stateChanges(provisional) {
     const states = provisional.filter((row) => row.geo_type === "state");
     const latest = states.reduce((max, row) => row.month > max ? row.month : max, "");
     const priorMonth = monthShift(monthLabel(latest), -12) + "-01";
     const changes = [];
+    const bases = new Set();
     const names = [...new Set(states.map((row) => row.state))];
     names.forEach((name) => {
         const current = states.find((row) => row.state === name && row.month === latest);
@@ -330,15 +362,20 @@ function stateChanges(provisional) {
             changes.push({ state: name, pct: null });
             return;
         }
-        const now = num(current.headline_deaths);
-        const then = prior ? num(prior.headline_deaths) : null;
+        const basis = current.headline_basis || "reported";
+        const now = seriesValue(current, basis);
+        const then = seriesValue(prior, basis);
         if (now === null || then === null || then === 0) {
             changes.push({ state: name, pct: null });
             return;
         }
+        bases.add(basis);
         changes.push({ state: name, pct: ((now - then) / then) * 100 });
     });
-    return { latest: monthLabel(latest), changes };
+    const comparison = bases.has("predicted")
+        ? "Both months use CDC's predicted total, so a reporting adjustment is not counted as a change."
+        : "Both months use CDC's reported total.";
+    return { latest: monthLabel(latest), changes, comparison };
 }
 
 function colorFor(pct) {
@@ -353,14 +390,14 @@ function colorFor(pct) {
 }
 
 async function renderMap(provisional) {
-    const { latest, changes } = stateChanges(provisional);
+    const { latest, changes, comparison } = stateChanges(provisional);
     const byName = Object.fromEntries(changes.map((row) => [row.state, row.pct]));
     const ranked = changes.filter((row) => row.pct !== null).sort((a, b) => a.pct - b.pct);
     const down = ranked.filter((row) => row.pct < 0).slice(0, 5);
     const up = ranked.filter((row) => row.pct > 0).reverse().slice(0, 5);
     const list = document.getElementById("state-list");
     const line = (row) => `<li>${row.state}: ${row.pct > 0 ? "+" : ""}${row.pct.toFixed(0)}%</li>`;
-    list.innerHTML = `<p class="note">12 months ending ${latest}, compared with a year earlier.</p>
+    list.innerHTML = `<p class="note">Percent change in the 12-month total ending ${latest}, compared with a year earlier. ${comparison}</p>
         <p><strong>Largest decreases</strong></p><ul>${down.map(line).join("")}</ul>
         <p><strong>Largest increases</strong></p><ul>${up.map(line).join("")}</ul>`;
     const svg = d3.select("#state-map");
@@ -407,7 +444,7 @@ function renderSupply() {
         <p class="note">Quoted from the 2025 National Drug Threat Assessment. A territory map is not drawn here, because DEA did not publish one as a dataset. <a href="sources/supply_context.md">Full quotations and page context</a>.</p>
         <blockquote><p>The Sinaloa Cartel and Jalisco New Generation Cartel … are the primary groups producing the illicit synthetic drugs driving U.S. drug poisoning deaths and trafficking these drugs into the United States.</p></blockquote>
         <blockquote><p>Mexican TCOs dominate fentanyl transportation into and through the United States, with the Southwest Border (SWB) as the main entry point for fentanyl entering the United States.</p></blockquote>
-        <p class="note">The seizure chart above is Customs and Border Protection's own pounds, by region. It is a separate series from the kilogram figure in the DEA report.</p>
+        <p class="note">DEA's threat assessment also cites kilograms seized by law enforcement at the southwest border. That is a different system from these Customs and Border Protection pounds. The two are not added together.</p>
     `;
 }
 
@@ -426,7 +463,7 @@ function renderPeople() {
     }).join("");
     const pages = Math.max(1, Math.ceil(people.length / PEOPLE_PAGE));
     document.getElementById("people-count").textContent = people.length
-        ? `Showing ${start + 1}–${Math.min(start + PEOPLE_PAGE, people.length)} of ${people.length}`
+        ? `Showing ${start + 1}–${Math.min(start + PEOPLE_PAGE, people.length)} of ${comma(people.length)} photos families sent to DEA`
         : "The exhibit listing is not in this copy of the site.";
     document.getElementById("people-prev").disabled = peoplePage === 0;
     document.getElementById("people-next").disabled = peoplePage >= pages - 1;
@@ -465,7 +502,8 @@ async function main() {
     summarizeMonths(monthly);
     drawMonthly("monthly-chart", monthly, actions, 2015);
     drawMonthly("policy-chart", monthly, actions, 2015);
-    renderAge(age);
+    const fullYear = share[0] ? num(share[0].t40_4_deaths) : null;
+    renderAge(age, fullYear);
     renderRace(raceDeaths, racePop);
     renderShare(share);
     renderSeizures(seizures);

@@ -33,6 +33,9 @@ with recursive headline as (
     select
         cast(month as date) as month
         , headline_deaths
+        , rolling_12_month_deaths
+        , predicted_12_month_deaths
+        , headline_basis
     from {{ ref('fact_fentanyl_deaths_over_time') }}
     where geo_type = 'nation'
       and headline_deaths is not null
@@ -42,9 +45,21 @@ headline_lag as (
     select
         month
         , headline_deaths
+        -- Stay inside one CDC series. A predicted total is not subtracted
+        -- from a reported total: that gap is a reporting adjustment.
         , case
             when lag(month) over (order by month) = month - interval 1 month
-                then headline_deaths - lag(headline_deaths) over (order by month)
+                then case
+                    when headline_basis = 'predicted'
+                        and predicted_12_month_deaths is not null
+                        and lag(predicted_12_month_deaths) over (order by month) is not null
+                        then predicted_12_month_deaths - lag(predicted_12_month_deaths) over (order by month)
+                    when headline_basis = 'reported'
+                        and rolling_12_month_deaths is not null
+                        and lag(rolling_12_month_deaths) over (order by month) is not null
+                        then rolling_12_month_deaths - lag(rolling_12_month_deaths) over (order by month)
+                    else headline_deaths - lag(headline_deaths) over (order by month)
+                end
           end as change_in_12_month_total
     from headline
 ),

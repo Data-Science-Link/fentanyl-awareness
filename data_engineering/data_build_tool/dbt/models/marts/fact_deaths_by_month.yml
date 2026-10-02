@@ -9,8 +9,10 @@ models:
 
       Months with a final NVSS count use that count (`Official final count`).
       Later months are estimated from the change in the provisional 12-month
-      headline total plus the count 12 months earlier. A negative estimate is
-      kept and flagged. It is not plotted as a death count.
+      total plus the count 12 months earlier. That change stays inside one
+      CDC series: a predicted month is differenced from the previous predicted
+      total, and a reported month from the previous reported total. A negative
+      estimate is kept and flagged. It is not plotted as a death count.
 
       The plain-language export is Final_Datasets/deaths_by_month.csv.
       The method note is docs/methods/monthly_deaths.md.

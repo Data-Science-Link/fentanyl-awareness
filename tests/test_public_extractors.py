@@ -1,15 +1,18 @@
 import pandas as pd
 
 from data_engineering.data_sources.announcements.announcements_extractor import (
+    archived_cdc_release,
     combine,
     mentions_fentanyl,
     parse_rss,
+    resolve_announcement_url,
 )
 from data_engineering.data_sources.cbp.cbp_extractor import aggregate_fentanyl, newest_dataset_url
 from data_engineering.data_sources.faces.faces_extractor import public_records
 from data_engineering.data_sources.nvss_wonder.wonder_demographics import (
     choose_group,
     group_options,
+    national_t40_deaths,
     parse_grouped_export,
 )
 
@@ -123,6 +126,33 @@ def test_announcements_keep_fentanyl_items_and_prior_publishers():
     assert "Drug Enforcement Administration" in publishers
     assert "Centers for Disease Control and Prevention" in publishers
     assert combined["url"].tolist().count("https://www.cdc.gov/example") == 1
+
+
+def test_dead_cdc_newsroom_link_points_at_the_archive():
+    assert archived_cdc_release(
+        "https://www.cdc.gov/media/releases/2018/p0329-drug-overdose-deaths.html"
+    ) == "https://archive.cdc.gov/www_cdc_gov/media/releases/2018/p0329-drug-overdose-deaths.html"
+    assert archived_cdc_release("https://www.dea.gov/press-releases/example") is None
+
+    class _Response:
+        status_code = 404
+        url = "https://www.cdc.gov/media/releases/2017/s1027-fentanyl-deaths.html"
+
+    class _Session:
+        def get(self, url, timeout=30, allow_redirects=True):
+            del url, timeout, allow_redirects
+            return _Response()
+
+    resolved = resolve_announcement_url(_Session(), "https://tools.cdc.gov/api/embed/downloader/download.asp?m=1")
+    assert resolved == "https://archive.cdc.gov/www_cdc_gov/media/releases/2017/s1027-fentanyl-deaths.html"
+
+
+def test_share_uses_the_full_year_total_not_the_age_group_sum():
+    age = pd.DataFrame({"deaths": [10, 20], "is_suppressed": [False, False]})
+    race = pd.DataFrame({"deaths": [10, 23], "is_suppressed": [False, False]})
+    assert national_t40_deaths(age, race) == 33
+    withheld = pd.DataFrame({"deaths": [10, None], "is_suppressed": [False, True]})
+    assert national_t40_deaths(age, withheld) == 30
 
 
 def test_wonder_group_choice_and_export():

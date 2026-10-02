@@ -57,7 +57,7 @@ Final incident T40.4 drug-overdose deaths, 1999 through the latest final year on
 python3 nvss_wonder/wonder_extractor.py
 ```
 
-Age, race, and the share of drug-poisoning deaths that also list T40.4 come from the same WONDER form, for the latest final year. If that request fails and a seed already exists, the job keeps the seed. The race categories are the ones WONDER returned. The Census crosswalk is written in `docs/methods/who_is_affected.md`.
+Age, race, and the share of drug-poisoning deaths that also list T40.4 come from the same WONDER form, for the latest final year. The share numerator is the race-group total, because an age grouping can omit a few deaths. If that request fails and a seed already exists, the job keeps the seed. The race categories are the ones WONDER returned. The Census crosswalk is written in `docs/methods/who_is_affected.md`.
 
 ```bash
 python3 nvss_wonder/wonder_demographics.py
