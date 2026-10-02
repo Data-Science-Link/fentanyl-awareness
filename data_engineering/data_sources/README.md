@@ -108,5 +108,7 @@ Census ACS   → census_extractor.py     → income and unemployment
 CBP CSV      → cbp_extractor.py        → fentanyl pounds by year, component, region
 DEA exhibit  → faces_extractor.py      → public memorial listing
 Agency feeds → announcements_extractor.py → fentanyl releases
-dbt          → fact_deaths_by_month    → deaths_by_month.csv
+dbt          → fact_deaths_by_month       → deaths_by_month.csv
+dbt          → fact_deaths_by_state_month → deaths_by_state_month.csv
+CDC metadata → freshness.py               → data_freshness.csv
 ```

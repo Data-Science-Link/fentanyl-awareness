@@ -13,7 +13,7 @@ How those questions are split into pages, and how the pages look, is decided in 
 
 * What is fentanyl and why is it important?
   * Text description
-  * Death toll per 1000 people for various events per year (WWII, WWI, Covid pandemic, vietnam war)
+  * The earlier deaths-per-1,000 comparison with wars is kept as a source file. The events shown on the site are public policy actions: border enforcement, immigration enforcement, supply-chain controls, and pressure on China
 * Is fentanyl use going up or down?
   * Time series of deaths
   * Map of % increase by state

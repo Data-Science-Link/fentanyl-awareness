@@ -115,12 +115,31 @@ function configureCharts() {
     Chart.defaults.font.size = 13;
     Chart.defaults.color = INK;
     Chart.defaults.borderColor = "#e2d9cc";
-    Chart.defaults.plugins.tooltip.backgroundColor = INK;
-    Chart.defaults.plugins.tooltip.padding = 10;
+    Chart.defaults.interaction.mode = "index";
+    Chart.defaults.interaction.intersect = false;
+    Chart.defaults.plugins.tooltip.enabled = false;
+    Chart.defaults.plugins.tooltip.external = externalTooltip;
     Chart.defaults.plugins.legend.labels.boxWidth = 12;
+    Chart.defaults.onHover = (event, elements, chart) => {
+        if (chart && chart.canvas) chart.canvas.style.cursor = elements && elements.length ? "crosshair" : "default";
+    };
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     Chart.defaults.animation = reduce ? false : { duration: 280 };
+    if (!Chart.defaults.transitions) Chart.defaults.transitions = {};
+    if (!Chart.defaults.transitions.active) Chart.defaults.transitions.active = {};
+    Chart.defaults.transitions.active.animation = { duration: 0 };
 }
+
+function barStyle(color) {
+    return {
+        backgroundColor: color,
+        hoverBackgroundColor: color === ACCENT ? INK : ACCENT,
+        borderWidth: 0,
+        hoverBorderWidth: 0
+    };
+}
+
+const ALONG_ROWS = { mode: "index", intersect: false, axis: "y" };
 
 function valueAxis(title) {
     const scale = {
@@ -153,18 +172,146 @@ function fillTable(id, headers, rows, caption) {
     node.innerHTML = `<table>${cap}${head}${body}</table>`;
 }
 
-function policyAnnotations(actions, labels) {
+function ensureVizTip() {
+    let tip = document.getElementById("viz-tip");
+    if (tip) return tip;
+    tip = document.createElement("div");
+    tip.id = "viz-tip";
+    tip.className = "viz-tip";
+    tip.setAttribute("role", "tooltip");
+    tip.hidden = true;
+    document.body.appendChild(tip);
+    window.addEventListener("scroll", hideVizTip, true);
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") hideVizTip();
+    });
+    return tip;
+}
+
+function showVizTip(lines, clientX, clientY) {
+    const tip = ensureVizTip();
+    const clean = (lines || []).map((line) => String(line || "").trim()).filter(Boolean);
+    if (!clean.length || clientX == null || clientY == null) {
+        hideVizTip();
+        return;
+    }
+    tip.innerHTML = clean.map((line, index) =>
+        `<p class="${index === 0 ? "viz-tip-title" : "viz-tip-line"}">${escapeHtml(line)}</p>`
+    ).join("");
+    tip.hidden = false;
+    tip.style.left = "0px";
+    tip.style.top = "0px";
+    const box = tip.getBoundingClientRect();
+    let left = clientX + 16;
+    let top = clientY + 18;
+    if (left + box.width > window.innerWidth - 8) left = clientX - box.width - 16;
+    if (top + box.height > window.innerHeight - 8) top = clientY - box.height - 16;
+    tip.style.left = Math.max(8, left) + "px";
+    tip.style.top = Math.max(8, top) + "px";
+}
+
+function hideVizTip() {
+    const tip = document.getElementById("viz-tip");
+    if (tip) tip.hidden = true;
+}
+
+function pushTipLines(lines, value) {
+    if (Array.isArray(value)) {
+        value.forEach((item) => pushTipLines(lines, item));
+        return;
+    }
+    if (value) lines.push(String(value));
+}
+
+function tooltipLines(tooltip) {
+    const lines = [];
+    pushTipLines(lines, tooltip.title);
+    pushTipLines(lines, tooltip.beforeBody);
+    (tooltip.body || []).forEach((part) => {
+        pushTipLines(lines, part.before);
+        pushTipLines(lines, part.lines);
+        pushTipLines(lines, part.after);
+    });
+    pushTipLines(lines, tooltip.afterBody);
+    pushTipLines(lines, tooltip.footer);
+    return lines;
+}
+
+function pointFromChartEvent(event, chart) {
+    const native = event && (event.native || event);
+    if (native && native.clientX != null) return { x: native.clientX, y: native.clientY };
+    if (chart && event && event.x != null) {
+        const rect = chart.canvas.getBoundingClientRect();
+        return { x: rect.left + event.x, y: rect.top + event.y };
+    }
+    return { x: null, y: null };
+}
+
+function externalTooltip(context) {
+    const tooltip = context && context.tooltip;
+    const chart = context && context.chart;
+    if (!tooltip || tooltip.opacity === 0 || !chart) {
+        hideVizTip();
+        return;
+    }
+    const rect = chart.canvas.getBoundingClientRect();
+    showVizTip(tooltipLines(tooltip), rect.left + tooltip.caretX, rect.top + tooltip.caretY);
+}
+
+function yearChangeLine(row) {
+    const delta = num(row["Change from the same month a year earlier"]);
+    if (delta === null) return "";
+    if (delta < 0) return comma(Math.abs(delta)) + " fewer than the same month a year earlier";
+    if (delta > 0) return comma(delta) + " more than the same month a year earlier";
+    return "Same number as a year earlier";
+}
+
+function monthTipLines(row, actions) {
+    if (!row) return [];
+    const lines = [row.Month];
+    if (isGap(row)) lines.push("Not plotted. The estimate fell below zero.");
+    else lines.push(comma(num(row["Estimated deaths"])) + " deaths");
+    if (row["How this number was produced"]) lines.push(row["How this number was produced"]);
+    const change = yearChangeLine(row);
+    if (change) lines.push(change);
+    const matched = (actions || []).filter((action) => monthLabel(action.action_date) === row.Month);
+    matched.forEach((action) => {
+        lines.push(action.action_date + " — " + action.title);
+        const who = [action.theme, action.actor].filter(Boolean).join(" · ");
+        if (who) lines.push(who);
+    });
+    if (matched.length) lines.push("A date is not proof an action changed the deaths.");
+    return lines;
+}
+
+function policyAnnotations(actions, labels, rows) {
     const annotations = {};
     actions.forEach((action, index) => {
         const label = monthLabel(action.action_date);
         if (!labels.includes(label)) return;
+        const show = (first, second) => {
+            const event = second && (second.native || second.clientX != null || second.x != null) ? second : first;
+            const chart = (first && first.chart) || (second && second.chart);
+            const point = pointFromChartEvent(event, chart);
+            const row = (rows || []).find((item) => item.Month === label);
+            showVizTip(monthTipLines(row, actions), point.x, point.y);
+        };
         annotations["line" + index] = {
             type: "line",
             xMin: label,
             xMax: label,
             borderColor: ACCENT,
             borderWidth: 1.5,
-            label: { display: false }
+            label: { display: false },
+            enter: show
+        };
+        annotations["hit" + index] = {
+            type: "line",
+            xMin: label,
+            xMax: label,
+            borderColor: "rgba(140, 47, 47, 0.02)",
+            borderWidth: 14,
+            enter: show
         };
     });
     return annotations;
@@ -198,7 +345,11 @@ function drawMonthly(canvasId, rows, actions, fromYear) {
                 backgroundColor: "rgba(28, 25, 21, 0.05)",
                 fill: true,
                 pointRadius: 0,
-                pointHoverRadius: 4,
+                pointHoverRadius: 6,
+                pointHitRadius: 14,
+                pointHoverBackgroundColor: ACCENT,
+                pointHoverBorderColor: "#fffdf8",
+                pointHoverBorderWidth: 2,
                 borderWidth: 2,
                 tension: 0.12,
                 spanGaps: false,
@@ -216,23 +367,49 @@ function drawMonthly(canvasId, rows, actions, fromYear) {
             interaction: { mode: "index", intersect: false },
             plugins: {
                 legend: { display: false },
-                annotation: { annotations: policyAnnotations(actions, labels) },
+                annotation: {
+                    interaction: { mode: "point", intersect: true },
+                    annotations: policyAnnotations(actions, labels, shown)
+                },
                 tooltip: {
                     callbacks: {
-                        label(item) {
-                            const value = item.parsed.y;
-                            return value === null || Number.isNaN(value) ? "Not plotted" : comma(value) + " deaths";
+                        title(items) {
+                            const row = shown[items[0].dataIndex];
+                            return row ? row.Month : "";
                         },
-                        afterLabel(item) {
+                        label(item) {
                             const row = shown[item.dataIndex];
-                            return row["How this number was produced"];
+                            if (!row || isGap(row)) return "Not plotted. The estimate fell below zero.";
+                            return comma(num(row["Estimated deaths"])) + " deaths";
+                        },
+                        afterBody(items) {
+                            const row = shown[items[0].dataIndex];
+                            if (!row) return [];
+                            return monthTipLines(row, actions).slice(2);
                         }
                     }
                 }
             },
             scales: {
                 y: valueAxis("Deaths that month"),
-                x: categoryAxis({ ticks: { color: INK, maxTicksLimit: 8 } })
+                x: categoryAxis({
+                    ticks: {
+                        color: INK,
+                        autoSkip: false,
+                        maxRotation: 0,
+                        callback(value, index) {
+                            const label = labels[index];
+                            if (!label) return "";
+                            const last = labels[labels.length - 1];
+                            if (index === labels.length - 1) return label;
+                            if (label.slice(0, 4) === last.slice(0, 4)) return "";
+                            if (index === 0) return label;
+                            if (!label.endsWith("-01")) return "";
+                            const step = labels.length > 200 ? 5 : 2;
+                            return Number(label.slice(0, 4)) % step === 0 ? label : "";
+                        }
+                    }
+                })
             }
         }
     });
@@ -325,44 +502,59 @@ function deathsInMonth(monthly, month) {
     return comma(value) + " (" + kind + ")";
 }
 
-function renderComparison(rows) {
-    const summary = document.getElementById("comparison-summary");
-    fillTable(
-        "comparison-table",
-        ["Event", "Deaths per 1,000 people per year", "What is counted", "Death source"],
-        rows.map((row) => [row.event, row.deaths_per_1000_per_year, row.what_is_counted, row.death_source_title]),
-        "Deaths per 1,000 people per year"
-    );
-    const fentanyl = rows.find((row) => String(row.event || "").startsWith("Synthetic"));
-    if (summary) {
-        summary.textContent = fentanyl
-            ? "In " + String(fentanyl.start_date).slice(0, 4) + ", the synthetic-opioid category was " + fentanyl.deaths_per_1000_per_year + " deaths per 1,000 people. The dark red bar is that category. War bars are service members, spread across the years in the source file. The Vietnam bar covers 1955 to 1975."
-            : "The comparison file had no synthetic-opioid row.";
-    }
-    const canvas = document.getElementById("comparison-chart");
-    if (!canvas || !window.Chart || !rows.length) return;
-    destroyChart("comparison");
-    charts.comparison = new Chart(canvas, {
-        type: "bar",
-        data: {
-            labels: rows.map((row) => row.event),
-            datasets: [{
-                label: "Deaths per 1,000 people per year",
-                data: rows.map((row) => num(row.deaths_per_1000_per_year)),
-                backgroundColor: rows.map((row) => String(row.event || "").startsWith("Synthetic") ? ACCENT : STONE)
-            }]
-        },
-        options: {
-            indexAxis: "y",
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: valueAxis("Deaths per 1,000 people per year"),
-                y: categoryAxis()
-            }
+function crisisAnswer(monthly) {
+    const usable = usableMonths(monthly);
+    if (!usable.length) return "";
+    const latest = usable[usable.length - 1];
+    const prior = usable.find((row) => row.Month === monthShift(latest.Month, -12));
+    const official = usable.filter((row) => !isEstimated(row));
+    const lastOfficial = official[official.length - 1];
+    const latestDeaths = num(latest["Estimated deaths"]);
+    let change = "";
+    if (prior) {
+        const delta = latestDeaths - num(prior["Estimated deaths"]);
+        if (delta < 0) {
+            change = " That is " + comma(Math.abs(delta)) + " fewer than " + prior.Month + ". On this measure, deaths are lower than a year earlier.";
+        } else if (delta > 0) {
+            change = " That is " + comma(delta) + " more than " + prior.Month + ". On this measure, deaths are higher than a year earlier.";
+        } else {
+            change = " That is the same number as " + prior.Month + ".";
         }
-    });
+    }
+    const layer = isEstimated(latest)
+        ? " " + latest.Month + " is a preliminary estimate, not a finished death certificate. Finished certificates in this file run through " + (lastOfficial ? lastOfficial.Month.slice(0, 4) : "the last final year") + "."
+        : " " + latest.Month + " is a finished death certificate.";
+    return "In " + latest.Month + ", " + comma(latestDeaths) + " people died in the synthetic-opioid category." + change + layer;
+}
+
+function renderFreshness(rows, monthly) {
+    const nodes = document.querySelectorAll("[data-freshness]");
+    if (!nodes.length) return;
+    const row = (rows || [])[0] || {};
+    let text = "";
+    if (row.latest_provisional_month && row.latest_final_year) {
+        const checked = String(row.checked_at || "").slice(0, 10);
+        text = "Finished death certificates run through " + row.latest_final_year
+            + ". Months after that use CDC's preliminary counts. CDC's newest published month in this copy is "
+            + row.latest_provisional_month
+            + (checked ? ", checked " + checked : "")
+            + ". The file is refreshed every Monday, and a new month is added when CDC has posted one.";
+    } else {
+        const usable = usableMonths(monthly || []);
+        const latest = usable[usable.length - 1];
+        const official = usable.filter((item) => !isEstimated(item));
+        const lastOfficial = official[official.length - 1];
+        if (lastOfficial && latest) {
+            text = "Finished death certificates run through " + lastOfficial.Month.slice(0, 4)
+                + ". The latest month in this file is " + latest.Month
+                + (isEstimated(latest) ? ", a preliminary estimate." : ".");
+        }
+    }
+    nodes.forEach((node) => { node.textContent = text; });
+}
+
+function loadOptionalCsv(name) {
+    return loadCsv(name).catch(() => []);
 }
 
 function renderAge(rows, fullYearDeaths) {
@@ -395,13 +587,31 @@ function renderAge(rows, fullYearDeaths) {
             datasets: [{
                 label: "Deaths",
                 data: rows.map((row) => num(row.deaths)),
-                backgroundColor: INK
+                ...barStyle(INK)
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title(items) {
+                            const row = rows[items[0].dataIndex];
+                            return row ? row.group : "";
+                        },
+                        label(item) {
+                            const row = rows[item.dataIndex];
+                            return comma(num(row.deaths)) + " deaths";
+                        },
+                        afterBody(items) {
+                            const row = rows[items[0].dataIndex];
+                            return row ? [row.year + ", final death certificates"] : [];
+                        }
+                    }
+                }
+            },
             scales: {
                 x: categoryAxis(),
                 y: valueAxis("Deaths")
@@ -438,15 +648,35 @@ function renderRace(deaths, population) {
         data: {
             labels: deaths.map((row) => row.group),
             datasets: [
-                { label: "Share of deaths", data: deathShare, backgroundColor: ACCENT },
-                { label: "Share of population", data: popShare, backgroundColor: STONE }
+                { label: "Share of deaths", data: deathShare, ...barStyle(ACCENT) },
+                { label: "Share of population", data: popShare, ...barStyle(STONE) }
             ]
         },
         options: {
             indexAxis: "y",
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: true } },
+            interaction: ALONG_ROWS,
+            plugins: {
+                legend: { display: true },
+                tooltip: {
+                    callbacks: {
+                        title(items) {
+                            const row = deaths[items[0].dataIndex];
+                            return row ? row.group : "";
+                        },
+                        label(item) {
+                            const value = item.parsed.x;
+                            const shown = value === null || value === undefined ? "Not published" : value.toFixed(1) + "%";
+                            if (item.datasetIndex === 0) {
+                                const row = deaths[item.dataIndex];
+                                return "Share of deaths: " + shown + " (" + comma(num(row.deaths)) + " deaths)";
+                            }
+                            return "Share of population: " + shown;
+                        }
+                    }
+                }
+            },
             scales: {
                 x: valueAxis("Percent"),
                 y: categoryAxis()
@@ -473,6 +703,21 @@ function renderShare(rows) {
     }
     if (fill && percent !== null) fill.style.width = Math.max(0, Math.min(100, percent)) + "%";
     if (meter && percent !== null) meter.setAttribute("aria-valuenow", percent.toFixed(1));
+    if (!meter) return;
+    const lines = [
+        String(row.year),
+        (percent === null ? "Share not published" : percent.toFixed(1) + "% of drug-poisoning deaths"),
+        comma(num(row.t40_4_deaths)) + " listed a synthetic opioid other than methadone",
+        comma(num(row.drug_poisoning_deaths)) + " drug-poisoning deaths"
+    ];
+    const show = (event) => showVizTip(lines, event.clientX, event.clientY);
+    meter.addEventListener("mousemove", show);
+    meter.addEventListener("mouseleave", hideVizTip);
+    meter.addEventListener("focus", () => {
+        const box = meter.getBoundingClientRect();
+        showVizTip(lines, box.left + 24, box.top + box.height);
+    });
+    meter.addEventListener("blur", hideVizTip);
 }
 
 function completeYears(rows) {
@@ -534,13 +779,26 @@ function renderSeizures(rows) {
                 datasets: components.map((component, index) => ({
                     label: component,
                     data: years.map((item) => componentTotals(item, component)),
-                    backgroundColor: colors[index % colors.length]
+                    ...barStyle(colors[index % colors.length])
                 }))
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: true } },
+                plugins: {
+                    legend: { display: true },
+                    tooltip: {
+                        callbacks: {
+                            title(items) { return years[items[0].dataIndex]; },
+                            label(item) {
+                                return item.dataset.label + ": " + pounds(item.parsed.y) + " pounds";
+                            },
+                            afterBody() {
+                                return ["Pounds CBP reports seizing. Not a measure of how much got through."];
+                            }
+                        }
+                    }
+                },
                 scales: {
                     x: categoryAxis(),
                     y: valueAxis("Pounds")
@@ -555,13 +813,25 @@ function renderSeizures(rows) {
             type: "bar",
             data: {
                 labels: regions,
-                datasets: [{ label: "Pounds", data: regionTotals, backgroundColor: INK }]
+                datasets: [{ label: "Pounds", data: regionTotals, ...barStyle(INK) }]
             },
             options: {
                 indexAxis: "y",
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                interaction: ALONG_ROWS,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title(items) { return regions[items[0].dataIndex]; },
+                            label(item) { return pounds(item.parsed.x) + " pounds"; },
+                            afterBody() {
+                                return ["Fiscal year " + year + ". Pounds seized, not pounds that got through."];
+                            }
+                        }
+                    }
+                },
                 scales: {
                     x: valueAxis("Pounds"),
                     y: categoryAxis()
@@ -588,17 +858,22 @@ function renderBudgets(rows) {
             datasets: [{
                 label: "Dollars",
                 data: rows.map((row) => num(row.amount_dollars)),
-                backgroundColor: INK
+                ...barStyle(INK)
             }]
         },
         options: {
             indexAxis: "y",
             responsive: true,
             maintainAspectRatio: false,
+            interaction: ALONG_ROWS,
             plugins: {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
+                        title(item) {
+                            const row = rows[item[0].dataIndex];
+                            return row.agency + ", FY" + row.fiscal_year;
+                        },
                         label(item) {
                             const row = rows[item.dataIndex];
                             return [money(num(row.amount_dollars)), row.line_name, row.amount_kind];
@@ -627,33 +902,56 @@ function seriesValue(row, basis) {
     return num(row.headline_deaths);
 }
 
+function blankChange(name) {
+    return { state: name, pct: null, now: null, then: null, basis: "" };
+}
+
 function stateChanges(provisional) {
     const states = provisional.filter((row) => row.geo_type === "state");
     const latest = states.reduce((max, row) => (row.month > max ? row.month : max), "");
-    const priorMonth = monthShift(monthLabel(latest), -12) + "-01";
+    const latestLabel = monthLabel(latest);
+    const priorLabel = monthShift(latestLabel, -12);
+    const priorMonth = priorLabel + "-01";
     const changes = [];
     const bases = new Set();
     [...new Set(states.map((row) => row.state))].forEach((name) => {
         const current = states.find((row) => row.state === name && row.month === latest);
         const prior = states.find((row) => row.state === name && row.month === priorMonth);
         if (!current || current.reporting_status === "not_reportable" || String(current.is_suppressed) === "true") {
-            changes.push({ state: name, pct: null });
+            changes.push(blankChange(name));
             return;
         }
         const basis = current.headline_basis || "reported";
         const now = seriesValue(current, basis);
         const then = seriesValue(prior, basis);
         if (now === null || then === null || then === 0) {
-            changes.push({ state: name, pct: null });
+            changes.push(blankChange(name));
             return;
         }
         bases.add(basis);
-        changes.push({ state: name, pct: ((now - then) / then) * 100 });
+        changes.push({ state: name, pct: ((now - then) / then) * 100, now, then, basis });
     });
     const comparison = bases.has("predicted")
         ? "Both months use CDC's predicted total, so a reporting adjustment is not counted as a change."
         : "Both months use CDC's reported total.";
-    return { latest: monthLabel(latest), changes, comparison };
+    return { latest: latestLabel, prior: priorLabel, changes, comparison };
+}
+
+function mapTipLines(row, latest, prior) {
+    if (!row) return ["Unknown", "Not published"];
+    if (row.pct === null) {
+        return [row.state, "Not published", "CDC did not publish a comparable 12-month total."];
+    }
+    const basis = row.basis === "predicted"
+        ? "Both months use CDC's predicted total."
+        : "Both months use CDC's reported total.";
+    return [
+        row.state,
+        formatPercent(row.pct) + " from a year earlier",
+        "12 months ending " + latest + ": " + comma(row.now),
+        "12 months ending " + prior + ": " + comma(row.then),
+        basis
+    ];
 }
 
 function colorFor(pct) {
@@ -672,9 +970,13 @@ function formatPercent(pct) {
     return (pct > 0 ? "+" : "") + pct.toFixed(0) + "%";
 }
 
+function stateName(feature) {
+    return FIPS[String(feature.id).padStart(2, "0")] || "Unknown";
+}
+
 async function renderMap(provisional) {
-    const { latest, changes, comparison } = stateChanges(provisional);
-    const byName = Object.fromEntries(changes.map((row) => [row.state, row.pct]));
+    const { latest, prior, changes, comparison } = stateChanges(provisional);
+    const byName = Object.fromEntries(changes.map((row) => [row.state, row]));
     const ranked = changes.filter((row) => row.pct !== null).sort((a, b) => a.pct - b.pct);
     const down = ranked.filter((row) => row.pct < 0).slice(0, 5);
     const up = ranked.filter((row) => row.pct > 0).reverse().slice(0, 5);
@@ -685,30 +987,78 @@ async function renderMap(provisional) {
             <p><strong>Largest decreases</strong></p><ul>${down.map(item).join("")}</ul>
             <p><strong>Largest increases</strong></p><ul>${up.map(item).join("")}</ul>`;
     }
+    const published = (value) => (value === null ? "Not published" : comma(value));
     fillTable(
         "state-table",
-        ["State", "Change in the 12-month total"],
-        changes.slice().sort((a, b) => a.state.localeCompare(b.state)).map((row) => [row.state, formatPercent(row.pct)]),
+        ["State", "Change in the 12-month total", "12-month total", "A year earlier"],
+        changes.slice().sort((a, b) => a.state.localeCompare(b.state)).map((row) => [
+            row.state,
+            formatPercent(row.pct),
+            published(row.now),
+            published(row.then)
+        ]),
         "Percent change by state, 12 months ending " + latest
     );
+    const readout = document.getElementById("map-readout");
+    if (readout) readout.textContent = "Select a state to keep its totals on the page.";
     const svg = window.d3 ? d3.select("#state-map") : null;
     if (!svg || svg.empty()) return;
     svg.selectAll("*").remove();
-    svg.attr("aria-label", "Map of the percent change in the 12-month death total by state, ending " + latest + ". Gray means not published.");
+    svg.attr("role", "group");
+    svg.attr("aria-label", "Map of the percent change in the 12-month death total by state, ending " + latest + ". Gray means not published. Hover or focus a state for both totals.");
     try {
         const atlas = await d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json");
         const states = topojson.feature(atlas, atlas.objects.states);
         const path = d3.geoPath(d3.geoAlbersUsa());
+        const rowFor = (feature) => byName[stateName(feature)] || blankChange(stateName(feature));
+        let selected = null;
+        const pin = (row) => {
+            if (selected === row.state) {
+                selected = null;
+                svg.selectAll("path").classed("is-selected", false);
+                if (readout) readout.textContent = "Select a state to keep its totals on the page.";
+                return;
+            }
+            selected = row.state;
+            svg.selectAll("path").classed("is-selected", (feature) => stateName(feature) === row.state);
+            if (readout) readout.textContent = mapTipLines(row, latest, prior).join(" ");
+        };
         svg.selectAll("path")
             .data(states.features)
             .join("path")
             .attr("d", path)
-            .attr("fill", (feature) => colorFor(byName[FIPS[String(feature.id).padStart(2, "0")]] ?? null))
+            .attr("fill", (feature) => colorFor(rowFor(feature).pct))
             .attr("stroke", "#fffdf8")
+            .attr("tabindex", "0")
+            .attr("role", "button")
+            .attr("aria-label", (feature) => mapTipLines(rowFor(feature), latest, prior).join(". "))
+            .on("mouseenter", function () { d3.select(this).classed("is-hot", true); })
+            .on("mousemove", (event, feature) => {
+                showVizTip(mapTipLines(rowFor(feature), latest, prior), event.clientX, event.clientY);
+            })
+            .on("mouseleave", function () {
+                d3.select(this).classed("is-hot", false);
+                hideVizTip();
+            })
+            .on("click", (event, feature) => {
+                const row = rowFor(feature);
+                pin(row);
+                showVizTip(mapTipLines(row, latest, prior), event.clientX, event.clientY);
+            })
+            .on("focus", function (event, feature) {
+                const box = this.getBoundingClientRect();
+                showVizTip(mapTipLines(rowFor(feature), latest, prior), box.left + box.width / 2, box.top + 8);
+            })
+            .on("blur", hideVizTip)
+            .on("keydown", (event, feature) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                pin(rowFor(feature));
+            })
             .append("title")
             .text((feature) => {
-                const name = FIPS[String(feature.id).padStart(2, "0")] || "Unknown";
-                return name + ": " + formatPercent(byName[name]);
+                const row = rowFor(feature);
+                return row.state + ": " + formatPercent(row.pct);
             });
     } catch (error) {
         svg.append("text").attr("x", 20).attr("y", 40).text("The map could not be loaded. The list and the table are still complete.");
@@ -728,6 +1078,7 @@ function renderActions(actions, monthly) {
             : escapeHtml(row.source_title || "");
         return `<tr>
             <th scope="row">${escapeHtml(row.action_date)}</th>
+            <td>${escapeHtml(row.theme || "")}</td>
             <td>${escapeHtml(row.title)}<br><span class="note">${escapeHtml(row.summary)}</span></td>
             <td>${escapeHtml(row.actor)}</td>
             <td>${escapeHtml(deathsInMonth(monthly, month) || "Not in the file")}</td>
@@ -735,6 +1086,42 @@ function renderActions(actions, monthly) {
             <td>${source}</td>
         </tr>`;
     }).join("");
+}
+
+function bindPolicyControls(chartId, monthly, actions) {
+    let fromYear = 2015;
+    let theme = "All";
+    const redraw = () => {
+        const shown = theme === "All" ? actions : actions.filter((action) => action.theme === theme);
+        drawMonthly(chartId, monthly, shown, fromYear);
+        renderActions(shown, monthly);
+    };
+    document.querySelectorAll("[data-theme]").forEach((button) => {
+        button.addEventListener("click", () => {
+            theme = button.getAttribute("data-theme") || "All";
+            document.querySelectorAll("[data-theme]").forEach((other) => {
+                other.setAttribute("aria-pressed", other === button ? "true" : "false");
+            });
+            redraw();
+        });
+    });
+    const recent = document.getElementById("range-recent");
+    const all = document.getElementById("range-all");
+    if (recent && all) {
+        recent.addEventListener("click", () => {
+            fromYear = 2015;
+            recent.setAttribute("aria-pressed", "true");
+            all.setAttribute("aria-pressed", "false");
+            redraw();
+        });
+        all.addEventListener("click", () => {
+            fromYear = 1999;
+            all.setAttribute("aria-pressed", "true");
+            recent.setAttribute("aria-pressed", "false");
+            redraw();
+        });
+    }
+    redraw();
 }
 
 function formatDate(value) {
@@ -862,18 +1249,33 @@ function bindMenu() {
 }
 
 async function renderHome() {
-    const comparison = await loadCsv("comparison_per_1000.csv");
-    renderComparison(comparison);
+    const [monthly, provisional, actions, freshness] = await Promise.all([
+        loadCsv("deaths_by_month.csv"),
+        loadCsv("fact_fentanyl_deaths_over_time.csv"),
+        loadCsv("policy_actions.csv"),
+        loadOptionalCsv("data_freshness.csv")
+    ]);
+    const answer = document.getElementById("trend-answer");
+    if (answer) answer.textContent = crisisAnswer(monthly);
+    renderFreshness(freshness, monthly);
+    renderStats(monthly, provisional);
+    summarizeMonths(monthly, "monthly-summary", null);
+    drawMonthly("monthly-chart", monthly, actions, 2015);
+    bindRange("monthly-chart", monthly, actions);
 }
 
 async function renderTrend() {
-    const [monthly, provisional, actions] = await Promise.all([
+    const [monthly, provisional, actions, freshness] = await Promise.all([
         loadCsv("deaths_by_month.csv"),
         loadCsv("fact_fentanyl_deaths_over_time.csv"),
-        loadCsv("policy_actions.csv")
+        loadCsv("policy_actions.csv"),
+        loadOptionalCsv("data_freshness.csv")
     ]);
+    renderFreshness(freshness, monthly);
     renderStats(monthly, provisional);
-    summarizeMonths(monthly, "monthly-summary", "trend-answer");
+    summarizeMonths(monthly, "monthly-summary", null);
+    const answer = document.getElementById("trend-answer");
+    if (answer) answer.textContent = crisisAnswer(monthly);
     drawMonthly("monthly-chart", monthly, actions, 2015);
     bindRange("monthly-chart", monthly, actions);
     await renderMap(provisional);
@@ -908,9 +1310,7 @@ async function renderActionsPage() {
         loadCsv("policy_actions.csv")
     ]);
     summarizeMonths(monthly, "policy-summary", null);
-    drawMonthly("policy-chart", monthly, actions, 2015);
-    bindRange("policy-chart", monthly, actions);
-    renderActions(actions, monthly);
+    bindPolicyControls("policy-chart", monthly, actions);
 }
 
 async function renderNewsPage() {
@@ -927,6 +1327,7 @@ async function main() {
         else if (page === "who") await renderWho();
         else if (page === "actions") await renderActionsPage();
         else if (page === "news") await renderNewsPage();
+        else if (page === "download") renderFreshness(await loadOptionalCsv("data_freshness.csv"), []);
     } catch (error) {
         setStatus("The page could not load a data file. " + error);
     }

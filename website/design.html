@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How this site is laid out — Fentanyl deaths</title>
+    <title>How this site is laid out — Fentanyl Awareness</title>
     <meta name="description" content="Why the fentanyl site is six pages, and how the charts, memorial, and download are meant to be read.">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
@@ -12,15 +12,16 @@
     <a class="skip" href="#content">Skip to content</a>
     <nav class="nav" aria-label="Pages">
         <div class="nav-bar">
-            <a class="brand" href="index.html">Fentanyl deaths</a>
+            <a class="brand" href="index.html">Fentanyl Awareness</a>
             <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
         </div>
         <div class="nav-links" id="site-nav">
-            <a href="index.html">What this is</a>
-            <a href="trend.html">Rising or falling</a>
-            <a href="who.html">Who is affected</a>
-            <a href="actions.html">Official actions</a>
-            <a href="news.html">Announcements</a>
+            <a href="index.html">Start</a>
+            <span class="nav-label">Learn</span>
+            <a href="who.html">About fentanyl</a>
+            <a href="trend.html">Better or worse</a>
+            <a href="actions.html">Public policy</a>
+            <span class="nav-label">Data</span>
             <a href="download.html">Download</a>
         </div>
     </nav>
@@ -44,21 +45,20 @@
             </ul>
         </section>
         <section>
-            <h2>Six pages, in the brief’s order</h2>
-            <p>A single page gave every question the same weight. On a phone, the download sat under the memorial and the charts. A screen reader had one title for six questions. Each page has its own title, one question, and a next link.</p>
+            <h2>Five pages, in the order of the story</h2>
+            <p>The site is called Fentanyl Awareness. The first page answers whether the crisis is getting better or worse, says why the site was built, and then offers two paths: learn about fentanyl, or take the data and the repository. A single page gave every question the same weight. On a phone, the download sat under the memorial and the charts. Each page has its own title. Agency announcements stay available, linked from the policy page and the download, and are not one of the five story pages.</p>
             <div class="panel table-scroll">
                 <table>
-                    <caption>The six pages</caption>
+                    <caption>The five pages</caption>
                     <thead>
                         <tr><th scope="col">Page</th><th scope="col">Question</th><th scope="col">What the reader does there</th></tr>
                     </thead>
                     <tbody>
-                        <tr><th scope="row"><a href="index.html">What this is</a></th><td>What is fentanyl and why is it important?</td><td>Reads a plain description and the deaths-per-1,000 comparison.</td></tr>
-                        <tr><th scope="row"><a href="trend.html">Rising or falling</a></th><td>Is it going up or down?</td><td>Reads estimated deaths in each month, and the state change.</td></tr>
-                        <tr><th scope="row"><a href="who.html">Who is affected</a></th><td>Who is impacted, and who is responding?</td><td>Reads the memorial, age, race, and the death share, then seizures and budget lines.</td></tr>
-                        <tr><th scope="row"><a href="actions.html">Official actions</a></th><td>Have recent policies lined up with a change?</td><td>Reads the count in an action’s month and the count a year later.</td></tr>
-                        <tr><th scope="row"><a href="news.html">Announcements</a></th><td>What has been published, and where did it come from?</td><td>Reads agency releases that mention fentanyl, each with its source.</td></tr>
-                        <tr><th scope="row"><a href="download.html">Download</a></th><td>The spreadsheet</td><td>Takes <code>deaths_by_month.csv</code>, the column dictionary, and the file behind every chart.</td></tr>
+                        <tr><th scope="row"><a href="index.html">Start</a></th><td>Is the crisis getting better or worse, and why is this site here?</td><td>Reads the answer, then chooses a path: learn about fentanyl, or take the data.</td></tr>
+                        <tr><th scope="row"><a href="trend.html">Better or worse</a></th><td>Are deaths rising or falling?</td><td>Reads finished months and later preliminary estimates, then the state change.</td></tr>
+                        <tr><th scope="row"><a href="who.html">About fentanyl</a></th><td>What is fentanyl, and who died?</td><td>Reads what fentanyl is, the memorial, age, race, and the death share, then seizures and budget lines.</td></tr>
+                        <tr><th scope="row"><a href="actions.html">Public policy</a></th><td>Did a border, enforcement, supply-chain, or China action line up with a change?</td><td>Reads the count in an action’s month and the count a year later. The page does not decide whether the action worked.</td></tr>
+                        <tr><th scope="row"><a href="download.html">Download</a></th><td>Can someone else use the data?</td><td>Takes <code>deaths_by_state_month.csv</code> and <code>deaths_by_month.csv</code>, by month, state, and year, plus the repository that builds them.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -66,9 +66,9 @@
         </section>
         <section>
             <h2>How a chart is built</h2>
-            <p>Every visual has the same parts: a title, a sentence that says how to read it, the chart, a table of the same numbers, and a source line.</p>
+            <p>Every visual has the same parts: a title, a sentence that says how to read it, the chart, a table of the same numbers, and a source line. Hovering a month, a policy line, a state, or a bar shows that figure beside the pointer. The table still holds the same numbers.</p>
             <p>Type is a serif for the question and the prose, and a sans-serif for navigation, numbers, tables, and charts. They are system fonts.</p>
-            <p>Color is a paper background and ink text. One dark red marks the subject. Stone marks a comparison series. On the map only, green means the 12-month total fell and dark red means it rose. Gray means CDC did not publish a number. Official months are a solid line. Estimated months are a dashed line. Action dates are vertical lines. The legend says this in words.</p>
+            <p>Color is a paper background and ink text. One dark red marks the subject. On the map only, green means the 12-month total fell and dark red means it rose. Gray means CDC did not publish a number. Finished months are a solid line. Preliminary months are a dashed line. Public policy dates are vertical lines. The legend says this in words. The old deaths-per-1,000 comparison with wars is no longer the front page. Those inputs remain in <code>comparison_per_1000.csv</code> for anyone who wants the scale calculation.</p>
             <p>Three pictures from the brief are not drawn. DEA’s threat assessment does not publish a territory file, so a cartel map, a supply-chain map, or a crossings map would be a guess. The site quotes DEA and shows Customs and Border Protection’s pounds by region and by component. The share of drug-poisoning deaths is a number and a single bar, not a pie, because one death can list more than one drug.</p>
             <p>The public memorial listing has a first name, an age, a state, and a DEA photo address. It does not include a video address. The site links to the exhibit.</p>
         </section>
@@ -80,10 +80,11 @@
             <h2>Phone, keyboard, and screen reader</h2>
             <p>The header collapses to a Menu button. Targets are at least 44 pixels tall. Charts stack in one column. The map is followed by a written list and a full table. Each page starts with a skip link. The current page is marked. Charts are labeled, and the table next to them is the text equivalent. If the reader asks for less motion, the charts do not animate.</p>
         </section>
-        <p class="next"><a href="index.html">Start at what this is</a></p>
+        <p class="next"><a href="index.html">Start with why this site exists</a></p>
     </main>
     <footer class="footer">
-        <p>Each count is a person. Confirm figures with the agency that published them before using them for a decision.</p>
+        <p>Each count is a person. This site exists so the loss stays visible, and so it is easier to see whether anything is changing.</p>
+        <p>Confirm figures with the agency that published them before using them for a decision.</p>
         <p><a href="design/public-site-layout.md">The same note as a text file</a></p>
     </footer>
     <script src="app.js"></script>

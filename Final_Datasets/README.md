@@ -2,6 +2,14 @@
 
 This folder holds snapshot extracts for local dbt. The live published files are on the [portal](https://data-science-link.github.io/fentanyl-awareness/). The numbers are people. Use them carefully.
 
+## Deaths by month, state, and year
+
+**File**: `deaths_by_state_month.csv`
+
+One row is one geography and one month. This is the file for analysis. Finished months are final death certificates. Months after the last final year keep CDC's preliminary 12-month total in `Preliminary 12-month total`. `Deaths in the month` is filled for those later months only on the United States row, as a preliminary estimate. A state monthly count is not invented. `Confidence` says which kind of number is in the row. `data_freshness.csv` says when the copy was checked and which provisional month CDC had published.
+
+Do not add the preliminary 12-month total across months. Do not read a blank as zero.
+
 ## Deaths in each month
 
 **File**: `deaths_by_month.csv`

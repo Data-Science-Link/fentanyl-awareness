@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Who is affected, and who is responding? — Fentanyl deaths</title>
-    <meta name="description" content="Age, race, a family memorial, and the public seizure and budget figures tied to fentanyl.">
+    <title>About fentanyl — Fentanyl Awareness</title>
+    <meta name="description" content="What fentanyl is, who has died, and what public agencies report about seizures and budgets.">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -12,23 +12,27 @@
     <a class="skip" href="#content">Skip to content</a>
     <nav class="nav" aria-label="Pages">
         <div class="nav-bar">
-            <a class="brand" href="index.html">Fentanyl deaths</a>
+            <a class="brand" href="index.html">Fentanyl Awareness</a>
             <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
         </div>
         <div class="nav-links" id="site-nav">
-            <a href="index.html">What this is</a>
-            <a href="trend.html">Rising or falling</a>
-            <a href="who.html" aria-current="page">Who is affected</a>
-            <a href="actions.html">Official actions</a>
-            <a href="news.html">Announcements</a>
+            <a href="index.html">Start</a>
+            <span class="nav-label">Learn</span>
+            <a href="who.html" aria-current="page">About fentanyl</a>
+            <a href="trend.html">Better or worse</a>
+            <a href="actions.html">Public policy</a>
+            <span class="nav-label">Data</span>
             <a href="download.html">Download</a>
         </div>
     </nav>
     <main id="content" tabindex="-1">
         <header class="hero">
-            <p class="eyebrow">Who is affected</p>
-            <h1>Who is affected, and who is responding?</h1>
-            <p class="lede">The first half of this page is about people who died. The second half is about the agencies that seize fentanyl or publish a budget line. None of these charts is a full account of who is responsible.</p>
+            <p class="eyebrow">Learn</p>
+            <h1>What fentanyl is</h1>
+            <p class="lede">Fentanyl is a synthetic opioid. In medicine, pharmaceutical fentanyl is used for severe pain. The deaths in this crisis are tied to illicit fentanyl, which is often pressed into counterfeit pills or mixed into other drugs. A very small amount can be fatal. <a href="https://www.dea.gov/factsheets/fentanyl">DEA's fentanyl fact sheet</a> describes that difference.</p>
+            <p>The counts on this site are not a fentanyl-only number. CDC publishes them as synthetic opioids, excluding methadone. That group includes fentanyl and other synthetics such as tramadol. CDC does not publish a public series of fentanyl use, so this site answers the question with deaths. <a href="https://www.cdc.gov/nchs/nvss/vsrr/drug-overdose-data.htm">CDC's overdose page</a> explains why recent months are still preliminary.</p>
+            <p>The reason to assemble the data is the lives behind it. Families submitted the names below to a public DEA memorial. Age and race come from finished death certificates for the last final year. Later sections show what public agencies report about seizures and budgets. None of that is a full account of who is responsible.</p>
+            <p>If you want the file or the code instead, <a href="download.html">take the data</a>.</p>
         </header>
         <nav class="on-page" aria-label="On this page">
             <a href="#memorial">Memorial</a>
@@ -68,6 +72,7 @@
                 <div class="chart-box short">
                     <canvas id="age-chart" role="img" aria-label="Bar chart of synthetic-opioid deaths by age group in the latest finished year"></canvas>
                 </div>
+                <p class="note">Hover a bar for the figure.</p>
                 <p class="note" id="age-summary">Loading ages…</p>
                 <details>
                     <summary>View these numbers as a table</summary>
@@ -84,6 +89,7 @@
                 <div class="chart-box tall">
                     <canvas id="race-chart" role="img" aria-label="Horizontal bar chart comparing each group's share of deaths with its share of the population. Dark red is deaths. Stone is population."></canvas>
                 </div>
+                <p class="note">Hover a bar for the figure.</p>
                 <details>
                     <summary>View these shares as a table</summary>
                     <div id="race-table" class="table-scroll"></div>
@@ -96,9 +102,10 @@
             <h2>Share of drug-poisoning deaths</h2>
             <p>This is the share of drug-poisoning deaths that also listed a synthetic opioid other than methadone. One death can list more than one drug, so this is not a pie and the remainder is not one other drug.</p>
             <div class="panel">
-                <div class="meter" id="share-meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="share-text">
+                <div class="meter" id="share-meter" role="meter" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="share-text">
                     <div class="meter-fill" id="share-fill"></div>
                 </div>
+                <p class="note">Hover the bar for the figure.</p>
                 <p id="share-text">Loading the share…</p>
                 <p class="source">Source: <a href="wonder_drug_share.csv">wonder_drug_share.csv</a>. <a href="methods/who_is_affected.md">Why this is not a pie</a>.</p>
             </div>
@@ -121,6 +128,7 @@
                 <div class="chart-box short">
                     <canvas id="seizure-chart" role="img" aria-label="Grouped bar chart of fentanyl pounds seized by CBP component and fiscal year"></canvas>
                 </div>
+                <p class="note">Hover a bar for the figure.</p>
                 <details>
                     <summary>View the pounds as a table</summary>
                     <div id="seizure-table" class="table-scroll"></div>
@@ -131,6 +139,7 @@
                 <div class="panel">
                     <h3>Where those seizures were counted</h3>
                     <p class="note" id="region-note">Loading regions…</p>
+                    <p class="note">Hover a bar for the figure.</p>
                     <div class="chart-box short">
                         <canvas id="region-chart" role="img" aria-label="Horizontal bar chart of fentanyl pounds by CBP region for the latest complete fiscal year"></canvas>
                     </div>
@@ -154,6 +163,7 @@
                 <div class="chart-box short">
                     <canvas id="budget-chart" role="img" aria-label="Horizontal bar chart of published budget lines. The lines are not comparable and should not be added."></canvas>
                 </div>
+                <p class="note">Hover a bar for the figure.</p>
                 <details>
                     <summary>View the dollars as a table</summary>
                     <div id="budget-table" class="table-scroll"></div>
@@ -162,12 +172,13 @@
             </div>
         </section>
 
-        <p class="next"><a href="actions.html">Next: Did an official action line up with a change?</a></p>
+        <p class="next"><a href="actions.html">Next: Did a public policy action line up with a change?</a></p>
         <p class="meta" id="status" role="status"></p>
         <noscript><p class="note">The charts need JavaScript. Each source file linked on this page can still be opened.</p></noscript>
     </main>
     <footer class="footer">
-        <p>Each count is a person. Confirm figures with the agency that published them before using them for a decision.</p>
+        <p>Each count is a person. This site exists so the loss stays visible, and so it is easier to see whether anything is changing.</p>
+        <p>Confirm figures with the agency that published them before using them for a decision.</p>
         <p><a href="design.html">How this site is laid out</a></p>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>

@@ -56,6 +56,9 @@ jobs:
     - name: Extract final NVSS T40.4 deaths
       run: python data_engineering/data_sources/nvss_wonder/wonder_extractor.py
 
+    - name: Record whether CDC has a newer provisional month
+      run: python data_engineering/data_sources/cdc_api/freshness.py
+
     - name: Extract WONDER age, race, and drug-poisoning share
       run: python data_engineering/data_sources/nvss_wonder/wonder_demographics.py
 
@@ -132,6 +135,8 @@ jobs:
         cp -r data_engineering/data_build_tool/target/* docs/dbt/
         cp -r website/. docs/
         cp Final_Datasets/deaths_by_month.csv docs/
+        cp Final_Datasets/deaths_by_state_month.csv docs/
+        cp Final_Datasets/data_freshness.csv docs/
         cp Final_Datasets/fact_fentanyl_deaths_over_time.csv docs/
         cp Final_Datasets/fact_nvss_final_t40_4.csv docs/
         cp Final_Datasets/comparison_per_1000.csv docs/

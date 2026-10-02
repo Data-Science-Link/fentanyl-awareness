@@ -49,6 +49,14 @@ The category is ICD-10 code T40.4, synthetic opioids other than methadone, on a 
 
 State charts on the site do not use this monthly estimate. Some states have months that CDC leaves blank, so a state-by-state reconstruction would invent too much. The state map is the percent change in the 12-month total from the same month a year earlier. Both months use the same kind of CDC total. New York on the map does not include New York City, because CDC publishes the city separately.
 
+## How current the series is
+
+Final death certificates currently run through the latest year CDC WONDER has closed. In this project that year is 2024 until WONDER releases another final year. Months after that are not dropped. They use CDC's preliminary 12-month totals from SODA dataset `xkb8-kh2a`. CDC usually publishes that file about four months after the deaths. The Monday publish re-reads the API. If CDC has posted a new month, the new month is included. If CDC has not, the series stays on the newest month CDC has published.
+
+`deaths_by_state_month.csv` is the same layer by month, state, and year. A finished month is the death certificate. A later state row keeps the preliminary 12-month total and leaves the single-month count blank. Only the United States row is given a single-month estimate after the last final year. `data_freshness.csv` records the check, the newest provisional month, and the last final year.
+
+A named-fentanyl file CDC publishes separately (`8hzs-zshh`) is more specific and, as checked on October 2, 2026, less current than the T40.4 provisional series. This project uses T40.4 for the recent months and says so.
+
 ## Sources
 
 - Provisional totals: CDC Vital Statistics Rapid Release, SODA dataset `xkb8-kh2a`, [Provisional Drug Overdose Death Counts](https://www.cdc.gov/nchs/nvss/vsrr/drug-overdose-data.htm).

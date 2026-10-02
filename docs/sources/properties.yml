@@ -12,9 +12,11 @@ seeds:
 
   - name: policy_actions
     description: >
-      Dated federal actions shown as vertical lines on the monthly death
-      chart. Each row cites a primary source. A line is the date of the
-      action, not evidence that the action caused a change in deaths.
+      Dated public policy actions shown as vertical lines on the monthly
+      death chart: border, immigration enforcement, supply chain, pressure
+      on China, public health, and law. Each row cites a primary source.
+      A line is the date of the action, not evidence that the action
+      caused a change in deaths.
     columns:
       - name: action_date
         description: Date printed in the source, YYYY-MM-DD

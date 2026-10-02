@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: fact_deaths_by_state_month
+    description: |
+      Analyst file of synthetic-opioid deaths by month, state, and year.
+
+      Finished months use the final death certificate. Months after the last
+      final year keep CDC's preliminary 12-month total. A single-month
+      estimate is filled in only for the United States. State monthly counts
+      are not invented where CDC left a month blank.
+
+      The plain-language export is Final_Datasets/deaths_by_state_month.csv.
+      It is refreshed by the Monday publish when CDC has posted a new month.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - month
+              - state
+    columns:
+      - name: year
+        tests:
+          - not_null
+      - name: month
+        tests:
+          - not_null
+      - name: state
+        tests:
+          - not_null
+      - name: geo_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['nation', 'state', 'city', 'territory']
+      - name: confidence
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - 'Final death certificate'
+                  - 'Withheld by CDC'
+                  - 'Preliminary estimate'
+                  - 'Preliminary estimate below zero'
+                  - 'Not published as a single month'
