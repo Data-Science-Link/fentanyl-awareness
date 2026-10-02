@@ -11,12 +11,12 @@ from __future__ import annotations
 import logging
 import re
 import sys
-import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 
 import pandas as pd
+from defusedxml.ElementTree import fromstring as parse_xml
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ def _text(node, name: str) -> str:
 
 
 def parse_rss(xml_text: str, publisher: str, extracted_at: str) -> list[dict]:
-    root = ET.fromstring(xml_text)
+    root = parse_xml(xml_text)
     rows = []
     for item in root.findall(".//item"):
         title = _text(item, "title")
