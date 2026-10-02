@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download deaths by month, state, and year — Fentanyl Awareness</title>
-    <meta name="description" content="A plain CSV of synthetic-opioid deaths by month, state, and year, refreshed every Monday when CDC posts a new month.">
+    <title>Deaths by month and state — Fentanyl Awareness</title>
+    <meta name="description" content="A table and CSV of synthetic-opioid deaths by month, state, and year, refreshed when CDC publishes a new month.">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -13,42 +13,44 @@
     <nav class="nav" aria-label="Pages">
         <div class="nav-bar">
             <a class="brand" href="index.html">Fentanyl Awareness</a>
+            <a class="nav-quick" href="download.html">Data</a>
             <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
         </div>
         <div class="nav-links" id="site-nav">
-            <a href="index.html">Start</a>
-            <span class="nav-label">Learn</span>
-            <a href="who.html">About fentanyl</a>
-            <a href="trend.html">Better or worse</a>
-            <a href="actions.html">Public policy</a>
-            <span class="nav-label">Data</span>
-            <a href="download.html" aria-current="page">Download</a>
+            <a href="index.html">Overview</a>
+            <a href="trend.html">By state</a>
+            <a href="who.html">About</a>
+            <a href="actions.html">Policy</a>
+            <a href="download.html" aria-current="page">Data</a>
         </div>
     </nav>
     <main id="content" tabindex="-1">
         <header class="hero">
-            <p class="eyebrow">For analysts</p>
-            <h1>A dataset by month, state, and year</h1>
-            <p class="lede">The file is meant to be used. One row is one geography and one month. Finished months are the death certificate. Later months keep CDC's preliminary 12-month total, labeled as preliminary, so the series does not stop at the last final year. Column names are ordinary words.</p>
-            <p>This is the path for analysts and developers. Download the file if you want the numbers. Open the repository if you want the code that builds them. Either way, you can skip assembling CDC's SODA API and the WONDER request form yourself.</p>
+            <p class="eyebrow">Data</p>
+            <h1>Deaths by month, state, and year</h1>
+            <p class="lede">One row is one place and one month. Final months are death certificates. Later national months are preliminary estimates. A blank cell was not published. It is not a zero.</p>
             <div class="toolbar">
-                <a class="button primary" href="deaths_by_state_month.csv" download>Download the dataset</a>
-                <a class="button" href="https://github.com/Data-Science-Link/fentanyl-awareness">Open the repository</a>
+                <a class="button primary" href="deaths_by_state_month.csv" download>Download the CSV</a>
+                <a class="button" href="deaths_by_month.csv" download>National months only</a>
+                <a class="button" href="https://github.com/Data-Science-Link/fentanyl-awareness">Source code</a>
             </div>
-            <p class="note" data-freshness>Checking how current the CDC files are…</p>
-            <p>If you want the explanation instead, start with <a href="who.html">what fentanyl is</a>.</p>
         </header>
-        <nav class="on-page" aria-label="On this page">
-            <a href="#state-file">Month, state, and year</a>
-            <a href="#spreadsheet">National months</a>
-            <a href="#dictionary">Column dictionary</a>
-            <a href="#sources">Sources</a>
-            <a href="#research">For researchers</a>
-        </nav>
-        <section id="state-file">
-            <h2>The file to start with</h2>
-            <p><a class="button primary" href="deaths_by_state_month.csv" download>Download deaths_by_state_month.csv</a></p>
-            <p class="note">The publish job runs every Monday, and again when this pipeline changes. If CDC has posted a new month, that month is in the file. If CDC has not, the newest month stays where CDC left it and the checked date moves forward. A state does not get an invented count for a single recent month. The United States row does, and it is marked "Preliminary estimate."</p>
+        <section id="preview">
+            <h2>See the numbers</h2>
+            <div class="toolbar">
+                <label class="field" for="data-state">Place
+                    <select id="data-state"><option value="United States">United States</option></select>
+                </label>
+            </div>
+            <p class="note" id="data-count" aria-live="polite">Loading the table…</p>
+            <div id="data-preview" class="panel table-scroll"></div>
+            <p class="note">Newest months are first. A recent state month may show a 12-month total and no count for that month alone.</p>
+            <p class="note" data-freshness>Checking the latest CDC update…</p>
+            <button type="button" id="data-more">Show more months</button>
+            <p class="source">The publish job runs every Monday, and again when this pipeline changes. A new month is added when CDC has posted one. <a href="data_freshness.csv">When this copy was checked</a>.</p>
+        </section>
+        <section id="dictionary">
+            <h2>What the columns mean</h2>
             <div class="panel table-scroll">
                 <table>
                     <caption>Column dictionary for deaths_by_state_month.csv</caption>
@@ -67,14 +69,9 @@
                     </tbody>
                 </table>
             </div>
-        </section>
-        <section id="spreadsheet">
-            <h2>National months, one row per month</h2>
-            <p><a class="button primary" href="deaths_by_month.csv" download>Download deaths_by_month.csv</a></p>
-            <p class="note">A number below zero is not a count of deaths. It means a provisional total was revised. Deaths per 100,000 use a July 1 Census population. When that population is from a different year than the deaths, the note on the row names the Census year. An earlier Census year is carried forward when the new year is not in the file yet. The method is written out in <a href="methods/monthly_deaths.md">monthly_deaths.md</a>.</p>
-        </section>
-        <section id="dictionary">
-            <h2>What the columns mean</h2>
+            <h3>National file, one row per month</h3>
+            <p><a class="button" href="deaths_by_month.csv" download>Download deaths_by_month.csv</a></p>
+            <p class="note">A number below zero is not a count of deaths. It means a provisional total was revised. The method is written out in <a href="methods/monthly_deaths.md">how a month is counted</a>.</p>
             <div class="panel table-scroll">
                 <table>
                     <caption>Column dictionary for deaths_by_month.csv</caption>
@@ -95,42 +92,30 @@
             </div>
         </section>
         <section id="sources">
-            <h2>Source for every visual</h2>
-            <ul>
-                <li>Questions and their order: <a href="Fentanyl_Project_Overview_and_Initial_Design.md">the project brief</a>. Layout: <a href="design.html">how this site is laid out</a>.</li>
-                <li>Audit of the public figures: <a href="methods/public_figures_audit.md">what was checked, what was confirmed, and what changed</a>.</li>
-                <li>Monthly deaths: <a href="methods/monthly_deaths.md">how the estimate is made</a> and <a href="deaths_by_month.csv">deaths_by_month.csv</a>.</li>
-                <li>Comparison chart: <a href="methods/comparison_per_1000.md">deaths per 1,000</a> and <a href="comparison_per_1000.csv">the inputs</a>.</li>
-                <li>State map: <a href="fact_fentanyl_deaths_over_time.csv">provisional 12-month file</a>.</li>
-                <li>Age, race, and the overdose share: <a href="methods/who_is_affected.md">who is affected</a>, <a href="wonder_age.csv">age</a>, <a href="wonder_race.csv">race</a>, <a href="census_race_2024.csv">Census race</a>, and <a href="wonder_drug_share.csv">the share</a>.</li>
-                <li>Memorial: <a href="faces_of_fentanyl.csv">exhibit listing</a> and <a href="https://fof.dea.gov/exhibit">DEA Faces of Fentanyl</a>.</li>
-                <li>Seizures: <a href="cbp_fentanyl_seizures.csv">CBP pounds</a> and <a href="https://www.cbp.gov/document/stats/nationwide-drug-seizures">CBP Nationwide Drug Seizures</a>.</li>
-                <li>Supply sentences: <a href="sources/supply_context.md">DEA National Drug Threat Assessment quotations</a>.</li>
-                <li>Budgets: <a href="agency_budgets.csv">agency_budgets.csv</a>.</li>
-                <li>Month, state, and year: <a href="deaths_by_state_month.csv">deaths_by_state_month.csv</a>. How current the copy is: <a href="data_freshness.csv">data_freshness.csv</a>.</li>
-                <li>Public policy actions: <a href="policy_actions.csv">policy_actions.csv</a>.</li>
-                <li>Announcements: <a href="official_announcements.csv">official_announcements.csv</a> and the <a href="news.html">list of releases</a>.</li>
-            </ul>
-        </section>
-        <section id="research">
-            <h2>For researchers</h2>
-            <p>The files above are the plain versions. The technical extracts keep CDC's own columns, including months the agency left blank. A blank is not a zero. Do not add 12-month totals across months. Do not add final monthly deaths into the 12-month column.</p>
+            <h2>Other files</h2>
             <ul>
                 <li><a href="deaths_by_state_month.csv">Deaths by month, state, and year</a></li>
+                <li><a href="deaths_by_month.csv">National deaths by month</a></li>
                 <li><a href="data_freshness.csv">When this copy was checked, and the newest CDC month</a></li>
                 <li><a href="fact_fentanyl_deaths_over_time.csv">Provisional 12-month file</a></li>
                 <li><a href="fact_nvss_final_t40_4.csv">Final death-certificate file</a></li>
-                <li><a href="cbp_fentanyl_seizures.csv">CBP fentanyl seizures by year, component, and region</a></li>
-                <li><a href="faces_of_fentanyl.csv">Exhibit listing (names and DEA image links, not image files)</a></li>
+                <li><a href="wonder_age.csv">Deaths by age</a>, <a href="wonder_race.csv">by race</a>, and <a href="wonder_drug_share.csv">the share of drug-poisoning deaths</a></li>
+                <li><a href="census_race_2024.csv">Census population by race</a></li>
+                <li><a href="cbp_fentanyl_seizures.csv">CBP fentanyl seizures</a></li>
+                <li><a href="faces_of_fentanyl.csv">DEA exhibit listing</a></li>
+                <li><a href="policy_actions.csv">Public policy actions</a></li>
+                <li><a href="official_announcements.csv">Agency announcements</a></li>
+                <li><a href="agency_budgets.csv">Published budget lines</a></li>
+                <li><a href="methods/monthly_deaths.md">How a month is counted</a> and <a href="methods/who_is_affected.md">how age and race are counted</a></li>
                 <li><a href="dbt/index.html">Pipeline documentation</a></li>
             </ul>
         </section>
-        <p class="next"><a href="index.html">Back to the start: Is the crisis getting better or worse?</a></p>
+        <p class="next"><a href="index.html">Back to the overview</a></p>
+        <p class="meta" id="status" role="status"></p>
     </main>
     <footer class="footer">
-        <p>Each count is a person. This site exists so the loss stays visible, and so it is easier to see whether anything is changing.</p>
-        <p>Confirm figures with the agency that published them before using them for a decision.</p>
-        <p><a href="design.html">How this site is laid out</a></p>
+        <p>Fentanyl Awareness reports public counts of synthetic-opioid deaths, including illicit fentanyl. The figures are refreshed every Monday, and a new month is added when CDC publishes one.</p>
+        <p>These counts are people. Confirm a figure with the agency that published it before using it for a decision.</p>
     </footer>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="app.js"></script>

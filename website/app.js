@@ -93,6 +93,137 @@ function monthShift(label, delta) {
     return date.getUTCFullYear() + "-" + String(date.getUTCMonth() + 1).padStart(2, "0");
 }
 
+function formatMonth(value, style) {
+    const label = monthLabel(value);
+    const match = label.match(/^(\d{4})-(\d{2})$/);
+    if (!match) return String(value || "");
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const name = months[Number(match[2]) - 1];
+    if (style === "short") return name.slice(0, 3) + " " + match[1];
+    return name + " " + match[1];
+}
+
+function shortGroup(name) {
+    return {
+        "American Indian or Alaska Native": "American Indian",
+        "Black or African American": "Black",
+        "Native Hawaiian or Other Pacific Islander": "Pacific Islander",
+        "More than one race": "Multiracial"
+    }[name] || name;
+}
+
+const TABLE_PREVIEW = 18;
+const seriesTables = {};
+
+function paintSeriesTable(id) {
+    const cached = seriesTables[id];
+    if (!cached) return;
+    const more = document.getElementById(id + "-more");
+    const expanded = more && more.getAttribute("aria-expanded") === "true";
+    const rows = !expanded && cached.rows.length > TABLE_PREVIEW ? cached.rows.slice(-TABLE_PREVIEW) : cached.rows;
+    const caption = !expanded && cached.rows.length > TABLE_PREVIEW
+        ? "Latest " + TABLE_PREVIEW + " months"
+        : cached.caption;
+    fillTable(id, cached.headers, rows, caption);
+    if (!more) return;
+    more.hidden = cached.rows.length <= TABLE_PREVIEW;
+    more.textContent = expanded
+        ? "Show the latest " + TABLE_PREVIEW + " months"
+        : "Show all " + cached.rows.length.toLocaleString() + " months";
+}
+
+function setSeriesTable(id, headers, rows, caption) {
+    seriesTables[id] = { headers, rows, caption };
+    const more = document.getElementById(id + "-more");
+    if (more && !more.dataset.bound) {
+        more.dataset.bound = "true";
+        more.setAttribute("aria-expanded", "false");
+        more.addEventListener("click", () => {
+            const open = more.getAttribute("aria-expanded") === "true";
+            more.setAttribute("aria-expanded", open ? "false" : "true");
+            paintSeriesTable(id);
+        });
+    }
+    paintSeriesTable(id);
+}
+
+function monthAxis(labels) {
+    const narrow = window.matchMedia("(max-width: 700px)").matches;
+    const firstYear = labels.length ? Number(labels[0].slice(0, 4)) : 0;
+    const lastYear = labels.length ? Number(labels[labels.length - 1].slice(0, 4)) : 0;
+    const step = narrow ? (lastYear - firstYear > 16 ? 5 : 3) : (lastYear - firstYear > 16 ? 4 : 2);
+    return {
+        grid: { display: false },
+        border: { display: false },
+        ticks: {
+            color: INK,
+            autoSkip: false,
+            maxRotation: 0,
+            minRotation: 0,
+            font: { size: narrow ? 11 : 13 },
+            callback(value, index) {
+                const label = labels[index];
+                if (!label || !label.endsWith("-01")) return "";
+                const year = Number(label.slice(0, 4));
+                if (year !== lastYear && year % step !== 0) return "";
+                if (year !== lastYear && lastYear - year < step) return "";
+                return String(year);
+            }
+        }
+    };
+}
+
+function noteChartMissing(canvas) {
+    if (!canvas || canvas.dataset.missing) return;
+    canvas.dataset.missing = "true";
+    const note = document.createElement("p");
+    note.className = "note";
+    note.textContent = "The chart did not load in this browser. The table below has the same numbers.";
+    canvas.insertAdjacentElement("afterend", note);
+}
+
+function writeReadout(readoutId, lines) {
+    const node = document.getElementById(readoutId);
+    if (!node) return;
+    const text = (lines || []).filter(Boolean).join(" · ");
+    if (text) node.textContent = text;
+}
+
+function watchChart(chart, readoutId, linesForIndex) {
+    if (!chart) return;
+    const writeIndex = (index) => {
+        if (index == null) return;
+        writeReadout(readoutId, linesForIndex(index));
+    };
+    const fromNative = (event) => {
+        const points = chart.getElementsAtEventForMode(event, "nearest", { intersect: false }, false);
+        if (points && points.length) writeIndex(points[0].index);
+    };
+    chart.canvas.addEventListener("pointerdown", fromNative);
+    chart.options.onClick = (event, elements) => {
+        if (elements && elements.length) writeIndex(elements[0].index);
+    };
+    chart.options.onHover = (event, elements, activeChart) => {
+        if (activeChart && activeChart.canvas) {
+            activeChart.canvas.style.cursor = elements && elements.length ? "crosshair" : "default";
+        }
+        if (elements && elements.length) writeIndex(elements[0].index);
+    };
+}
+
+function shortMethod(value) {
+    const text = String(value || "");
+    if (text.startsWith("Estimated")) return "Preliminary estimate";
+    if (text.startsWith("Official")) return "Final certificate";
+    return text;
+}
+
+function fitCharts() {
+    Object.values(charts).forEach((chart) => {
+        if (chart && chart.resize) chart.resize();
+    });
+}
+
 function isEstimated(row) {
     return String(row["How this number was produced"] || "").startsWith("Estimated");
 }
@@ -142,12 +273,14 @@ function barStyle(color) {
 const ALONG_ROWS = { mode: "index", intersect: false, axis: "y" };
 
 function valueAxis(title) {
+    const narrow = window.matchMedia("(max-width: 700px)").matches;
     const scale = {
+        beginAtZero: true,
         grid: { color: "#efe8dc" },
         border: { display: false },
-        ticks: { color: INK, maxTicksLimit: 6 }
+        ticks: { color: INK, maxTicksLimit: narrow ? 5 : 6, font: { size: narrow ? 11 : 13 } }
     };
-    if (title) scale.title = { display: true, text: title, color: "#5c564c" };
+    if (title && !narrow) scale.title = { display: true, text: title, color: "#5c564c" };
     return scale;
 }
 
@@ -268,7 +401,7 @@ function yearChangeLine(row) {
 
 function monthTipLines(row, actions) {
     if (!row) return [];
-    const lines = [row.Month];
+    const lines = [formatMonth(row.Month)];
     if (isGap(row)) lines.push("Not plotted. The estimate fell below zero.");
     else lines.push(comma(num(row["Estimated deaths"])) + " deaths");
     if (row["How this number was produced"]) lines.push(row["How this number was produced"]);
@@ -322,18 +455,23 @@ function drawMonthly(canvasId, rows, actions, fromYear) {
     const shown = rows.filter((row) => Number(String(row.Month).slice(0, 4)) >= fromYear);
     const labels = shown.map((row) => row.Month);
     const deaths = shown.map((row) => (isGap(row) ? null : num(row["Estimated deaths"])));
-    fillTable(
+    const listed = actions || [];
+    setSeriesTable(
         canvasId + "-data",
-        ["Month", "Deaths", "How this number was produced"],
+        ["Month", "Deaths", "What the number is"],
         shown.map((row) => [
-            row.Month,
+            formatMonth(row.Month, "short"),
             isGap(row) ? "Not plotted. The estimate fell below zero." : comma(num(row["Estimated deaths"])),
-            row["How this number was produced"] || ""
+            isGap(row) ? "Not plotted" : shortMethod(row["How this number was produced"])
         ]),
         "Deaths in each month"
     );
-    if (!canvas || !window.Chart) return;
+    if (!canvas || !window.Chart) {
+        noteChartMissing(canvas);
+        return;
+    }
     destroyChart(canvasId);
+    const narrow = window.matchMedia("(max-width: 700px)").matches;
     charts[canvasId] = new Chart(canvas, {
         type: "line",
         data: {
@@ -345,8 +483,8 @@ function drawMonthly(canvasId, rows, actions, fromYear) {
                 backgroundColor: "rgba(28, 25, 21, 0.05)",
                 fill: true,
                 pointRadius: 0,
-                pointHoverRadius: 6,
-                pointHitRadius: 14,
+                pointHoverRadius: 5,
+                pointHitRadius: narrow ? 18 : 12,
                 pointHoverBackgroundColor: ACCENT,
                 pointHoverBorderColor: "#fffdf8",
                 pointHoverBorderWidth: 2,
@@ -365,17 +503,18 @@ function drawMonthly(canvasId, rows, actions, fromYear) {
             responsive: true,
             maintainAspectRatio: false,
             interaction: { mode: "index", intersect: false },
+            layout: { padding: { top: 8, right: 16, bottom: 2, left: 0 } },
             plugins: {
                 legend: { display: false },
                 annotation: {
                     interaction: { mode: "point", intersect: true },
-                    annotations: policyAnnotations(actions, labels, shown)
+                    annotations: policyAnnotations(listed, labels, shown)
                 },
                 tooltip: {
                     callbacks: {
                         title(items) {
                             const row = shown[items[0].dataIndex];
-                            return row ? row.Month : "";
+                            return row ? formatMonth(row.Month) : "";
                         },
                         label(item) {
                             const row = shown[item.dataIndex];
@@ -385,34 +524,21 @@ function drawMonthly(canvasId, rows, actions, fromYear) {
                         afterBody(items) {
                             const row = shown[items[0].dataIndex];
                             if (!row) return [];
-                            return monthTipLines(row, actions).slice(2);
+                            return monthTipLines(row, listed).slice(2);
                         }
                     }
                 }
             },
             scales: {
-                y: valueAxis("Deaths that month"),
-                x: categoryAxis({
-                    ticks: {
-                        color: INK,
-                        autoSkip: false,
-                        maxRotation: 0,
-                        callback(value, index) {
-                            const label = labels[index];
-                            if (!label) return "";
-                            const last = labels[labels.length - 1];
-                            if (index === labels.length - 1) return label;
-                            if (label.slice(0, 4) === last.slice(0, 4)) return "";
-                            if (index === 0) return label;
-                            if (!label.endsWith("-01")) return "";
-                            const step = labels.length > 200 ? 5 : 2;
-                            return Number(label.slice(0, 4)) % step === 0 ? label : "";
-                        }
-                    }
-                })
+                y: valueAxis(narrow ? "" : "Deaths"),
+                x: monthAxis(labels)
             }
         }
     });
+    watchChart(charts[canvasId], canvasId + "-readout", (index) => monthTipLines(shown[index], listed));
+    const latestShown = shown.filter((row) => !isGap(row)).pop();
+    if (latestShown) writeReadout(canvasId + "-readout", monthTipLines(latestShown, listed));
+    requestAnimationFrame(() => fitCharts());
 }
 
 function bindRange(chartId, monthly, actions) {
@@ -441,19 +567,19 @@ function summarizeMonths(rows, summaryId, answerId) {
     const latest = usable[usable.length - 1];
     const summary = document.getElementById(summaryId);
     if (summary) {
-        summary.textContent = "The highest month in this file is " + peak.Month + " (" + comma(num(peak["Estimated deaths"]))
-            + " deaths). The latest month is " + latest.Month + " (" + comma(num(latest["Estimated deaths"])) + ").";
+        summary.textContent = "The highest month in this file is " + formatMonth(peak.Month) + " (" + comma(num(peak["Estimated deaths"]))
+            + " deaths). The latest month is " + formatMonth(latest.Month) + " (" + comma(num(latest["Estimated deaths"])) + ").";
     }
     const answer = document.getElementById(answerId);
     if (!answer) return;
     const latestDeaths = num(latest["Estimated deaths"]);
     const peakDeaths = num(peak["Estimated deaths"]);
     if (latest.Month === peak.Month) {
-        answer.textContent = "The latest month in this file, " + latest.Month + ", is the highest month.";
+        answer.textContent = "The latest month in this file, " + formatMonth(latest.Month) + ", is the highest month.";
         return;
     }
     const relation = latestDeaths < peakDeaths ? "lower than" : "higher than";
-    answer.textContent = "The latest month, " + latest.Month + ", is " + relation + " the highest month in this file (" + peak.Month + ").";
+    answer.textContent = "The latest month, " + formatMonth(latest.Month) + ", is " + relation + " the highest month in this file (" + formatMonth(peak.Month) + ").";
 }
 
 function renderStats(monthly, provisional) {
@@ -469,8 +595,8 @@ function renderStats(monthly, provisional) {
     if (yearChange === 0) changeText = "No change";
     else if (yearChange !== null) changeText = comma(Math.abs(yearChange)) + (yearChange > 0 ? " more" : " fewer");
     const cards = [
-        ["Deaths in the latest month", latest ? comma(num(latest["Estimated deaths"])) : "—", latest ? latest.Month + " · " + latest["How this number was produced"] : ""],
-        ["Compared with a year earlier", changeText, prior ? "Against " + prior.Month : "Same month, previous year"],
+        ["Deaths in the latest month", latest ? comma(num(latest["Estimated deaths"])) : "—", latest ? formatMonth(latest.Month) + " · " + (isEstimated(latest) ? "Preliminary estimate" : "Final death certificate") : ""],
+        ["Compared with a year earlier", changeText, prior ? "Same month in " + prior.Month.slice(0, 4) : "Same month, previous year"],
         ["Deaths in the last 12 months", latestNation ? comma(num(latestNation.headline_deaths)) : "—", latestNation ? twelveMonthDetail(latestNation) : ""]
     ];
     const stats = document.getElementById("stats");
@@ -486,11 +612,11 @@ function renderStats(monthly, provisional) {
 }
 
 function twelveMonthDetail(row) {
-    const ending = monthLabel(row.month);
+    const ending = formatMonth(row.month);
     if (row.headline_basis === "predicted") {
-        return "CDC's predicted total for the 12 months ending " + ending + ". Recent death certificates are still coming in. Not a sum of the monthly chart.";
+        return "CDC predicted total for the 12 months ending " + ending + ". Not a sum of single months.";
     }
-    return "CDC's reported total for the 12 months ending " + ending + ". Not a sum of the monthly chart.";
+    return "CDC reported total for the 12 months ending " + ending + ". Not a sum of single months.";
 }
 
 function deathsInMonth(monthly, month) {
@@ -514,17 +640,17 @@ function crisisAnswer(monthly) {
     if (prior) {
         const delta = latestDeaths - num(prior["Estimated deaths"]);
         if (delta < 0) {
-            change = " That is " + comma(Math.abs(delta)) + " fewer than " + prior.Month + ". On this measure, deaths are lower than a year earlier.";
+            change = " Deaths are lower than " + formatMonth(prior.Month) + ", by " + comma(Math.abs(delta)) + ".";
         } else if (delta > 0) {
-            change = " That is " + comma(delta) + " more than " + prior.Month + ". On this measure, deaths are higher than a year earlier.";
+            change = " Deaths are higher than " + formatMonth(prior.Month) + ", by " + comma(delta) + ".";
         } else {
-            change = " That is the same number as " + prior.Month + ".";
+            change = " That is the same number as " + formatMonth(prior.Month) + ".";
         }
     }
     const layer = isEstimated(latest)
-        ? " " + latest.Month + " is a preliminary estimate, not a finished death certificate. Finished certificates in this file run through " + (lastOfficial ? lastOfficial.Month.slice(0, 4) : "the last final year") + "."
-        : " " + latest.Month + " is a finished death certificate.";
-    return "In " + latest.Month + ", " + comma(latestDeaths) + " people died in the synthetic-opioid category." + change + layer;
+        ? " This month is a preliminary estimate. Final death certificates run through " + (lastOfficial ? lastOfficial.Month.slice(0, 4) : "the last final year") + "."
+        : " This month is a final death certificate.";
+    return "In " + formatMonth(latest.Month) + ", " + comma(latestDeaths) + " people died from synthetic opioids other than methadone, the CDC category that includes fentanyl." + change + layer;
 }
 
 function renderFreshness(rows, monthly) {
@@ -534,19 +660,18 @@ function renderFreshness(rows, monthly) {
     let text = "";
     if (row.latest_provisional_month && row.latest_final_year) {
         const checked = String(row.checked_at || "").slice(0, 10);
-        text = "Finished death certificates run through " + row.latest_final_year
-            + ". Months after that use CDC's preliminary counts. CDC's newest published month in this copy is "
-            + row.latest_provisional_month
-            + (checked ? ", checked " + checked : "")
-            + ". The file is refreshed every Monday, and a new month is added when CDC has posted one.";
+        text = "Final through " + row.latest_final_year
+            + ". Newest CDC month: " + formatMonth(row.latest_provisional_month)
+            + (checked ? ". Checked " + checked : "")
+            + ". Updated every Monday.";
     } else {
         const usable = usableMonths(monthly || []);
         const latest = usable[usable.length - 1];
         const official = usable.filter((item) => !isEstimated(item));
         const lastOfficial = official[official.length - 1];
         if (lastOfficial && latest) {
-            text = "Finished death certificates run through " + lastOfficial.Month.slice(0, 4)
-                + ". The latest month in this file is " + latest.Month
+            text = "Final death certificates run through " + lastOfficial.Month.slice(0, 4)
+                + ". The latest month in this file is " + formatMonth(latest.Month)
                 + (isEstimated(latest) ? ", a preliminary estimate." : ".");
         }
     }
@@ -613,10 +738,26 @@ function renderAge(rows, fullYearDeaths) {
                 }
             },
             scales: {
-                x: categoryAxis(),
-                y: valueAxis("Deaths")
+                x: categoryAxis({
+                    ticks: {
+                        color: INK,
+                        autoSkip: false,
+                        maxRotation: 50,
+                        minRotation: 50,
+                        font: { size: 11 },
+                        callback(value) {
+                            const label = this.getLabelForValue(value);
+                            return String(label).replace(" years", "").replace(" year", "");
+                        }
+                    }
+                }),
+                y: valueAxis("")
             }
         }
+    });
+    watchChart(charts.age, "age-readout", (index) => {
+        const row = rows[index];
+        return row ? [row.group, comma(num(row.deaths)) + " deaths", String(row.year)] : [];
     });
 }
 
@@ -646,7 +787,7 @@ function renderRace(deaths, population) {
     charts.race = new Chart(canvas, {
         type: "bar",
         data: {
-            labels: deaths.map((row) => row.group),
+            labels: deaths.map((row) => shortGroup(row.group)),
             datasets: [
                 { label: "Share of deaths", data: deathShare, ...barStyle(ACCENT) },
                 { label: "Share of population", data: popShare, ...barStyle(STONE) }
@@ -679,9 +820,22 @@ function renderRace(deaths, population) {
             },
             scales: {
                 x: valueAxis("Percent"),
-                y: categoryAxis()
+                y: categoryAxis({
+                    ticks: {
+                        color: INK,
+                        autoSkip: false,
+                        font: { size: window.matchMedia("(max-width: 700px)").matches ? 11 : 13 }
+                    }
+                })
             }
         }
+    });
+    watchChart(charts.race, "race-readout", (index) => {
+        const row = deaths[index];
+        if (!row) return [];
+        const deathText = deathShare[index] === null ? "Share of deaths not published" : "Share of deaths " + deathShare[index].toFixed(1) + "%";
+        const popText = popShare[index] === null ? "Population share not published" : "Population share " + popShare[index].toFixed(1) + "%";
+        return [row.group, deathText, popText, comma(num(row.deaths)) + " deaths"];
     });
 }
 
@@ -800,10 +954,14 @@ function renderSeizures(rows) {
                     }
                 },
                 scales: {
-                    x: categoryAxis(),
+                    x: categoryAxis({ ticks: { color: INK, maxRotation: 0, minRotation: 0 } }),
                     y: valueAxis("Pounds")
                 }
             }
+        });
+        watchChart(charts.seizure, "seizure-readout", (index) => {
+            const year = years[index];
+            return [year].concat(components.map((component) => component + ": " + pounds(componentTotals(year, component)) + " pounds"));
         });
     }
     const regionCanvas = document.getElementById("region-chart");
@@ -983,7 +1141,7 @@ async function renderMap(provisional) {
     const list = document.getElementById("state-list");
     const item = (row) => `<li>${escapeHtml(row.state)}: ${escapeHtml(formatPercent(row.pct))}</li>`;
     if (list) {
-        list.innerHTML = `<p class="note">Percent change in the 12-month total ending ${escapeHtml(latest)}, compared with a year earlier. ${escapeHtml(comparison)}</p>
+        list.innerHTML = `<p class="note">Percent change in the 12-month total ending ${escapeHtml(formatMonth(latest))}, compared with a year earlier. ${escapeHtml(comparison)}</p>
             <p><strong>Largest decreases</strong></p><ul>${down.map(item).join("")}</ul>
             <p><strong>Largest increases</strong></p><ul>${up.map(item).join("")}</ul>`;
     }
@@ -997,15 +1155,30 @@ async function renderMap(provisional) {
             published(row.now),
             published(row.then)
         ]),
-        "Percent change by state, 12 months ending " + latest
+        "Percent change by state, 12 months ending " + formatMonth(latest)
     );
+    const comparable = changes.filter((row) => row.pct !== null);
+    const downCount = comparable.filter((row) => row.pct < 0).length;
+    const upCount = comparable.filter((row) => row.pct > 0).length;
+    const flatCount = comparable.filter((row) => row.pct === 0).length;
+    const missingCount = changes.length - comparable.length;
+    const stateAnswer = document.getElementById("state-answer");
+    if (stateAnswer) {
+        const parts = [
+            downCount + (downCount === 1 ? " state is" : " states are") + " lower than a year earlier",
+            upCount + (upCount === 1 ? " is" : " are") + " higher"
+        ];
+        if (flatCount) parts.push(flatCount + (flatCount === 1 ? " is" : " are") + " unchanged");
+        stateAnswer.textContent = "For the 12 months ending " + formatMonth(latest) + ", " + parts.join(", ") + ". "
+            + missingCount + (missingCount === 1 ? " state was" : " states were") + " not published in this CDC series.";
+    }
     const readout = document.getElementById("map-readout");
-    if (readout) readout.textContent = "Select a state to keep its totals on the page.";
+    if (readout) readout.textContent = "Tap a state to see both 12-month totals.";
     const svg = window.d3 ? d3.select("#state-map") : null;
     if (!svg || svg.empty()) return;
     svg.selectAll("*").remove();
     svg.attr("role", "group");
-    svg.attr("aria-label", "Map of the percent change in the 12-month death total by state, ending " + latest + ". Gray means not published. Hover or focus a state for both totals.");
+    svg.attr("aria-label", "Map of the percent change in the 12-month death total by state, ending " + formatMonth(latest) + ". Gray means not published. Tap or focus a state for both totals.");
     try {
         const atlas = await d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json");
         const states = topojson.feature(atlas, atlas.objects.states);
@@ -1016,7 +1189,7 @@ async function renderMap(provisional) {
             if (selected === row.state) {
                 selected = null;
                 svg.selectAll("path").classed("is-selected", false);
-                if (readout) readout.textContent = "Select a state to keep its totals on the page.";
+                if (readout) readout.textContent = "Tap a state to see both 12-month totals.";
                 return;
             }
             selected = row.state;
@@ -1077,13 +1250,13 @@ function renderActions(actions, monthly) {
             ? `<a href="${escapeHtml(href)}">${escapeHtml(row.source_title || "Source")}</a>`
             : escapeHtml(row.source_title || "");
         return `<tr>
-            <th scope="row">${escapeHtml(row.action_date)}</th>
-            <td>${escapeHtml(row.theme || "")}</td>
-            <td>${escapeHtml(row.title)}<br><span class="note">${escapeHtml(row.summary)}</span></td>
-            <td>${escapeHtml(row.actor)}</td>
-            <td>${escapeHtml(deathsInMonth(monthly, month) || "Not in the file")}</td>
-            <td>${escapeHtml(deathsInMonth(monthly, later) || "Not in the file yet")}</td>
-            <td>${source}</td>
+            <th scope="row" data-label="Date">${escapeHtml(formatDate(row.action_date))}</th>
+            <td data-label="Theme">${escapeHtml(row.theme || "")}</td>
+            <td data-label="Action">${escapeHtml(row.title)}<br><span class="note">${escapeHtml(row.summary)}</span></td>
+            <td data-label="Who">${escapeHtml(row.actor)}</td>
+            <td data-label="Deaths that month">${escapeHtml(deathsInMonth(monthly, month) || "Not in the file")}</td>
+            <td data-label="Deaths 12 months later">${escapeHtml(deathsInMonth(monthly, later) || "Not in the file yet")}</td>
+            <td data-label="Source">${source}</td>
         </tr>`;
     }).join("");
 }
@@ -1096,15 +1269,13 @@ function bindPolicyControls(chartId, monthly, actions) {
         drawMonthly(chartId, monthly, shown, fromYear);
         renderActions(shown, monthly);
     };
-    document.querySelectorAll("[data-theme]").forEach((button) => {
-        button.addEventListener("click", () => {
-            theme = button.getAttribute("data-theme") || "All";
-            document.querySelectorAll("[data-theme]").forEach((other) => {
-                other.setAttribute("aria-pressed", other === button ? "true" : "false");
-            });
+    const themeSelect = document.getElementById("theme-filter");
+    if (themeSelect) {
+        themeSelect.addEventListener("change", () => {
+            theme = themeSelect.value || "All";
             redraw();
         });
-    });
+    }
     const recent = document.getElementById("range-recent");
     const all = document.getElementById("range-all");
     if (recent && all) {
@@ -1246,13 +1417,23 @@ function bindMenu() {
             links.classList.remove("is-open");
         }
     });
+    links.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", () => {
+            button.setAttribute("aria-expanded", "false");
+            links.classList.remove("is-open");
+        });
+    });
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(fitCharts, 120);
+    });
 }
 
 async function renderHome() {
-    const [monthly, provisional, actions, freshness] = await Promise.all([
+    const [monthly, provisional, freshness] = await Promise.all([
         loadCsv("deaths_by_month.csv"),
         loadCsv("fact_fentanyl_deaths_over_time.csv"),
-        loadCsv("policy_actions.csv"),
         loadOptionalCsv("data_freshness.csv")
     ]);
     const answer = document.getElementById("trend-answer");
@@ -1260,35 +1441,26 @@ async function renderHome() {
     renderFreshness(freshness, monthly);
     renderStats(monthly, provisional);
     summarizeMonths(monthly, "monthly-summary", null);
-    drawMonthly("monthly-chart", monthly, actions, 2015);
-    bindRange("monthly-chart", monthly, actions);
+    drawMonthly("monthly-chart", monthly, [], 2015);
+    bindRange("monthly-chart", monthly, []);
 }
 
 async function renderTrend() {
-    const [monthly, provisional, actions, freshness] = await Promise.all([
-        loadCsv("deaths_by_month.csv"),
+    const [provisional, freshness] = await Promise.all([
         loadCsv("fact_fentanyl_deaths_over_time.csv"),
-        loadCsv("policy_actions.csv"),
         loadOptionalCsv("data_freshness.csv")
     ]);
-    renderFreshness(freshness, monthly);
-    renderStats(monthly, provisional);
-    summarizeMonths(monthly, "monthly-summary", null);
-    const answer = document.getElementById("trend-answer");
-    if (answer) answer.textContent = crisisAnswer(monthly);
-    drawMonthly("monthly-chart", monthly, actions, 2015);
-    bindRange("monthly-chart", monthly, actions);
+    renderFreshness(freshness, []);
     await renderMap(provisional);
 }
 
 async function renderWho() {
-    const [age, raceDeaths, racePop, share, seizures, budgets, memorials] = await Promise.all([
+    const [age, raceDeaths, racePop, share, seizures, memorials] = await Promise.all([
         loadCsv("wonder_age.csv"),
         loadCsv("wonder_race.csv"),
         loadCsv("census_race_2024.csv"),
         loadCsv("wonder_drug_share.csv"),
         loadCsv("cbp_fentanyl_seizures.csv"),
-        loadCsv("agency_budgets.csv"),
         loadCsv("faces_of_fentanyl.csv")
     ]);
     people = memorials
@@ -1301,7 +1473,61 @@ async function renderWho() {
     renderRace(raceDeaths, racePop);
     renderShare(share);
     renderSeizures(seizures);
-    renderBudgets(budgets);
+}
+
+function deathCell(value) {
+    const parsed = num(value);
+    return parsed === null ? "Not published" : comma(parsed);
+}
+
+async function renderDownload() {
+    const [rows, freshness] = await Promise.all([
+        loadCsv("deaths_by_state_month.csv"),
+        loadOptionalCsv("data_freshness.csv")
+    ]);
+    renderFreshness(freshness, []);
+    const select = document.getElementById("data-state");
+    const more = document.getElementById("data-more");
+    const count = document.getElementById("data-count");
+    if (!select) return;
+    const states = [...new Set(rows.map((row) => row.State).filter(Boolean))];
+    const ordered = ["United States", ...states.filter((state) => state !== "United States").sort((a, b) => a.localeCompare(b))];
+    select.innerHTML = ordered.map((state) => `<option value="${escapeHtml(state)}">${escapeHtml(state)}</option>`).join("");
+    if (ordered.includes("United States")) select.value = "United States";
+    let shown = 24;
+    const paint = () => {
+        const state = select.value || "United States";
+        const filtered = rows
+            .filter((row) => row.State === state)
+            .sort((a, b) => String(b.Month).localeCompare(String(a.Month)));
+        const slice = filtered.slice(0, shown);
+        fillTable(
+            "data-preview",
+            ["Month", "Deaths in the month", "What the number is", "Preliminary 12-month total"],
+            slice.map((row) => [
+                formatMonth(row.Month, "short"),
+                deathCell(row["Deaths in the month"]),
+                row.Confidence || "",
+                num(row["Preliminary 12-month total"]) === null ? "—" : comma(num(row["Preliminary 12-month total"]))
+            ]),
+            "Deaths for " + state + ", newest month first"
+        );
+        if (count) {
+            count.textContent = "Showing " + slice.length.toLocaleString() + " of " + filtered.length.toLocaleString() + " months for " + state + ".";
+        }
+        if (more) more.hidden = slice.length >= filtered.length;
+    };
+    select.addEventListener("change", () => {
+        shown = 24;
+        paint();
+    });
+    if (more) {
+        more.addEventListener("click", () => {
+            shown += 24;
+            paint();
+        });
+    }
+    paint();
 }
 
 async function renderActionsPage() {
@@ -1327,9 +1553,14 @@ async function main() {
         else if (page === "who") await renderWho();
         else if (page === "actions") await renderActionsPage();
         else if (page === "news") await renderNewsPage();
-        else if (page === "download") renderFreshness(await loadOptionalCsv("data_freshness.csv"), []);
+        else if (page === "download") await renderDownload();
     } catch (error) {
         setStatus("The page could not load a data file. " + error);
+        document.querySelectorAll(".answer").forEach((node) => {
+            if (String(node.textContent).startsWith("Loading")) {
+                node.textContent = "The latest figures did not load. The data page still links to the CSV files.";
+            }
+        });
     }
 }
 

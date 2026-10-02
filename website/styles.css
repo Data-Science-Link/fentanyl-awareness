@@ -48,7 +48,18 @@ a { color: var(--focus); text-underline-offset: 0.15em; }
     top: 0;
     z-index: 4;
 }
-.nav-bar { display: flex; align-items: center; }
+.nav-bar { display: flex; align-items: center; gap: 0.35rem; }
+.brand { margin-right: auto; }
+.nav-quick {
+    display: none;
+    color: white;
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    text-decoration: none;
+    min-height: 44px;
+    align-items: center;
+    padding: 0 0.35rem;
+}
 .nav a {
     color: white;
     text-decoration: none;
@@ -123,7 +134,7 @@ main:focus { outline: none; }
 }
 .meta, .note, .source { color: var(--muted); font-size: 0.95rem; }
 .source { margin-top: 0.8rem; }
-section { margin: 2rem 0; }
+section { margin: 2rem 0; scroll-margin-top: 4.75rem; }
 h2 { font-size: 1.6rem; line-height: 1.25; margin: 0 0 0.5rem; }
 h3 { font-size: 1.15rem; margin: 0 0 0.35rem; }
 .panel {
@@ -132,8 +143,38 @@ h3 { font-size: 1.15rem; margin: 0 0 0.35rem; }
     border-radius: 14px;
     padding: 1rem 1.1rem 1.15rem;
     margin: 0.8rem 0;
+    min-width: 0;
+    max-width: 100%;
 }
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; }
+.journeys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.3rem 0 0.2rem;
+}
+.journeys a {
+    font-family: var(--sans);
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+}
+.journeys a:hover,
+.journeys a:focus-visible { border-color: var(--ink); }
+.readout {
+    font-family: var(--sans);
+    background: var(--paper);
+    border-radius: 10px;
+    padding: 0.7rem 0.85rem;
+    margin: 0.7rem 0 0.2rem;
+    min-height: 44px;
+}
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; min-width: 0; }
 .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 0.9rem 1rem; }
 .stat b {
     display: block;
@@ -143,9 +184,21 @@ h3 { font-size: 1.15rem; margin: 0 0 0.35rem; }
     font-variant-numeric: tabular-nums;
     margin: 0.2rem 0;
 }
-.chart-box { position: relative; height: 420px; }
-.chart-box.short { height: 320px; }
-.chart-box.tall { height: 460px; }
+.chart-box {
+    position: relative;
+    height: 320px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+.chart-box.short { height: 280px; }
+.chart-box.tall { height: 420px; }
+.chart-box canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+}
 .split { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 1rem; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 0.6rem 0.8rem; align-items: end; margin: 0.4rem 0 0.8rem; }
 .field { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; color: var(--muted); }
@@ -195,9 +248,9 @@ table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
 th, td { text-align: left; padding: 0.5rem 0.45rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { font-size: 0.78rem; letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted); }
 caption { text-align: left; font-weight: 600; padding: 0.2rem 0 0.45rem; color: var(--ink); }
-.table-scroll { overflow-x: auto; }
-.map-layout { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 1rem; align-items: start; }
-#state-map { width: 100%; height: auto; aspect-ratio: 975 / 610; display: block; background: var(--card); }
+.table-scroll { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+.map-layout { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 1rem; align-items: start; min-width: 0; }
+#state-map { width: 100%; height: auto; min-height: 210px; aspect-ratio: 975 / 610; display: block; background: #f7f4ee; }
 #state-map path { cursor: pointer; }
 #state-map path.is-hot,
 #state-map path:focus-visible { stroke: var(--ink); stroke-width: 2px; }
@@ -287,8 +340,9 @@ caption { text-align: left; font-weight: 600; padding: 0.2rem 0 0.45rem; color: 
         background: transparent;
         border-color: rgba(255, 255, 255, 0.45);
     }
+    .nav-quick { display: inline-flex; }
     .nav { flex-direction: column; align-items: stretch; }
-    .nav-bar { justify-content: space-between; }
+    .nav-bar { width: 100%; justify-content: space-between; }
     .nav-links { display: none; flex-direction: column; align-items: flex-start; padding-top: 0.4rem; }
     .nav-links.is-open { display: flex; }
     .nav-links a { min-height: 44px; display: flex; align-items: center; }
@@ -296,9 +350,53 @@ caption { text-align: left; font-weight: 600; padding: 0.2rem 0 0.45rem; color: 
 }
 @media (max-width: 800px) {
     .split, .map-layout, .fork { grid-template-columns: 1fr; }
-    .hero h1 { max-width: none; }
-    .chart-box, .chart-box.tall { height: 360px; }
-    .chart-box.short { height: 300px; }
+    .hero { padding: 0.7rem 0 0; }
+    .hero h1 { max-width: none; margin-bottom: 0.45rem; }
+    section { margin: 1.15rem 0; }
+    .chart-box { height: 220px; }
+    .chart-box.short { height: 250px; }
+    .chart-box.tall { height: 380px; }
+    main { padding: 1rem 0.9rem 2rem; }
+    .panel { padding: 0.8rem 0.75rem 0.9rem; }
+    .action-list thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+    .action-list table,
+    .action-list tbody,
+    .action-list tr,
+    .action-list td,
+    .action-list th {
+        display: block;
+        width: 100%;
+    }
+    .action-list tr {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        margin: 0 0 0.75rem;
+        padding: 0.55rem 0.75rem 0.7rem;
+        background: var(--paper);
+    }
+    .action-list td,
+    .action-list th {
+        border: 0;
+        padding: 0.28rem 0;
+    }
+    .action-list td::before,
+    .action-list th[scope="row"]::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.72rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
 }
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
