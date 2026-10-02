@@ -3,8 +3,8 @@
 Charts now live on the project portal, not in this folder.
 
 - **Portal**: https://data-science-link.github.io/fentanyl-awareness/
-- **Dashboard tab**: national 12-month ending trend and latest state rates per 100,000
-- **Data Explorer**: filterable table and CSV download
-- **CSV**: `Final_Datasets/fact_fentanyl_deaths_over_time.csv`
+- **Main chart**: estimated deaths in each month, with official-action dates as vertical lines
+- **State map**: percent change in the 12-month total versus the same month a year earlier. Unpublished states stay gray
+- **Download**: `Final_Datasets/deaths_by_month.csv`
 
-The dashboard uses only `geo_type = nation` for the national series and `geo_type = state` for rankings. Suppressed CDC counts are omitted rather than plotted as zero.
+The monthly chart uses the national series only. The map uses `geo_type = state`. Suppressed CDC counts are omitted rather than plotted as zero. A negative monthly estimate is left as a gap.
