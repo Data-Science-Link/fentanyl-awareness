@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: fact_deaths_by_month
+    description: |
+      National deaths in each calendar month for synthetic opioids other than
+      methadone (ICD-10 T40.4). This includes fentanyl and is not a
+      fentanyl-only series.
+
+      Months with a final NVSS count use that count (`Official final count`).
+      Later months are estimated from the change in the provisional 12-month
+      headline total plus the count 12 months earlier. A negative estimate is
+      kept and flagged. It is not plotted as a death count.
+
+      The plain-language export is Final_Datasets/deaths_by_month.csv.
+      The method note is docs/methods/monthly_deaths.md.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - month
+    columns:
+      - name: month
+        tests:
+          - not_null
+      - name: estimated_deaths
+        tests:
+          - not_null
+      - name: how_produced
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - 'Official final count'
+                  - 'Estimated from the change in the 12-month total'
+      - name: is_negative_estimate
+        tests:
+          - not_null
+      - name: source
+        tests:
+          - not_null
+      - name: note
+        tests:
+          - not_null

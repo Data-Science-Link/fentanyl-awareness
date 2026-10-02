@@ -56,6 +56,18 @@ jobs:
     - name: Extract final NVSS T40.4 deaths
       run: python data_engineering/data_sources/nvss_wonder/wonder_extractor.py
 
+    - name: Extract WONDER age, race, and drug-poisoning share
+      run: python data_engineering/data_sources/nvss_wonder/wonder_demographics.py
+
+    - name: Extract CBP fentanyl seizure totals
+      run: python data_engineering/data_sources/cbp/cbp_extractor.py
+
+    - name: Extract Faces of Fentanyl listing
+      run: python data_engineering/data_sources/faces/faces_extractor.py
+
+    - name: Extract official announcements
+      run: python data_engineering/data_sources/announcements/announcements_extractor.py
+
     - name: Check for Census API key
       id: check_key
       run: |
@@ -118,9 +130,20 @@ jobs:
       run: |
         mkdir -p docs/dbt
         cp -r data_engineering/data_build_tool/target/* docs/dbt/
-        cp website/index.html docs/
+        cp -r website/. docs/
+        cp Final_Datasets/deaths_by_month.csv docs/
         cp Final_Datasets/fact_fentanyl_deaths_over_time.csv docs/
         cp Final_Datasets/fact_nvss_final_t40_4.csv docs/
+        cp Final_Datasets/comparison_per_1000.csv docs/
+        cp Final_Datasets/policy_actions.csv docs/
+        cp Final_Datasets/agency_budgets.csv docs/
+        cp Final_Datasets/census_race_2024.csv docs/
+        cp Final_Datasets/wonder_age.csv docs/
+        cp Final_Datasets/wonder_race.csv docs/
+        cp Final_Datasets/wonder_drug_share.csv docs/
+        cp Final_Datasets/cbp_fentanyl_seizures.csv docs/
+        cp Final_Datasets/official_announcements.csv docs/
+        cp Final_Datasets/faces_of_fentanyl.csv docs/
         touch docs/.nojekyll
 
     - name: Upload GitHub Pages artifact
@@ -153,5 +176,6 @@ jobs:
       run: |
         echo "Portal published from this run. HTML and data are the same snapshot."
         echo "Portal: https://data-science-link.github.io/fentanyl-awareness/"
+        echo "Monthly CSV: https://data-science-link.github.io/fentanyl-awareness/deaths_by_month.csv"
         echo "Provisional CSV: https://data-science-link.github.io/fentanyl-awareness/fact_fentanyl_deaths_over_time.csv"
         echo "Final CSV: https://data-science-link.github.io/fentanyl-awareness/fact_nvss_final_t40_4.csv"

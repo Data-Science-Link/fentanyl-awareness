@@ -63,6 +63,7 @@ profiles.yml
 *.csv
 !Final_Datasets/*.csv
 !data_engineering/data_build_tool/dbt/seeds/*.csv
+!docs/sources/*.csv
 *.xlsx
 *.xls
 

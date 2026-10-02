@@ -2,6 +2,27 @@
 
 This folder holds snapshot extracts for local dbt. The live published files are on the [portal](https://data-science-link.github.io/fentanyl-awareness/). The numbers are people. Use them carefully.
 
+## Deaths in each month
+
+**File**: `deaths_by_month.csv`
+
+One row is one month for the United States. Finished months are the official final count. Months after the last final year are estimated from the change in CDC’s 12-month total plus the count 12 months earlier. The method, including a worked example, is in [`docs/methods/monthly_deaths.md`](../docs/methods/monthly_deaths.md).
+
+| Column | What it means |
+|--------|----------------|
+| `Month` | Calendar month, `YYYY-MM` |
+| `Estimated deaths` | Deaths that month |
+| `How this number was produced` | `Official final count` or `Estimated from the change in the 12-month total` |
+| `Deaths per 100,000` | Deaths that month for every 100,000 people. This is not a yearly rate |
+| `Change from the previous month` | This month minus the month before |
+| `Change from the same month a year earlier` | This month minus that month one year earlier |
+| `Change in the 12-month total` | The raw change in CDC’s rolling total, kept so the estimate can be checked |
+| `Official actions that month` | Actions whose source date falls in the month |
+| `Source` | Where the death number came from |
+| `Note` | What the category includes, and a warning if an estimate fell below zero |
+
+A number below zero is stored and described in `Note`. It is a revision artifact, not a count of deaths. The category is synthetic opioids other than methadone (ICD-10 T40.4). It includes fentanyl and is not fentanyl alone.
+
 ## Provisional series
 
 **File**: `fact_fentanyl_deaths_over_time.csv`
@@ -56,6 +77,25 @@ Incident deaths from CDC WONDER final multiple-cause datasets. A death is counte
 | `incident_deaths` | Deaths in that period. Null when suppressed |
 | `data_source` | `NVSS final` |
 | `source_dataset` | `D77` or `D157` |
+
+## Other public files
+
+These are extracts or cited snapshots. Each row that states a fact has a source URL in the file, or the method note next to it.
+
+| File | What it is |
+|------|------------|
+| `policy_actions.csv` | Dated statutes, Federal Register actions, and named enforcement announcements. A date is not evidence the action caused a change |
+| `agency_budgets.csv` | Budget lines copied from the cited agency document. Different years and scopes. Do not add them together |
+| `comparison_per_1000.csv` | Inputs for deaths per 1,000 people per year. Formula and windows are in [`docs/methods/comparison_per_1000.md`](../docs/methods/comparison_per_1000.md) |
+| `census_race_2024.csv` | July 1 2024 race-alone population used beside the WONDER race table. The crosswalk is in [`docs/methods/who_is_affected.md`](../docs/methods/who_is_affected.md) |
+| `wonder_age.csv` | Final 2024 T40.4 deaths by age group |
+| `wonder_race.csv` | Final 2024 T40.4 deaths by race alone |
+| `wonder_drug_share.csv` | Share of 2024 drug-poisoning deaths that also list T40.4. Drug categories overlap, so this is not a pie |
+| `cbp_fentanyl_seizures.csv` | CBP fentanyl pounds and events by fiscal year, component, and region. Field offices are not published |
+| `faces_of_fentanyl.csv` | Public DEA Faces of Fentanyl listing: first name, state, age, exhibit URL, and the DEA-hosted image URL. Image files are not stored here |
+| `official_announcements.csv` | DEA, CDC, and CBP releases whose title or summary mentions fentanyl |
+
+Supply quotations, with page context, are in [`docs/sources/supply_context.md`](../docs/sources/supply_context.md). That note replaces a territory map. DEA did not publish cartel territory as a dataset.
 
 ## How to use these files
 

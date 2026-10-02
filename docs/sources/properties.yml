@@ -1,0 +1,24 @@
+version: 2
+
+seeds:
+  - name: agency_budgets
+    config:
+      column_types:
+        fiscal_year: bigint
+        amount_dollars: bigint
+    description: >
+      One-year snapshot of agency budget lines copied from the cited
+      budget document. Amounts are not additive across agencies.
+
+  - name: policy_actions
+    description: >
+      Dated federal actions shown as vertical lines on the monthly death
+      chart. Each row cites a primary source. A line is the date of the
+      action, not evidence that the action caused a change in deaths.
+    columns:
+      - name: action_date
+        description: Date printed in the source, YYYY-MM-DD
+      - name: title
+        description: Short name of the action
+      - name: source_url
+        description: Primary source URL

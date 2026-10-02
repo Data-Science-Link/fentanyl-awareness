@@ -9,7 +9,7 @@ profile: 'fentanyl_awareness'
 model-paths: ["dbt/models"]
 analysis-paths: ["dbt/analysis"]
 test-paths: ["dbt/tests"]
-seed-paths: ["dbt/seeds"]
+seed-paths: ["dbt/seeds", "../../docs/sources"]
 macro-paths: ["dbt/macros"]
 snapshot-paths: ["dbt/snapshots"]
 
