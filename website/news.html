@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agency announcements — Fentanyl Awareness</title>
-    <meta name="description" content="Agency releases that mention fentanyl, each with a link to the publisher. Policy actions are on a separate page.">
+    <meta name="description" content="Federal agency releases that mention fentanyl, each linked to the publisher.">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -13,39 +13,37 @@
     <nav class="nav" aria-label="Pages">
         <div class="nav-bar">
             <a class="brand" href="index.html">Fentanyl Awareness</a>
+            <a class="nav-quick" href="download.html">Data</a>
             <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
         </div>
         <div class="nav-links" id="site-nav">
-            <a href="index.html">Start</a>
-            <span class="nav-label">Learn</span>
-            <a href="who.html">About fentanyl</a>
-            <a href="trend.html">Better or worse</a>
-            <a href="actions.html">Public policy</a>
-            <span class="nav-label">Data</span>
-            <a href="download.html">Download</a>
+            <a href="index.html">Overview</a>
+            <a href="trend.html">By state</a>
+            <a href="who.html">About</a>
+            <a href="actions.html">Policy</a>
+            <a href="download.html">Data</a>
         </div>
     </nav>
     <main id="content" tabindex="-1">
         <header class="hero">
-            <p class="eyebrow">Source list</p>
-            <h1>Agency announcements</h1>
-            <p class="lede">These are agency releases that mention fentanyl. Each one links to the page it came from. The events used to ask whether policy lined up with a change are on the <a href="actions.html">public policy</a> page: border, immigration enforcement, supply chain, and pressure on China. This list is not a ranking of news outlets, and it is not evidence that an action worked.</p>
+            <p class="eyebrow">Announcements</p>
+            <h1>Agency releases</h1>
+            <p class="lede">Federal releases that mention fentanyl, each linked to the page it came from. Actions placed on the death chart are on the <a href="actions.html">public policy</a> page. This list is not a ranking, and it is not evidence that an action changed the death toll.</p>
         </header>
         <section>
-            <h2>Releases in this extract</h2>
+            <h2>Releases in this update</h2>
             <div class="panel" id="news-list">
                 <p class="note">Loading announcements…</p>
             </div>
-            <p class="source">Source: <a href="official_announcements.csv">official_announcements.csv</a>.</p>
+            <p class="source">Source: <a href="official_announcements.csv">official announcements</a>.</p>
         </section>
-        <p class="next"><a href="download.html">Next: Download the spreadsheet</a></p>
+        <p class="next"><a href="download.html">Next: See the data and download the CSV</a></p>
         <p class="meta" id="status" role="status"></p>
         <noscript><p class="note">The list needs JavaScript. The CSV linked above can still be opened.</p></noscript>
     </main>
     <footer class="footer">
-        <p>Each count is a person. This site exists so the loss stays visible, and so it is easier to see whether anything is changing.</p>
-        <p>Confirm figures with the agency that published them before using them for a decision.</p>
-        <p><a href="design.html">How this site is laid out</a></p>
+        <p>Fentanyl Awareness reports public counts of synthetic-opioid deaths, including illicit fentanyl. The figures are refreshed every Monday, and a new month is added when CDC publishes one.</p>
+        <p>These counts are people. Confirm a figure with the agency that published it before using it for a decision.</p>
     </footer>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="app.js"></script>

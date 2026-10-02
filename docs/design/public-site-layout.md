@@ -16,19 +16,17 @@ Strong public-data sites separate a question, a chart, and a source. They treat 
 
 ## Five pages, in the order of the story
 
-The site is called Fentanyl Awareness. It starts with the question — is the fentanyl crisis getting better or worse? — because that was hard to piece together. The deaths sit in more than one CDC file, recent months are preliminary, and there was no plain dashboard. The first page answers that question, says why the site was built, and then offers two paths. One path explains what fentanyl is, who died, and which public actions people look at. The other is for analysts and developers: a dataset by month, state, and year, or the open source repository that builds it, so they do not have to start from CDC's interfaces. The Monday job refreshes the file when CDC posts a new month. The counts are people. That is the reason to keep them visible.
+The site is called Fentanyl Awareness. The first page answers whether deaths are lower or higher than a year earlier, shows the national chart, and shows a table of recent months. From that page, two journeys are each one click: read the crisis (states, what fentanyl is, and public policy), or open the data table and the CSV. The Monday job refreshes the file when CDC posts a new month.
 
-A single page gave every part the same weight. On a phone, the download sat under the memorial and the charts. A screen reader had one title for several questions.
-
-Each story page has its own title and a next link. The header is the same list on every page, with the current page marked. Agency announcements stay available from the policy page and the download. They are not one of the five story pages.
+A single page gave every part the same weight. On a phone, charts were easy to miss and the download sat under the memorial. Each story page now has one job. The header is the same list on every page, with the current page marked. Agency announcements stay available from the policy page. They are not one of the five story pages. This layout note is for maintainers. The public pages do not link to it.
 
 | Page | File | What the page is for | What the reader does there |
 | --- | --- | --- | --- |
-| Start | `website/index.html` | The question, why the site was built, and the two paths | Reads whether deaths are lower or higher than a year earlier, then chooses to learn about fentanyl or take the data |
-| Better or worse | `website/trend.html` | Is it going up or down? | Reads finished months and later preliminary estimates, and the state change |
-| About fentanyl | `website/who.html` | What is fentanyl, and who died? | Reads what fentanyl is, the memorial, age, race, and the death share, then seizures and budget lines |
-| Public policy | `website/actions.html` | Did a border, enforcement, supply-chain, or China action line up with a change? | Reads the monthly series with those dates, and the count that month and a year later. The page does not decide whether the action worked |
-| Download | `website/download.html` | A file, or the code that builds it | Takes `deaths_by_state_month.csv`, by month, state, and year, and `deaths_by_month.csv`, or opens the repository |
+| Overview | `website/index.html` | Is the crisis getting better or worse? | Reads the latest month, the national chart, and a table of recent months |
+| By state | `website/trend.html` | Where is the 12-month total rising or falling? | Reads the map and the full state table. The national month-by-month chart stays on the overview |
+| About fentanyl | `website/who.html` | What is fentanyl, and who died? | Reads what fentanyl is, age, the share of drug-poisoning deaths, race, the memorial, and CBP seizures |
+| Public policy | `website/actions.html` | Did a border, enforcement, supply-chain, or China action line up with a change? | Reads the count in that month and the count a year later. A difference is not treated as proof the action worked |
+| Data | `website/download.html` | The numbers, in a table and a file | Reads deaths by month, state, and year, then downloads `deaths_by_state_month.csv` or `deaths_by_month.csv` |
 
 The deaths-per-1,000 comparison with wars is no longer the front page. The inputs remain in `comparison_per_1000.csv`. The events on the chart are public policy actions.
 
@@ -36,7 +34,7 @@ The deaths-per-1,000 comparison with wars is no longer the front page. The input
 
 ## How a chart is built
 
-Every visual has the same parts: a title, a sentence that says how to read it, the chart, a table of the same numbers, and a source line. The table is there for someone who cannot see the chart, and for someone who wants the figures on a phone. Hovering a month, a policy line, a state, or a bar shows that figure beside the pointer. The table still holds the same numbers.
+Every visual has the same parts: a title, a sentence that says how to read it, the chart, a table of the same numbers, and a source line. The table is open on the page, including on a phone, where a canvas can fail to paint. Tapping a month, a policy line, a state, or a bar keeps that figure on the page. The budget bars were removed: the lines are different kinds of dollars from different years, and a shared axis made them look comparable. The regional seizure bars were removed for the same reason the table already states the pounds. The national death chart is drawn once, on the overview, so the state page can be the map and the table.
 
 Type is a serif for the question and the prose, and a sans-serif for navigation, numbers, tables, and charts. They are system fonts, so the page does not wait on a font service.
 

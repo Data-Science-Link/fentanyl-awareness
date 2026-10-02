@@ -11,7 +11,7 @@ The fentanyl crisis in the United States is a profound tragedy. This project rep
 - A cleaned CSV of **provisional CDC 12-month ending T40.4 counts** (2015–current)
 - A separate CSV of **final NVSS incident deaths** for the same ICD-10 code (1999 through the latest final year)
 - Cited snapshots for official actions, agency budget lines, CBP fentanyl seizure totals, and a public DEA memorial listing
-- An [interactive portal](https://data-science-link.github.io/fentanyl-awareness/) of six short pages for a general reader. The plain-language download and the technical files are on the last page. The layout note is [How this site is laid out](docs/design/public-site-layout.md)
+- A public site, [Fentanyl Awareness](https://data-science-link.github.io/fentanyl-awareness/), refreshed when CDC publishes a new month. The overview answers whether deaths are rising or falling. A second page compares states. The data page shows a table and the CSV. The layout note for maintainers is [How this site is laid out](docs/design/public-site-layout.md)
 - Weekly extracts via GitHub Actions
 - dbt tests and lineage docs
 

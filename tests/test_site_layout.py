@@ -63,23 +63,22 @@ def test_each_page_has_the_same_reading_order():
         for href in NAV:
             assert href in page.hrefs
         assert page.current == [name] or (name == "index.html" and "index.html" in page.current)
-        assert "design.html" in page.hrefs
+        assert "design.html" not in page.hrefs
 
 
 def test_visuals_name_a_source_and_charts_are_labeled():
     home = read_page("index.html")
     home_text = (SITE / "index.html").read_text()
     assert "monthly-chart" in home.ids
+    assert "monthly-chart-data" in home.ids
     assert "deaths_by_month.csv" in home.hrefs
-    assert "policy_actions.csv" in home.hrefs
     assert "comparison-chart" not in home.ids
     assert "getting better or worse" in home_text
     assert "Fentanyl Awareness" in home_text
-    assert "Choose a path" in home_text
-    assert "Learn about fentanyl" in home_text
     assert "What fentanyl is" in home_text
-    assert "github.com/Data-Science-Link/fentanyl-awareness" in home_text
-    assert "month, state, and year" in home_text
+    assert "Deaths by state" in home_text
+    assert "Get the data" in home_text
+    assert "Tap a month to see the count." in home_text
     for name in PAGES:
         page_text = (SITE / name).read_text()
         assert "Fentanyl Awareness" in page_text
@@ -87,16 +86,19 @@ def test_visuals_name_a_source_and_charts_are_labeled():
     assert all(home.canvas_labels)
 
     trend = read_page("trend.html")
-    assert {"monthly-chart", "state-map", "monthly-chart-data", "state-table"} <= trend.ids
-    assert "deaths_by_month.csv" in trend.hrefs
+    assert {"state-map", "state-table", "state-answer", "map-readout"} <= trend.ids
+    assert "monthly-chart" not in trend.ids
     assert "fact_fentanyl_deaths_over_time.csv" in trend.hrefs
-    assert all(trend.canvas_labels)
+    assert "Tap a state to see both 12-month totals." in (SITE / "trend.html").read_text()
 
     who = read_page("who.html")
-    for element_id in ("people", "age-chart", "race-chart", "share-meter", "seizure-chart", "region-chart", "budget-chart"):
+    for element_id in ("people", "age-chart", "race-chart", "share-meter", "seizure-chart", "region-table"):
         assert element_id in who.ids
-    for href in ("faces_of_fentanyl.csv", "wonder_age.csv", "wonder_race.csv", "census_race_2024.csv", "wonder_drug_share.csv", "cbp_fentanyl_seizures.csv", "agency_budgets.csv", "sources/supply_context.md"):
+    assert "budget-chart" not in who.ids
+    assert "region-chart" not in who.ids
+    for href in ("faces_of_fentanyl.csv", "wonder_age.csv", "wonder_race.csv", "census_race_2024.csv", "wonder_drug_share.csv", "cbp_fentanyl_seizures.csv", "sources/supply_context.md"):
         assert href in who.hrefs
+    assert "agency_budgets.csv" in (SITE / "download.html").read_text()
     assert all(who.canvas_labels)
 
     actions = read_page("actions.html")
@@ -132,7 +134,8 @@ def test_download_keeps_the_plain_language_dictionary():
     assert "deaths_by_state_month.csv" in text
     assert "methods/monthly_deaths.md" in text
     assert "github.com/Data-Science-Link/fentanyl-awareness" in text
-    assert "what fentanyl is" in text
+    assert "data-preview" in text
+    assert "month, state, and year" in text
 
 
 def test_layout_note_names_the_practice_and_the_five_pages():
@@ -166,8 +169,11 @@ def test_motion_and_photos_stay_restrained():
     assert ":focus-visible" in style
     assert "showVizTip" in script
     assert "viz-tip" in style
-    for name in ("index.html", "trend.html", "actions.html"):
-        assert "Hover a month or a policy line." in (SITE / name).read_text()
-    assert "Hover a state for both 12-month totals." in (SITE / "trend.html").read_text()
-    assert "Hover a bar for the figure." in (SITE / "who.html").read_text()
+    assert "Tap a month to see the count." in (SITE / "index.html").read_text()
+    assert "Tap a month or a policy line to see the count." in (SITE / "actions.html").read_text()
+    assert "Tap a state to see both 12-month totals." in (SITE / "trend.html").read_text()
+    assert "Tap a bar to see the figure." in (SITE / "who.html").read_text()
     assert "map-readout" in (SITE / "trend.html").read_text()
+    for name in PAGES:
+        assert "design.html" not in (SITE / name).read_text()
+        assert "How this site is laid out" not in (SITE / name).read_text()
