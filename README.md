@@ -6,7 +6,8 @@ The fentanyl crisis in the United States is a profound tragedy. This project rep
 
 ## What this project provides
 
-- A plain CSV of **estimated deaths in each month** (`deaths_by_month.csv`). Finished months are the official count. Later months are estimated from the change in the 12-month total
+- A plain CSV of **deaths by month, state, and year** (`deaths_by_state_month.csv`). Finished months are the official count. Later months keep CDC's preliminary 12-month total, so the file does not stop at the last final year. The United States row also has a single-month estimate after that year. The Monday job adds a month when CDC has posted one
+- A plain CSV of **estimated deaths in each month** for the United States (`deaths_by_month.csv`). Finished months are the official count. Later months are estimated from the change in the 12-month total
 - A cleaned CSV of **provisional CDC 12-month ending T40.4 counts** (2015–current)
 - A separate CSV of **final NVSS incident deaths** for the same ICD-10 code (1999 through the latest final year)
 - Cited snapshots for official actions, agency budget lines, CBP fentanyl seizure totals, and a public DEA memorial listing
@@ -45,8 +46,8 @@ The published files are on the [portal](https://data-science-link.github.io/fent
 1. `soda_extractor.py` pulls T40.4 rows from the CDC SODA API and fails if a state that was in the previous extract disappears
 2. `wonder_extractor.py` requests final T40.4 incident deaths from the CDC WONDER request form. The XML API does not return state tabulations, so the job uses the form that does. `wonder_demographics.py` requests age, race, and the drug-poisoning share for the latest final year
 3. `pep_extractor.py` loads Census PEP July 1 population. `census_extractor.py` loads ACS income and unemployment when `CENSUS_API_KEY` is present
-4. `cbp_extractor.py` keeps fentanyl rows from CBP’s newest nationwide seizure CSV and publishes year, component, and region totals. `faces_extractor.py` reads the public DEA Faces of Fentanyl listing and stores names plus DEA image links, not image files. `announcements_extractor.py` keeps agency releases that mention fentanyl
-5. dbt writes the provisional fact, the final fact, and `deaths_by_month.csv`. Final incident deaths are never copied into `rolling_12_month_deaths`, and a final month is never replaced by the monthly estimate
+4. `cbp_extractor.py` keeps fentanyl rows from CBP’s newest nationwide seizure CSV and publishes year, component, and region totals. `faces_extractor.py` reads the public DEA Faces of Fentanyl listing and stores names plus DEA image links, not image files. `announcements_extractor.py` keeps agency releases that mention fentanyl. `freshness.py` records the newest provisional month and fails the publish if that month is behind the CDC API
+5. dbt writes the provisional fact, the final fact, `deaths_by_month.csv`, and `deaths_by_state_month.csv`. Final incident deaths are never copied into `rolling_12_month_deaths`, and a final month is never replaced by the monthly estimate. State rows are not given an invented monthly count after the last final year
 6. The publish job extracts, tests, and deploys GitHub Pages. It runs every Monday, on **Run workflow**, and when website or pipeline changes merge to `main`. The whole `website/` folder and the public CSVs in that run are one snapshot. It does not open a pull request.
 
 ### Publishing

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download the monthly spreadsheet — Fentanyl deaths</title>
-    <meta name="description" content="A plain CSV of estimated deaths in each month, with a column dictionary and the file behind every chart.">
+    <title>Download deaths by month, state, and year — Fentanyl deaths</title>
+    <meta name="description" content="A plain CSV of synthetic-opioid deaths by month, state, and year, refreshed every Monday when CDC posts a new month.">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -16,28 +16,52 @@
             <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
         </div>
         <div class="nav-links" id="site-nav">
-            <a href="index.html">What this is</a>
-            <a href="trend.html">Rising or falling</a>
-            <a href="who.html">Who is affected</a>
-            <a href="actions.html">Official actions</a>
-            <a href="news.html">Announcements</a>
+            <a href="index.html">Why this exists</a>
+            <a href="trend.html">Better or worse</a>
+            <a href="who.html">Lives lost</a>
+            <a href="actions.html">Public policy</a>
             <a href="download.html" aria-current="page">Download</a>
         </div>
     </nav>
     <main id="content" tabindex="-1">
         <header class="hero">
-            <p class="eyebrow">Download</p>
-            <h1>Download the monthly spreadsheet</h1>
-            <p class="lede">One row is one month for the United States. Column names are ordinary words. You can open the file in a spreadsheet and do your own analysis.</p>
+            <p class="eyebrow">For analysts</p>
+            <h1>A dataset by month, state, and year</h1>
+            <p class="lede">The file is meant to be used. One row is one geography and one month. Finished months are the death certificate. Later months keep CDC's preliminary 12-month total, labeled as preliminary, so the series does not stop at the last final year. Column names are ordinary words.</p>
+            <p class="note" data-freshness>Checking how current the CDC files are…</p>
         </header>
         <nav class="on-page" aria-label="On this page">
-            <a href="#spreadsheet">Spreadsheet</a>
+            <a href="#state-file">Month, state, and year</a>
+            <a href="#spreadsheet">National months</a>
             <a href="#dictionary">Column dictionary</a>
             <a href="#sources">Sources</a>
             <a href="#research">For researchers</a>
         </nav>
+        <section id="state-file">
+            <h2>The file to start with</h2>
+            <p><a class="button primary" href="deaths_by_state_month.csv" download>Download deaths_by_state_month.csv</a></p>
+            <p class="note">The publish job runs every Monday, and again when this pipeline changes. If CDC has posted a new month, that month is in the file. If CDC has not, the newest month stays where CDC left it and the checked date moves forward. A state does not get an invented count for a single recent month. The United States row does, and it is marked "Preliminary estimate."</p>
+            <div class="panel table-scroll">
+                <table>
+                    <caption>Column dictionary for deaths_by_state_month.csv</caption>
+                    <thead><tr><th scope="col">Column</th><th scope="col">What it means</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">Year</th><td>Calendar year.</td></tr>
+                        <tr><th scope="row">Month</th><td>Calendar month, written as year-month.</td></tr>
+                        <tr><th scope="row">State</th><td>United States, a state, the District of Columbia, New York City, or Puerto Rico. New York City is separate from New York.</td></tr>
+                        <tr><th scope="row">Geography</th><td>nation, state, city, or territory.</td></tr>
+                        <tr><th scope="row">Deaths in the month</th><td>Deaths that month when a finished certificate exists. For the United States after the last final year, a preliminary estimate. Blank for a state when CDC has not finished the month. A blank is not a zero.</td></tr>
+                        <tr><th scope="row">Confidence</th><td>Final death certificate, Preliminary estimate, Withheld by CDC, or Not published as a single month.</td></tr>
+                        <tr><th scope="row">Preliminary 12-month total</th><td>CDC's preliminary total for the 12 months ending that month. This is not the deaths in that month alone, and it should not be added across months.</td></tr>
+                        <tr><th scope="row">Preliminary basis</th><td>predicted or reported, naming which CDC total was used. Recent months use the predicted total.</td></tr>
+                        <tr><th scope="row">Note</th><td>How to read the row, including the drug category.</td></tr>
+                        <tr><th scope="row">Source</th><td>Which CDC file the numbers came from.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
         <section id="spreadsheet">
-            <h2>The plain file</h2>
+            <h2>National months, one row per month</h2>
             <p><a class="button primary" href="deaths_by_month.csv" download>Download deaths_by_month.csv</a></p>
             <p class="note">A number below zero is not a count of deaths. It means a provisional total was revised. Deaths per 100,000 use a July 1 Census population. When that population is from a different year than the deaths, the note on the row names the Census year. An earlier Census year is carried forward when the new year is not in the file yet. The method is written out in <a href="methods/monthly_deaths.md">monthly_deaths.md</a>.</p>
         </section>
@@ -75,14 +99,17 @@
                 <li>Seizures: <a href="cbp_fentanyl_seizures.csv">CBP pounds</a> and <a href="https://www.cbp.gov/document/stats/nationwide-drug-seizures">CBP Nationwide Drug Seizures</a>.</li>
                 <li>Supply sentences: <a href="sources/supply_context.md">DEA National Drug Threat Assessment quotations</a>.</li>
                 <li>Budgets: <a href="agency_budgets.csv">agency_budgets.csv</a>.</li>
-                <li>Official actions: <a href="policy_actions.csv">policy_actions.csv</a>.</li>
-                <li>Announcements: <a href="official_announcements.csv">official_announcements.csv</a>.</li>
+                <li>Month, state, and year: <a href="deaths_by_state_month.csv">deaths_by_state_month.csv</a>. How current the copy is: <a href="data_freshness.csv">data_freshness.csv</a>.</li>
+                <li>Public policy actions: <a href="policy_actions.csv">policy_actions.csv</a>.</li>
+                <li>Announcements: <a href="official_announcements.csv">official_announcements.csv</a> and the <a href="news.html">list of releases</a>.</li>
             </ul>
         </section>
         <section id="research">
             <h2>For researchers</h2>
             <p>The files above are the plain versions. The technical extracts keep CDC's own columns, including months the agency left blank. A blank is not a zero. Do not add 12-month totals across months. Do not add final monthly deaths into the 12-month column.</p>
             <ul>
+                <li><a href="deaths_by_state_month.csv">Deaths by month, state, and year</a></li>
+                <li><a href="data_freshness.csv">When this copy was checked, and the newest CDC month</a></li>
                 <li><a href="fact_fentanyl_deaths_over_time.csv">Provisional 12-month file</a></li>
                 <li><a href="fact_nvss_final_t40_4.csv">Final death-certificate file</a></li>
                 <li><a href="cbp_fentanyl_seizures.csv">CBP fentanyl seizures by year, component, and region</a></li>
@@ -90,12 +117,14 @@
                 <li><a href="dbt/index.html">Pipeline documentation</a></li>
             </ul>
         </section>
-        <p class="next"><a href="index.html">Back to the start: What is fentanyl?</a></p>
+        <p class="next"><a href="index.html">Back to the start: Is the crisis getting better or worse?</a></p>
     </main>
     <footer class="footer">
-        <p>Each count is a person. Confirm figures with the agency that published them before using them for a decision.</p>
+        <p>Each count is a person. This site exists so the loss stays visible, and so it is easier to see whether anything is changing.</p>
+        <p>Confirm figures with the agency that published them before using them for a decision.</p>
         <p><a href="design.html">How this site is laid out</a></p>
     </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

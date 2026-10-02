@@ -18,6 +18,9 @@ def test_pages_artifact_includes_the_plain_csv_memorials_and_site_assets():
     text = (ROOT / ".github/workflows/weekly-data-refresh.yml").read_text()
     assert "cp -r website/. docs/" in text
     assert "Final_Datasets/deaths_by_month.csv" in text
+    assert "Final_Datasets/deaths_by_state_month.csv" in text
+    assert "Final_Datasets/data_freshness.csv" in text
+    assert "data_engineering/data_sources/cdc_api/freshness.py" in text
     assert "Final_Datasets/faces_of_fentanyl.csv" in text
     assert "data_engineering/data_sources/cbp/cbp_extractor.py" in text
     assert "data_engineering/data_sources/faces/faces_extractor.py" in text

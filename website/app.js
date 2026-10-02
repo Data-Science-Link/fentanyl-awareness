@@ -232,7 +232,24 @@ function drawMonthly(canvasId, rows, actions, fromYear) {
             },
             scales: {
                 y: valueAxis("Deaths that month"),
-                x: categoryAxis({ ticks: { color: INK, maxTicksLimit: 8 } })
+                x: categoryAxis({
+                    ticks: {
+                        color: INK,
+                        autoSkip: false,
+                        maxRotation: 0,
+                        callback(value, index) {
+                            const label = labels[index];
+                            if (!label) return "";
+                            const last = labels[labels.length - 1];
+                            if (index === labels.length - 1) return label;
+                            if (label.slice(0, 4) === last.slice(0, 4)) return "";
+                            if (index === 0) return label;
+                            if (!label.endsWith("-01")) return "";
+                            const step = labels.length > 200 ? 5 : 2;
+                            return Number(label.slice(0, 4)) % step === 0 ? label : "";
+                        }
+                    }
+                })
             }
         }
     });
@@ -325,44 +342,59 @@ function deathsInMonth(monthly, month) {
     return comma(value) + " (" + kind + ")";
 }
 
-function renderComparison(rows) {
-    const summary = document.getElementById("comparison-summary");
-    fillTable(
-        "comparison-table",
-        ["Event", "Deaths per 1,000 people per year", "What is counted", "Death source"],
-        rows.map((row) => [row.event, row.deaths_per_1000_per_year, row.what_is_counted, row.death_source_title]),
-        "Deaths per 1,000 people per year"
-    );
-    const fentanyl = rows.find((row) => String(row.event || "").startsWith("Synthetic"));
-    if (summary) {
-        summary.textContent = fentanyl
-            ? "In " + String(fentanyl.start_date).slice(0, 4) + ", the synthetic-opioid category was " + fentanyl.deaths_per_1000_per_year + " deaths per 1,000 people. The dark red bar is that category. War bars are service members, spread across the years in the source file. The Vietnam bar covers 1955 to 1975."
-            : "The comparison file had no synthetic-opioid row.";
-    }
-    const canvas = document.getElementById("comparison-chart");
-    if (!canvas || !window.Chart || !rows.length) return;
-    destroyChart("comparison");
-    charts.comparison = new Chart(canvas, {
-        type: "bar",
-        data: {
-            labels: rows.map((row) => row.event),
-            datasets: [{
-                label: "Deaths per 1,000 people per year",
-                data: rows.map((row) => num(row.deaths_per_1000_per_year)),
-                backgroundColor: rows.map((row) => String(row.event || "").startsWith("Synthetic") ? ACCENT : STONE)
-            }]
-        },
-        options: {
-            indexAxis: "y",
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: valueAxis("Deaths per 1,000 people per year"),
-                y: categoryAxis()
-            }
+function crisisAnswer(monthly) {
+    const usable = usableMonths(monthly);
+    if (!usable.length) return "";
+    const latest = usable[usable.length - 1];
+    const prior = usable.find((row) => row.Month === monthShift(latest.Month, -12));
+    const official = usable.filter((row) => !isEstimated(row));
+    const lastOfficial = official[official.length - 1];
+    const latestDeaths = num(latest["Estimated deaths"]);
+    let change = "";
+    if (prior) {
+        const delta = latestDeaths - num(prior["Estimated deaths"]);
+        if (delta < 0) {
+            change = " That is " + comma(Math.abs(delta)) + " fewer than " + prior.Month + ". On this measure, deaths are lower than a year earlier.";
+        } else if (delta > 0) {
+            change = " That is " + comma(delta) + " more than " + prior.Month + ". On this measure, deaths are higher than a year earlier.";
+        } else {
+            change = " That is the same number as " + prior.Month + ".";
         }
-    });
+    }
+    const layer = isEstimated(latest)
+        ? " " + latest.Month + " is a preliminary estimate, not a finished death certificate. Finished certificates in this file run through " + (lastOfficial ? lastOfficial.Month.slice(0, 4) : "the last final year") + "."
+        : " " + latest.Month + " is a finished death certificate.";
+    return "In " + latest.Month + ", " + comma(latestDeaths) + " people died in the synthetic-opioid category." + change + layer;
+}
+
+function renderFreshness(rows, monthly) {
+    const nodes = document.querySelectorAll("[data-freshness]");
+    if (!nodes.length) return;
+    const row = (rows || [])[0] || {};
+    let text = "";
+    if (row.latest_provisional_month && row.latest_final_year) {
+        const checked = String(row.checked_at || "").slice(0, 10);
+        text = "Finished death certificates run through " + row.latest_final_year
+            + ". Months after that use CDC's preliminary counts. CDC's newest published month in this copy is "
+            + row.latest_provisional_month
+            + (checked ? ", checked " + checked : "")
+            + ". The file is refreshed every Monday, and a new month is added when CDC has posted one.";
+    } else {
+        const usable = usableMonths(monthly || []);
+        const latest = usable[usable.length - 1];
+        const official = usable.filter((item) => !isEstimated(item));
+        const lastOfficial = official[official.length - 1];
+        if (lastOfficial && latest) {
+            text = "Finished death certificates run through " + lastOfficial.Month.slice(0, 4)
+                + ". The latest month in this file is " + latest.Month
+                + (isEstimated(latest) ? ", a preliminary estimate." : ".");
+        }
+    }
+    nodes.forEach((node) => { node.textContent = text; });
+}
+
+function loadOptionalCsv(name) {
+    return loadCsv(name).catch(() => []);
 }
 
 function renderAge(rows, fullYearDeaths) {
@@ -728,6 +760,7 @@ function renderActions(actions, monthly) {
             : escapeHtml(row.source_title || "");
         return `<tr>
             <th scope="row">${escapeHtml(row.action_date)}</th>
+            <td>${escapeHtml(row.theme || "")}</td>
             <td>${escapeHtml(row.title)}<br><span class="note">${escapeHtml(row.summary)}</span></td>
             <td>${escapeHtml(row.actor)}</td>
             <td>${escapeHtml(deathsInMonth(monthly, month) || "Not in the file")}</td>
@@ -735,6 +768,42 @@ function renderActions(actions, monthly) {
             <td>${source}</td>
         </tr>`;
     }).join("");
+}
+
+function bindPolicyControls(chartId, monthly, actions) {
+    let fromYear = 2015;
+    let theme = "All";
+    const redraw = () => {
+        const shown = theme === "All" ? actions : actions.filter((action) => action.theme === theme);
+        drawMonthly(chartId, monthly, shown, fromYear);
+        renderActions(shown, monthly);
+    };
+    document.querySelectorAll("[data-theme]").forEach((button) => {
+        button.addEventListener("click", () => {
+            theme = button.getAttribute("data-theme") || "All";
+            document.querySelectorAll("[data-theme]").forEach((other) => {
+                other.setAttribute("aria-pressed", other === button ? "true" : "false");
+            });
+            redraw();
+        });
+    });
+    const recent = document.getElementById("range-recent");
+    const all = document.getElementById("range-all");
+    if (recent && all) {
+        recent.addEventListener("click", () => {
+            fromYear = 2015;
+            recent.setAttribute("aria-pressed", "true");
+            all.setAttribute("aria-pressed", "false");
+            redraw();
+        });
+        all.addEventListener("click", () => {
+            fromYear = 1999;
+            all.setAttribute("aria-pressed", "true");
+            recent.setAttribute("aria-pressed", "false");
+            redraw();
+        });
+    }
+    redraw();
 }
 
 function formatDate(value) {
@@ -862,18 +931,33 @@ function bindMenu() {
 }
 
 async function renderHome() {
-    const comparison = await loadCsv("comparison_per_1000.csv");
-    renderComparison(comparison);
+    const [monthly, provisional, actions, freshness] = await Promise.all([
+        loadCsv("deaths_by_month.csv"),
+        loadCsv("fact_fentanyl_deaths_over_time.csv"),
+        loadCsv("policy_actions.csv"),
+        loadOptionalCsv("data_freshness.csv")
+    ]);
+    const answer = document.getElementById("trend-answer");
+    if (answer) answer.textContent = crisisAnswer(monthly);
+    renderFreshness(freshness, monthly);
+    renderStats(monthly, provisional);
+    summarizeMonths(monthly, "monthly-summary", null);
+    drawMonthly("monthly-chart", monthly, actions, 2015);
+    bindRange("monthly-chart", monthly, actions);
 }
 
 async function renderTrend() {
-    const [monthly, provisional, actions] = await Promise.all([
+    const [monthly, provisional, actions, freshness] = await Promise.all([
         loadCsv("deaths_by_month.csv"),
         loadCsv("fact_fentanyl_deaths_over_time.csv"),
-        loadCsv("policy_actions.csv")
+        loadCsv("policy_actions.csv"),
+        loadOptionalCsv("data_freshness.csv")
     ]);
+    renderFreshness(freshness, monthly);
     renderStats(monthly, provisional);
-    summarizeMonths(monthly, "monthly-summary", "trend-answer");
+    summarizeMonths(monthly, "monthly-summary", null);
+    const answer = document.getElementById("trend-answer");
+    if (answer) answer.textContent = crisisAnswer(monthly);
     drawMonthly("monthly-chart", monthly, actions, 2015);
     bindRange("monthly-chart", monthly, actions);
     await renderMap(provisional);
@@ -908,9 +992,7 @@ async function renderActionsPage() {
         loadCsv("policy_actions.csv")
     ]);
     summarizeMonths(monthly, "policy-summary", null);
-    drawMonthly("policy-chart", monthly, actions, 2015);
-    bindRange("policy-chart", monthly, actions);
-    renderActions(actions, monthly);
+    bindPolicyControls("policy-chart", monthly, actions);
 }
 
 async function renderNewsPage() {
@@ -927,6 +1009,7 @@ async function main() {
         else if (page === "who") await renderWho();
         else if (page === "actions") await renderActionsPage();
         else if (page === "news") await renderNewsPage();
+        else if (page === "download") renderFreshness(await loadOptionalCsv("data_freshness.csv"), []);
     } catch (error) {
         setStatus("The page could not load a data file. " + error);
     }

@@ -1,0 +1,2 @@
+checked_at,cdc_dataset_id,cdc_dataset_updated_at,latest_provisional_month,latest_final_year,provisional_extract_at,update_schedule,note
+2026-10-02T16:45:26Z,xkb8-kh2a,2026-09-16T14:03:29Z,2026-04,2024,2026-09-26T07:54:33Z,"Every Monday, and when the pipeline changes on main",Finished death certificates are layered with CDC's preliminary 12-month totals. The preliminary series is as new as CDC has published it. Drug-overdose certificates usually lag the calendar by about four months. This check runs with the Monday publish. A new month is added when CDC has posted one.

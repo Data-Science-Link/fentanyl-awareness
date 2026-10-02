@@ -1,4 +1,4 @@
-"""The public site is six pages with a shared reading order and a source on each visual."""
+"""The public site is five story pages with a shared reading order and a source on each visual."""
 
 from html.parser import HTMLParser
 from pathlib import Path
@@ -10,7 +10,6 @@ PAGES = {
     "trend.html": "trend",
     "who.html": "who",
     "actions.html": "actions",
-    "news.html": "news",
     "download.html": "download",
 }
 NAV = list(PAGES)
@@ -69,8 +68,14 @@ def test_each_page_has_the_same_reading_order():
 
 def test_visuals_name_a_source_and_charts_are_labeled():
     home = read_page("index.html")
-    assert "comparison-chart" in home.ids
-    assert "comparison_per_1000.csv" in home.hrefs
+    home_text = (SITE / "index.html").read_text()
+    assert "monthly-chart" in home.ids
+    assert "deaths_by_month.csv" in home.hrefs
+    assert "policy_actions.csv" in home.hrefs
+    assert "comparison-chart" not in home.ids
+    assert "getting better or worse" in home_text
+    assert "What fentanyl is" in home_text
+    assert "month, state, and year" in home_text
     assert all(home.canvas_labels)
 
     trend = read_page("trend.html")
@@ -93,6 +98,7 @@ def test_visuals_name_a_source_and_charts_are_labeled():
     news = read_page("news.html")
     assert "news-list" in news.ids
     assert "official_announcements.csv" in news.hrefs
+    assert "actions.html" in news.hrefs
 
 
 def test_download_keeps_the_plain_language_dictionary():
@@ -107,11 +113,19 @@ def test_download_keeps_the_plain_language_dictionary():
         "Official actions that month",
     ):
         assert column in text
+    for column in (
+        "Deaths in the month",
+        "Confidence",
+        "Preliminary 12-month total",
+        "month, state, and year",
+    ):
+        assert column in text
     assert "deaths_by_month.csv" in text
+    assert "deaths_by_state_month.csv" in text
     assert "methods/monthly_deaths.md" in text
 
 
-def test_layout_note_names_the_practice_and_the_six_pages():
+def test_layout_note_names_the_practice_and_the_five_pages():
     note = (ROOT / "docs/design/public-site-layout.md").read_text()
     page = (SITE / "design.html").read_text()
     for phrase in (
@@ -119,7 +133,7 @@ def test_layout_note_names_the_practice_and_the_six_pages():
         "Office for National Statistics",
         "Marshall Project",
         "Periscopic",
-        "Six pages",
+        "Five pages",
         "deaths_by_month.csv",
     ):
         assert phrase in note

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What fentanyl is, and why it matters — Fentanyl deaths</title>
-    <meta name="description" content="A plain-language introduction to illicit fentanyl and a comparison of deaths per 1,000 people per year.">
+    <title>Is the fentanyl crisis getting better or worse?</title>
+    <meta name="description" content="A plain account of whether synthetic-opioid deaths are rising or falling, what fentanyl is, which public policies people look at, and a dataset by month, state, and year.">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231c1915'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -16,53 +16,70 @@
             <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav">Menu</button>
         </div>
         <div class="nav-links" id="site-nav">
-            <a href="index.html" aria-current="page">What this is</a>
-            <a href="trend.html">Rising or falling</a>
-            <a href="who.html">Who is affected</a>
-            <a href="actions.html">Official actions</a>
-            <a href="news.html">Announcements</a>
+            <a href="index.html" aria-current="page">Why this exists</a>
+            <a href="trend.html">Better or worse</a>
+            <a href="who.html">Lives lost</a>
+            <a href="actions.html">Public policy</a>
             <a href="download.html">Download</a>
         </div>
     </nav>
     <main id="content" tabindex="-1">
         <header class="hero">
-            <p class="eyebrow">What this is</p>
-            <h1>What is fentanyl, and why does it matter?</h1>
-            <p class="lede">Fentanyl is a synthetic opioid. Pharmaceutical fentanyl is used in medicine for severe pain. The increase in deaths over the last decade is tied to illicit fentanyl, which is often pressed into pills or mixed into other drugs. <a href="https://www.dea.gov/factsheets/fentanyl">DEA's fentanyl fact sheet</a> describes that difference.</p>
-            <p class="lede">The death counts on this site are not a fentanyl-only number. CDC publishes them as synthetic opioids, excluding methadone. That group includes fentanyl and other synthetics such as tramadol. <a href="https://www.cdc.gov/nchs/nvss/vsrr/drug-overdose-data.htm">CDC's overdose page</a> explains why recent months are still provisional.</p>
+            <p class="eyebrow">Why this site exists</p>
+            <h1>Is the fentanyl crisis getting better or worse?</h1>
+            <p class="answer" id="trend-answer">Loading the latest month…</p>
+            <p class="note" data-freshness>Checking how current the CDC files are…</p>
+            <p class="lede">This site was built because that question was surprisingly hard to answer. The deaths are public, but they are split across CDC files. Recent months are still preliminary. There was no plain dashboard that said whether the toll was rising or falling, explained what fentanyl is, and handed an analyst a file they could trust.</p>
+            <p class="lede">It is also here because the loss is enormous, and easy to lose sight of. These counts are people. Putting them in one place is a way to keep that visible, and to make it easier to see whether anything is changing.</p>
         </header>
-        <ol class="path">
-            <li><div class="path-item" aria-current="page"><span class="step">1</span><span>What this is</span></div></li>
-            <li><a class="path-item" href="trend.html"><span class="step">2</span><span>Are deaths rising or falling?</span></a></li>
-            <li><a class="path-item" href="who.html"><span class="step">3</span><span>Who is affected, and who is responding?</span></a></li>
-            <li><a class="path-item" href="actions.html"><span class="step">4</span><span>Did an official action line up with a change?</span></a></li>
-            <li><a class="path-item" href="news.html"><span class="step">5</span><span>Official announcements</span></a></li>
-            <li><a class="path-item" href="download.html"><span class="step">6</span><span>Download the spreadsheet</span></a></li>
+        <ol class="reasons">
+            <li class="reason"><a href="#monthly">See the trend.</a> Finished death certificates are used for older months. CDC's preliminary counts continue the series after the last final year, instead of stopping there.</li>
+            <li class="reason"><a href="#what">Learn what fentanyl is.</a> Pharmaceutical fentanyl and illicit fentanyl are not the same thing, and the death category CDC publishes is wider than fentanyl alone.</li>
+            <li class="reason"><a href="actions.html">Look at public policy.</a> Border, immigration, supply-chain, and China actions are marked on the death series. A mark is a date, not proof the action worked.</li>
+            <li class="reason"><a href="download.html">Download the dataset.</a> One file by month, state, and year. It is refreshed every Monday when CDC has posted a new month.</li>
         </ol>
-        <section id="why">
-            <h2>Deaths per 1,000 people per year</h2>
-            <p>The same formula is used for every bar: deaths ÷ years ÷ population × 1,000. War rows are U.S. service-member deaths, including deaths from disease and other causes that were not battle deaths. They are not death certificates. The Vietnam bar is short because those deaths are spread from 1955 to 1975, not across one year of fighting. COVID-19 is death certificates that mention COVID-19. The 2024 bar is the synthetic-opioid category, for one year. These are different kinds of death. The chart only lines up the rate.</p>
-            <div class="panel">
-                <div class="chart-box short">
-                    <canvas id="comparison-chart" role="img" aria-label="Horizontal bar chart of deaths per 1,000 people per year. The synthetic-opioid bar is dark red. The other events are stone colored."></canvas>
-                </div>
-                <p class="note" id="comparison-summary">Loading the comparison…</p>
-                <details>
-                    <summary>View these numbers as a table</summary>
-                    <div id="comparison-table" class="table-scroll"></div>
-                </details>
-                <p class="source">Source: <a href="methods/comparison_per_1000.md">how the rates are calculated</a> and <a href="comparison_per_1000.csv">the inputs</a>.</p>
+        <section id="monthly">
+            <h2>Deaths in each month</h2>
+            <p>A solid line is a finished death certificate. A dashed line is a preliminary estimate for a month CDC has not finished. Vertical lines are public policy actions people may think changed the toll. The <a href="actions.html">public policy</a> page reads those dates one by one. The <a href="trend.html">better or worse</a> page adds the change by state.</p>
+            <div class="toolbar" role="group" aria-label="Years shown on the chart">
+                <button type="button" id="range-recent" aria-pressed="true">From 2015</button>
+                <button type="button" id="range-all" aria-pressed="false">Back to 1999</button>
             </div>
+            <div class="panel">
+                <div class="chart-box">
+                    <canvas id="monthly-chart" role="img" aria-label="Line chart of deaths in each month. A solid line is a finished death certificate. A dashed line is a preliminary estimate. Vertical lines are public policy actions."></canvas>
+                </div>
+                <ul class="legend">
+                    <li><span class="legend-swatch line"></span> Finished death certificate, solid line</li>
+                    <li><span class="legend-swatch line dashed"></span> Preliminary estimate, dashed line</li>
+                    <li><span class="legend-swatch tick"></span> Public policy action</li>
+                </ul>
+                <p class="note" id="monthly-summary"></p>
+                <details>
+                    <summary>View these months as a table</summary>
+                    <div id="monthly-chart-data" class="table-scroll"></div>
+                </details>
+                <p class="source">Source: <a href="deaths_by_month.csv">deaths_by_month.csv</a> and <a href="policy_actions.csv">policy_actions.csv</a>. <a href="methods/monthly_deaths.md">How a month is counted</a>.</p>
+            </div>
+            <div class="stats" id="stats"></div>
         </section>
-        <p class="next"><a href="trend.html">Next: Are deaths rising or falling?</a></p>
+        <section id="what">
+            <h2>What fentanyl is</h2>
+            <p>Fentanyl is a synthetic opioid. In medicine, pharmaceutical fentanyl is used for severe pain. The deaths in this crisis are tied to illicit fentanyl, which is often pressed into counterfeit pills or mixed into other drugs. A very small amount can be fatal. <a href="https://www.dea.gov/factsheets/fentanyl">DEA's fentanyl fact sheet</a> describes that difference.</p>
+            <p>The counts here are not a fentanyl-only number. CDC publishes them as synthetic opioids, excluding methadone. That group includes fentanyl and other synthetics such as tramadol. CDC does not publish a public series of fentanyl use, so this site answers the question with deaths. <a href="https://www.cdc.gov/nchs/nvss/vsrr/drug-overdose-data.htm">CDC's overdose page</a> explains why recent months are still preliminary.</p>
+            <p>The series does not stop at the last finished year. Older months stay on the death certificate. Later months use CDC's preliminary 12-month totals, labeled as preliminary, and the national chart turns that change into an estimate for the month. State rows in the download keep the preliminary 12-month total and do not invent a monthly count.</p>
+        </section>
+        <p class="next"><a href="trend.html">Next: Is it getting better or worse, including by state?</a></p>
         <p class="meta" id="status" role="status"></p>
-        <noscript><p class="note">The chart needs JavaScript. The source file linked above can still be opened.</p></noscript>
+        <noscript><p class="note">The chart needs JavaScript. The source files linked above can still be opened.</p></noscript>
     </main>
     <footer class="footer">
-        <p>Each count is a person. Confirm figures with the agency that published them before using them for a decision.</p>
+        <p>Each count is a person. This site exists so the loss stays visible, and so it is easier to see whether anything is changing.</p>
+        <p>Confirm figures with the agency that published them before using them for a decision.</p>
         <p><a href="design.html">How this site is laid out</a></p>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="app.js"></script>
 </body>
